@@ -1,2 +1,2 @@
 # prstats
-Github PR stats
+CLI for Github PR stats
