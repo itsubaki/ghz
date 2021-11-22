@@ -5,7 +5,8 @@ import (
 	"os"
 
 	"github.com/itsubaki/prstats/cmd/actions"
-	"github.com/itsubaki/prstats/cmd/pr"
+	"github.com/itsubaki/prstats/cmd/prlist"
+	"github.com/itsubaki/prstats/cmd/prrate"
 	"github.com/urfave/cli/v2"
 )
 
@@ -19,18 +20,22 @@ func New(version string) *cli.App {
 	app.Version = version
 	app.Flags = []cli.Flag{
 		&cli.StringFlag{
-			Name: "pat",
-			EnvVars: []string{
-				"PAT",
-			},
+			Name:    "pat",
+			EnvVars: []string{"PAT"},
+		},
+		&cli.StringFlag{
+			Name:    "format",
+			Aliases: []string{"f"},
+			Value:   "json",
+			Usage:   "json, csv",
 		},
 	}
 
-	pr := cli.Command{
-		Name:    "pr",
-		Aliases: []string{"p"},
-		Action:  pr.Action,
-		Usage:   "PR stats",
+	prrate := cli.Command{
+		Name:    "rate",
+		Aliases: []string{"r"},
+		Action:  prrate.Action,
+		Usage:   "PR count/day",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "org",
@@ -46,6 +51,37 @@ func New(version string) *cli.App {
 				Name:    "state",
 				Aliases: []string{"s"},
 				Value:   "all",
+				Usage:   "all, open, closed",
+			},
+			&cli.IntFlag{
+				Name:    "perpage",
+				Aliases: []string{"p"},
+				Value:   30,
+			},
+		},
+	}
+
+	prlist := cli.Command{
+		Name:    "list",
+		Aliases: []string{"p"},
+		Action:  prlist.Action,
+		Usage:   "PR list",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "org",
+				Aliases: []string{"o"},
+				Value:   "github",
+			},
+			&cli.StringFlag{
+				Name:    "repo",
+				Aliases: []string{"r"},
+				Value:   "docs",
+			},
+			&cli.StringFlag{
+				Name:    "state",
+				Aliases: []string{"s"},
+				Value:   "all",
+				Usage:   "all, open, closed",
 			},
 			&cli.IntFlag{
 				Name:    "perpage",
@@ -62,7 +98,8 @@ func New(version string) *cli.App {
 	}
 
 	app.Commands = []*cli.Command{
-		&pr,
+		&prlist,
+		&prrate,
 		&actions,
 	}
 
