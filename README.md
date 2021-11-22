@@ -9,7 +9,7 @@ go install github.com/itsubaki/prstats@latest
 
 ## Example
 
-```
+```shell
 $ prstats --owner itsubaki --repo q | jq .
 {
   "owner": "itsubaki",
