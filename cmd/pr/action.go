@@ -33,14 +33,14 @@ func Action(c *cli.Context) error {
 			return fmt.Errorf("list PR: %v", err)
 		}
 
+		for _, r := range pr {
+			fmt.Printf("ID: %v, title: %v, created: %v, merged: %v, closed: %v\n", *r.ID, *r.Title, r.CreatedAt, r.MergedAt, r.ClosedAt)
+		}
+
 		if resp.NextPage == 0 {
 			break
 		}
 		opt.Page = resp.NextPage
-
-		for _, r := range pr {
-			fmt.Printf("ID: %v, title: %v, created: %v, merged: %v, closed: %v\n", *r.ID, *r.Title, r.CreatedAt, r.MergedAt, r.ClosedAt)
-		}
 	}
 
 	return nil
