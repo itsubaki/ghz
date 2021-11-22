@@ -45,15 +45,20 @@ func New(version string) *cli.App {
 			Value:   "all",
 			Usage:   "all, open, closed",
 		},
+		&cli.IntFlag{
+			Name:    "perpage",
+			Aliases: []string{"p"},
+			Value:   100,
+		},
 		&cli.StringFlag{
 			Name:    "workflow",
 			Aliases: []string{"w"},
 			Usage:   "workflow name of deployment",
 		},
 		&cli.IntFlag{
-			Name:    "perpage",
-			Aliases: []string{"p"},
-			Value:   100,
+			Name:    "month",
+			Aliases: []string{"m"},
+			Value:   3,
 		},
 	}
 
