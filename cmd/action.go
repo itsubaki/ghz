@@ -12,15 +12,6 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type PR struct {
-	ID        int64      `json:"id"`
-	Title     string     `json:"title"`
-	CreatedAt *time.Time `json:"created_at"`
-	UpdatedAt *time.Time `json:"updated_at"`
-	MergedAt  *time.Time `json:"merged_at"`
-	ClosedAt  *time.Time `json:"closed_at"`
-}
-
 type PRStats struct {
 	Org  string `json:"org"`
 	Repo string `json:"repo"`
@@ -31,25 +22,25 @@ type PRStats struct {
 	} `json:"range"`
 
 	PerDay struct {
+		CountPerDay float64 `json:"count_per_day"`
 		Count       int     `json:"count"`
 		Days        int     `json:"days"`
-		CountPerDay float64 `json:"count_per_day"`
 	} `json:"pr"`
 
 	Lifetime struct {
-		AverageHours int `json:"average_hours"`
-		TotalHours   int `json:"total_hours"`
-		MergedCount  int `json:"merged_count"`
+		HoursPerCount int `json:"hours_per_count"`
+		TotalHours    int `json:"total_hours"`
+		MergedCount   int `json:"merged_count"`
 	} `json:"lifetime"`
 
 	Deploy struct {
 		WorkflowName string  `json:"workflow_name"`
+		FailureRate  float64 `json:"failure_rate"`
 		Count        int     `json:"count"`
 		Success      int     `json:"success"`
 		Failure      int     `json:"failure"`
 		Skipped      int     `json:"skipped"`
 		Cancelled    int     `json:"cancelled"`
-		FailureRate  float64 `json:"failure_rate"`
 	} `json:"deploy"`
 }
 
@@ -124,7 +115,7 @@ func Action(c *cli.Context) error {
 
 		stats.Lifetime.MergedCount = count
 		stats.Lifetime.TotalHours = int(sum)
-		stats.Lifetime.AverageHours = int(sum / float64(count))
+		stats.Lifetime.HoursPerCount = int(sum / float64(count))
 	}
 
 	{
