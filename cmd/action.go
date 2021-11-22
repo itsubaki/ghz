@@ -26,11 +26,13 @@ type PRStats struct {
 		Days        int     `json:"days"`
 	} `json:"pr"`
 
-	Lifetime struct {
-		HoursPerCount int `json:"hours_per_count"`
-		TotalHours    int `json:"total_hours"`
-		MergedCount   int `json:"merged_count"`
-	} `json:"lifetime"`
+	Merged struct {
+		CountPerDay   float64 `json:"count_per_day"`
+		Count         int     `json:"count"`
+		Days          int     `json:"days"`
+		HoursPerCount int     `json:"hours_per_count"`
+		TotalHours    int     `json:"total_hours"`
+	} `json:"merged"`
 
 	Workflow []Workflow `json:"workflow"`
 }
@@ -118,9 +120,12 @@ func Action(c *cli.Context) error {
 			sum += r.MergedAt.Sub(*r.CreatedAt).Hours()
 		}
 
-		stats.Lifetime.MergedCount = count
-		stats.Lifetime.TotalHours = int(sum)
-		stats.Lifetime.HoursPerCount = int(sum / float64(count))
+		stats.Merged.Count = count
+		stats.Merged.Days = int(list[0].MergedAt.Sub(*list[len(list)-1].MergedAt).Hours() / 24)
+		stats.Merged.CountPerDay = float64(stats.Merged.Count) / float64(stats.Merged.Days)
+
+		stats.Merged.HoursPerCount = int(sum / float64(count))
+		stats.Merged.TotalHours = int(sum)
 	}
 
 	{
@@ -134,7 +139,7 @@ func Action(c *cli.Context) error {
 		for {
 			runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, owner, repo, &opt)
 			if err != nil {
-				return fmt.Errorf("list PR: %v", err)
+				return fmt.Errorf("list Workflow Runs: %v", err)
 			}
 
 			for _, r := range runs.WorkflowRuns {
