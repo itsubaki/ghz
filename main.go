@@ -30,7 +30,7 @@ func New(version string) *cli.App {
 			Usage:   "json, csv",
 		},
 		&cli.StringFlag{
-			Name:    "org",
+			Name:    "owner",
 			Aliases: []string{"o"},
 			Value:   "github",
 		},
@@ -49,11 +49,6 @@ func New(version string) *cli.App {
 			Name:    "perpage",
 			Aliases: []string{"p"},
 			Value:   100,
-		},
-		&cli.StringFlag{
-			Name:    "workflow",
-			Aliases: []string{"w"},
-			Usage:   "workflow name of deployment",
 		},
 		&cli.IntFlag{
 			Name:    "month",

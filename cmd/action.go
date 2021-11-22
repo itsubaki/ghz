@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/google/go-github/v40/github"
@@ -13,8 +12,8 @@ import (
 )
 
 type PRStats struct {
-	Org  string `json:"org"`
-	Repo string `json:"repo"`
+	Owner string `json:"owner"`
+	Repo  string `json:"repo"`
 
 	Range struct {
 		Beg *time.Time `json:"beg"`
@@ -33,15 +32,18 @@ type PRStats struct {
 		MergedCount   int `json:"merged_count"`
 	} `json:"lifetime"`
 
-	Deploy struct {
-		WorkflowName string  `json:"workflow_name"`
-		FailureRate  float64 `json:"failure_rate"`
-		Count        int     `json:"count"`
-		Success      int     `json:"success"`
-		Failure      int     `json:"failure"`
-		Skipped      int     `json:"skipped"`
-		Cancelled    int     `json:"cancelled"`
-	} `json:"deploy"`
+	Workflow []Workflow `json:"workflow"`
+}
+
+type Workflow struct {
+	ID          int64   `json:"id"`
+	Name        string  `json:"name"`
+	FailureRate float64 `json:"failure_rate"`
+	Count       int     `json:"count"`
+	Success     int     `json:"success"`
+	Failure     int     `json:"failure"`
+	Skipped     int     `json:"skipped"`
+	Cancelled   int     `json:"cancelled"`
 }
 
 func (s PRStats) String() string {
@@ -58,6 +60,9 @@ func (s PRStats) JSON() string {
 }
 
 func Action(c *cli.Context) error {
+	owner := c.String("owner")
+	repo := c.String("repo")
+
 	ctx := context.Background()
 	client := github.NewClient(nil)
 
@@ -80,7 +85,7 @@ func Action(c *cli.Context) error {
 
 		list := make([]*github.PullRequest, 0)
 		for {
-			pr, resp, err := client.PullRequests.List(ctx, c.String("org"), c.String("repo"), &opt)
+			pr, resp, err := client.PullRequests.List(ctx, owner, repo, &opt)
 			if err != nil {
 				return fmt.Errorf("list PR: %v", err)
 			}
@@ -93,8 +98,8 @@ func Action(c *cli.Context) error {
 			opt.Page = resp.NextPage
 		}
 
-		stats.Org = c.String("org")
-		stats.Repo = c.String("repo")
+		stats.Owner = owner
+		stats.Repo = repo
 		stats.Range.Beg = list[0].CreatedAt
 		stats.Range.End = list[len(list)-1].CreatedAt
 
@@ -125,23 +130,24 @@ func Action(c *cli.Context) error {
 			},
 		}
 
-		list := make([]*github.WorkflowRun, 0)
+		wmap := make(map[int64][]*github.WorkflowRun)
 		for {
-			runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, c.String("org"), c.String("repo"), &opt)
+			runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, owner, repo, &opt)
 			if err != nil {
 				return fmt.Errorf("list PR: %v", err)
 			}
 
 			for _, r := range runs.WorkflowRuns {
-				if strings.ToLower(c.String("workflow")) != *r.Name {
-					continue
-				}
-
 				if r.Conclusion == nil {
 					continue
 				}
 
-				list = append(list, runs.WorkflowRuns...)
+				runs, ok := wmap[*r.WorkflowID]
+				if !ok {
+					wmap[*r.WorkflowID] = make([]*github.WorkflowRun, 0)
+				}
+
+				wmap[*r.WorkflowID] = append(runs, r)
 			}
 
 			if resp.NextPage == 0 {
@@ -151,38 +157,46 @@ func Action(c *cli.Context) error {
 			opt.Page = resp.NextPage
 		}
 
-		var success, failure, skipped, cancelled int
-		for _, r := range list {
-			if *r.Conclusion == "success" {
-				success++
+		for k, v := range wmap {
+			if len(v) < 1 {
 				continue
 			}
 
-			if *r.Conclusion == "failure" {
-				failure++
-				continue
+			var success, failure, skipped, cancelled int
+			for _, r := range v {
+				if *r.Conclusion == "success" {
+					success++
+					continue
+				}
+
+				if *r.Conclusion == "failure" {
+					failure++
+					continue
+				}
+
+				if *r.Conclusion == "skipped" {
+					skipped++
+					continue
+				}
+
+				if *r.Conclusion == "cancelled" {
+					cancelled++
+					continue
+				}
 			}
 
-			if *r.Conclusion == "skipped" {
-				skipped++
-				continue
-			}
-
-			if *r.Conclusion == "cancelled" {
-				cancelled++
-				continue
-			}
+			stats.Workflow = append(stats.Workflow, Workflow{
+				ID:          k,
+				Name:        *v[0].Name,
+				FailureRate: float64(failure) / float64(len(v)),
+				Count:       len(v),
+				Success:     success,
+				Failure:     failure,
+				Skipped:     skipped,
+				Cancelled:   cancelled,
+			})
 		}
 
-		stats.Deploy.WorkflowName = c.String("workflow")
-		if len(list) > 0 {
-			stats.Deploy.Count = len(list)
-			stats.Deploy.Success = success
-			stats.Deploy.Failure = failure
-			stats.Deploy.Skipped = skipped
-			stats.Deploy.Cancelled = cancelled
-			stats.Deploy.FailureRate = float64(failure) / float64(len(list))
-		}
 	}
 
 	fmt.Println(stats)
