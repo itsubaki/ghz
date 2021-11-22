@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/itsubaki/prstats/cmd"
+	"github.com/itsubaki/prstats/cmd/actions"
+	"github.com/itsubaki/prstats/cmd/pr"
 	"github.com/urfave/cli/v2"
 )
 
@@ -16,7 +17,54 @@ func New(version string) *cli.App {
 	app.Name = "prstats"
 	app.Usage = "Github PR stats"
 	app.Version = version
-	app.Action = cmd.Action
+	app.Flags = []cli.Flag{
+		&cli.StringFlag{
+			Name: "pat",
+			EnvVars: []string{
+				"PAT",
+			},
+		},
+	}
+
+	pr := cli.Command{
+		Name:    "pr",
+		Aliases: []string{"p"},
+		Action:  pr.Action,
+		Usage:   "PR stats",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "org",
+				Aliases: []string{"o"},
+				Value:   "github",
+			},
+			&cli.StringFlag{
+				Name:    "repo",
+				Aliases: []string{"r"},
+				Value:   "docs",
+			},
+			&cli.StringFlag{
+				Name:    "state",
+				Aliases: []string{"s"},
+				Value:   "all",
+			},
+			&cli.IntFlag{
+				Name:    "perpage",
+				Aliases: []string{"p"},
+				Value:   30,
+			},
+		},
+	}
+
+	actions := cli.Command{
+		Name:    "actions",
+		Aliases: []string{"a"},
+		Action:  actions.Action,
+	}
+
+	app.Commands = []*cli.Command{
+		&pr,
+		&actions,
+	}
 
 	return app
 }
