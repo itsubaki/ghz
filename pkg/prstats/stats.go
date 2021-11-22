@@ -65,6 +65,7 @@ type GetStatsInput struct {
 	Repo    string
 	PAT     string
 	State   string
+	Week    int
 	PerPage int
 }
 
@@ -190,6 +191,8 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 					cancelled++
 					continue
 				}
+
+				return nil, fmt.Errorf("invalid conclusion=%v", *r.Conclusion)
 			}
 
 			out.Workflow = append(out.Workflow, Workflow{
