@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/itsubaki/prstats/cmd"
 	"github.com/urfave/cli/v2"
 )
 
@@ -15,6 +16,7 @@ func New(version string) *cli.App {
 	app.Name = "prstats"
 	app.Usage = "Github PR stats"
 	app.Version = version
+	app.Action = cmd.Action
 
 	return app
 }
