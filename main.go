@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/itsubaki/prstats/cmd"
-	"github.com/itsubaki/prstats/cmd/actions"
 	"github.com/itsubaki/prstats/cmd/prlist"
 	"github.com/urfave/cli/v2"
 )
@@ -46,6 +45,11 @@ func New(version string) *cli.App {
 			Value:   "all",
 			Usage:   "all, open, closed",
 		},
+		&cli.StringFlag{
+			Name:    "workflow",
+			Aliases: []string{"w"},
+			Usage:   "workflow name of deployment",
+		},
 		&cli.IntFlag{
 			Name:    "perpage",
 			Aliases: []string{"p"},
@@ -60,15 +64,8 @@ func New(version string) *cli.App {
 		Usage:   "PR list",
 	}
 
-	actions := cli.Command{
-		Name:    "actions",
-		Aliases: []string{"a"},
-		Action:  actions.Action,
-	}
-
 	app.Commands = []*cli.Command{
 		&prlist,
-		&actions,
 	}
 
 	return app

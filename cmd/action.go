@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/google/go-github/v40/github"
@@ -29,24 +30,26 @@ type PRStats struct {
 		End *time.Time `json:"end"`
 	} `json:"range"`
 
-	PRPerDay struct {
-		Count int     `json:"count"`
-		Days  int     `json:"days"`
-		Rate  float64 `json:"rate"`
+	PerDay struct {
+		Count       int     `json:"count"`
+		Days        int     `json:"days"`
+		CountPerDay float64 `json:"count_per_day"`
 	} `json:"pr"`
 
 	Lifetime struct {
 		AverageHours int `json:"average_hours"`
 		TotalHours   int `json:"total_hours"`
-		Count        int `json:"count"`
+		MergedCount  int `json:"merged_count"`
 	} `json:"lifetime"`
 
 	Deploy struct {
-		Count       int     `json:"count"`
-		Succeeded   int     `json:"succeeded"`
-		Failed      int     `json:"failed"`
-		Cancelled   int     `json:"cancelled"`
-		SuccessRate float64 `json:"rate"`
+		WorkflowName string  `json:"workflow_name"`
+		Count        int     `json:"count"`
+		Success      int     `json:"success"`
+		Failure      int     `json:"failure"`
+		Skipped      int     `json:"skipped"`
+		Cancelled    int     `json:"cancelled"`
+		FailureRate  float64 `json:"failure_rate"`
 	} `json:"deploy"`
 }
 
@@ -74,52 +77,123 @@ func Action(c *cli.Context) error {
 		)))
 	}
 
-	opt := github.PullRequestListOptions{
-		State: c.String("state"),
-		ListOptions: github.ListOptions{
-			PerPage: c.Int("perpage"),
-		},
-	}
-
-	list := make([]*github.PullRequest, 0)
-	for {
-		pr, resp, err := client.PullRequests.List(ctx, c.String("org"), c.String("repo"), &opt)
-		if err != nil {
-			return fmt.Errorf("list PR: %v", err)
-		}
-
-		list = append(list, pr...)
-		if resp.NextPage == 0 {
-			break
-		}
-
-		opt.Page = resp.NextPage
-	}
-
 	var stats PRStats
-	stats.Org = c.String("org")
-	stats.Repo = c.String("repo")
-	stats.Range.Beg = list[0].CreatedAt
-	stats.Range.End = list[len(list)-1].CreatedAt
+	{
 
-	stats.PRPerDay.Count = len(list)
-	stats.PRPerDay.Days = int(list[0].CreatedAt.Sub(*list[len(list)-1].CreatedAt).Hours() / 24)
-	stats.PRPerDay.Rate = float64(stats.PRPerDay.Count) / float64(stats.PRPerDay.Days)
-
-	var count int
-	var sum float64
-	for _, r := range list {
-		if r.MergedAt == nil {
-			continue
+		opt := github.PullRequestListOptions{
+			State: c.String("state"),
+			ListOptions: github.ListOptions{
+				PerPage: c.Int("perpage"),
+			},
 		}
 
-		count++
-		sum += r.MergedAt.Sub(*r.CreatedAt).Hours()
+		list := make([]*github.PullRequest, 0)
+		for {
+			pr, resp, err := client.PullRequests.List(ctx, c.String("org"), c.String("repo"), &opt)
+			if err != nil {
+				return fmt.Errorf("list PR: %v", err)
+			}
+
+			list = append(list, pr...)
+			if resp.NextPage == 0 {
+				break
+			}
+
+			opt.Page = resp.NextPage
+		}
+
+		stats.Org = c.String("org")
+		stats.Repo = c.String("repo")
+		stats.Range.Beg = list[0].CreatedAt
+		stats.Range.End = list[len(list)-1].CreatedAt
+
+		stats.PerDay.Count = len(list)
+		stats.PerDay.Days = int(list[0].CreatedAt.Sub(*list[len(list)-1].CreatedAt).Hours() / 24)
+		stats.PerDay.CountPerDay = float64(stats.PerDay.Count) / float64(stats.PerDay.Days)
+
+		var count int
+		var sum float64
+		for _, r := range list {
+			if r.MergedAt == nil {
+				continue
+			}
+
+			count++
+			sum += r.MergedAt.Sub(*r.CreatedAt).Hours()
+		}
+
+		stats.Lifetime.MergedCount = count
+		stats.Lifetime.TotalHours = int(sum)
+		stats.Lifetime.AverageHours = int(sum / float64(count))
+
 	}
 
-	stats.Lifetime.Count = count
-	stats.Lifetime.TotalHours = int(sum)
-	stats.Lifetime.AverageHours = int(sum / float64(count))
+	{
+		opt := github.ListWorkflowRunsOptions{
+			ListOptions: github.ListOptions{
+				PerPage: c.Int("perpage"),
+			},
+		}
+
+		list := make([]*github.WorkflowRun, 0)
+		for {
+			runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, c.String("org"), c.String("repo"), &opt)
+			if err != nil {
+				return fmt.Errorf("list PR: %v", err)
+			}
+
+			for _, r := range runs.WorkflowRuns {
+				if strings.ToLower(c.String("workflow")) != *r.Name {
+					continue
+				}
+
+				if r.Conclusion == nil {
+					continue
+				}
+
+				list = append(list, runs.WorkflowRuns...)
+			}
+
+			if resp.NextPage == 0 {
+				break
+			}
+
+			opt.Page = resp.NextPage
+		}
+
+		var success, failure, skipped, cancelled int
+		for _, r := range list {
+			if *r.Conclusion == "success" {
+				success++
+				continue
+			}
+
+			if *r.Conclusion == "failure" {
+				failure++
+				continue
+			}
+
+			if *r.Conclusion == "skipped" {
+				skipped++
+				continue
+			}
+
+			if *r.Conclusion == "cancelled" {
+				cancelled++
+				continue
+			}
+		}
+
+		stats.Deploy.WorkflowName = c.String("workflow")
+		if len(list) > 0 {
+			stats.Deploy.Count = len(list)
+			stats.Deploy.Success = success
+			stats.Deploy.Failure = failure
+			stats.Deploy.Skipped = skipped
+			stats.Deploy.Cancelled = cancelled
+			stats.Deploy.FailureRate = float64(failure) / float64(len(list))
+		}
+	}
 
 	fmt.Println(stats)
 	return nil
