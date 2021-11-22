@@ -44,6 +44,12 @@ func New(version string) *cli.App {
 			Aliases: []string{"p"},
 			Value:   100,
 		},
+		&cli.StringFlag{
+			Name:    "format",
+			Aliases: []string{"f"},
+			Value:   "json",
+			Usage:   "json, csv",
+		},
 		&cli.IntFlag{
 			Name:    "month",
 			Aliases: []string{"m"},
