@@ -125,7 +125,6 @@ func Action(c *cli.Context) error {
 		stats.Lifetime.MergedCount = count
 		stats.Lifetime.TotalHours = int(sum)
 		stats.Lifetime.AverageHours = int(sum / float64(count))
-
 	}
 
 	{
