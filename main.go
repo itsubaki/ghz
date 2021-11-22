@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/itsubaki/prstats/cmd"
 	"github.com/itsubaki/prstats/cmd/actions"
 	"github.com/itsubaki/prstats/cmd/prlist"
-	"github.com/itsubaki/prstats/cmd/prrate"
 	"github.com/urfave/cli/v2"
 )
 
@@ -18,6 +18,7 @@ func New(version string) *cli.App {
 	app.Name = "prstats"
 	app.Usage = "Github PR stats"
 	app.Version = version
+	app.Action = cmd.Action
 	app.Flags = []cli.Flag{
 		&cli.StringFlag{
 			Name:    "pat",
@@ -29,35 +30,26 @@ func New(version string) *cli.App {
 			Value:   "json",
 			Usage:   "json, csv",
 		},
-	}
-
-	prrate := cli.Command{
-		Name:    "rate",
-		Aliases: []string{"r"},
-		Action:  prrate.Action,
-		Usage:   "PR count/day",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "org",
-				Aliases: []string{"o"},
-				Value:   "github",
-			},
-			&cli.StringFlag{
-				Name:    "repo",
-				Aliases: []string{"r"},
-				Value:   "docs",
-			},
-			&cli.StringFlag{
-				Name:    "state",
-				Aliases: []string{"s"},
-				Value:   "all",
-				Usage:   "all, open, closed",
-			},
-			&cli.IntFlag{
-				Name:    "perpage",
-				Aliases: []string{"p"},
-				Value:   30,
-			},
+		&cli.StringFlag{
+			Name:    "org",
+			Aliases: []string{"o"},
+			Value:   "github",
+		},
+		&cli.StringFlag{
+			Name:    "repo",
+			Aliases: []string{"r"},
+			Value:   "docs",
+		},
+		&cli.StringFlag{
+			Name:    "state",
+			Aliases: []string{"s"},
+			Value:   "all",
+			Usage:   "all, open, closed",
+		},
+		&cli.IntFlag{
+			Name:    "perpage",
+			Aliases: []string{"p"},
+			Value:   100,
 		},
 	}
 
@@ -66,29 +58,6 @@ func New(version string) *cli.App {
 		Aliases: []string{"p"},
 		Action:  prlist.Action,
 		Usage:   "PR list",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "org",
-				Aliases: []string{"o"},
-				Value:   "github",
-			},
-			&cli.StringFlag{
-				Name:    "repo",
-				Aliases: []string{"r"},
-				Value:   "docs",
-			},
-			&cli.StringFlag{
-				Name:    "state",
-				Aliases: []string{"s"},
-				Value:   "all",
-				Usage:   "all, open, closed",
-			},
-			&cli.IntFlag{
-				Name:    "perpage",
-				Aliases: []string{"p"},
-				Value:   30,
-			},
-		},
 	}
 
 	actions := cli.Command{
@@ -99,7 +68,6 @@ func New(version string) *cli.App {
 
 	app.Commands = []*cli.Command{
 		&prlist,
-		&prrate,
 		&actions,
 	}
 
