@@ -24,12 +24,6 @@ func New(version string) *cli.App {
 			EnvVars: []string{"PAT"},
 		},
 		&cli.StringFlag{
-			Name:    "format",
-			Aliases: []string{"f"},
-			Value:   "json",
-			Usage:   "json, csv",
-		},
-		&cli.StringFlag{
 			Name:    "owner",
 			Aliases: []string{"o"},
 			Value:   "github",
@@ -62,6 +56,14 @@ func New(version string) *cli.App {
 		Aliases: []string{"p"},
 		Action:  prlist.Action,
 		Usage:   "PR list",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "format",
+				Aliases: []string{"f"},
+				Value:   "json",
+				Usage:   "json, csv",
+			},
+		},
 	}
 
 	app.Commands = []*cli.Command{

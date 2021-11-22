@@ -78,7 +78,7 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 		)))
 	}
 
-	var stats PRStats
+	var out PRStats
 	{
 		opt := github.PullRequestListOptions{
 			State: in.State,
@@ -102,14 +102,14 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 			opt.Page = resp.NextPage
 		}
 
-		stats.Owner = in.Owner
-		stats.Repo = in.Repo
-		stats.Range.Beg = list[0].CreatedAt
-		stats.Range.End = list[len(list)-1].CreatedAt
+		out.Owner = in.Owner
+		out.Repo = in.Repo
+		out.Range.Beg = list[0].CreatedAt
+		out.Range.End = list[len(list)-1].CreatedAt
 
-		stats.PerDay.Count = len(list)
-		stats.PerDay.Days = int(list[0].CreatedAt.Sub(*list[len(list)-1].CreatedAt).Hours() / 24)
-		stats.PerDay.CountPerDay = float64(stats.PerDay.Count) / float64(stats.PerDay.Days)
+		out.PerDay.Count = len(list)
+		out.PerDay.Days = int(list[0].CreatedAt.Sub(*list[len(list)-1].CreatedAt).Hours() / 24)
+		out.PerDay.CountPerDay = float64(out.PerDay.Count) / float64(out.PerDay.Days)
 
 		var count int
 		var sum float64
@@ -122,12 +122,12 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 			sum += r.MergedAt.Sub(*r.CreatedAt).Hours()
 		}
 
-		stats.Merged.Count = count
-		stats.Merged.Days = int(list[0].MergedAt.Sub(*list[len(list)-1].MergedAt).Hours() / 24)
-		stats.Merged.CountPerDay = float64(stats.Merged.Count) / float64(stats.Merged.Days)
+		out.Merged.Count = count
+		out.Merged.Days = int(list[0].MergedAt.Sub(*list[len(list)-1].MergedAt).Hours() / 24)
+		out.Merged.CountPerDay = float64(out.Merged.Count) / float64(out.Merged.Days)
 
-		stats.Merged.HoursPerCount = int(sum / float64(count))
-		stats.Merged.TotalHours = int(sum)
+		out.Merged.HoursPerCount = int(sum / float64(count))
+		out.Merged.TotalHours = int(sum)
 	}
 
 	{
@@ -192,7 +192,7 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 				}
 			}
 
-			stats.Workflow = append(stats.Workflow, Workflow{
+			out.Workflow = append(out.Workflow, Workflow{
 				ID:          k,
 				Name:        *v[0].Name,
 				FailureRate: float64(failure) / float64(len(v)),
@@ -205,5 +205,5 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 		}
 	}
 
-	return &stats, nil
+	return &out, nil
 }
