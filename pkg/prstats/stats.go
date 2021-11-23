@@ -11,15 +11,16 @@ import (
 )
 
 type WorkflowRun struct {
-	ID          int64   `json:"id"`
-	Name        string  `json:"name"`
-	CountPerDay float64 `json:"count_per_day"`
-	FailureRate float64 `json:"failure_rate"`
-	Success     int     `json:"success"`
-	Failure     int     `json:"failure"`
-	Skipped     int     `json:"skipped"`
-	Cancelled   int     `json:"cancelled"`
-	Count       int     `json:"count"`
+	ID             int64   `json:"id"`
+	Name           string  `json:"name"`
+	CountPerDay    float64 `json:"count_per_day"`
+	FailureRate    float64 `json:"failure_rate"`
+	Success        int     `json:"success"`
+	Failure        int     `json:"failure"`
+	Skipped        int     `json:"skipped"`
+	Cancelled      int     `json:"cancelled"`
+	ActionRequired int     `json:"action_required"`
+	Count          int     `json:"count"`
 }
 
 type Range struct {
@@ -187,7 +188,7 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 			continue
 		}
 
-		var success, failure, skipped, cancelled int
+		var success, failure, skipped, cancelled, required int
 		for _, r := range v {
 			if *r.Conclusion == "success" {
 				success++
@@ -209,17 +210,23 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 				continue
 			}
 
+			if *r.Conclusion == "action_required" {
+				required++
+				continue
+			}
+
 			return nil, fmt.Errorf("invalid conclusion=%v", *r.Conclusion)
 		}
 
 		w := WorkflowRun{
-			ID:        k,
-			Name:      *v[0].Name,
-			Count:     len(v),
-			Success:   success,
-			Failure:   failure,
-			Skipped:   skipped,
-			Cancelled: cancelled,
+			ID:             k,
+			Name:           *v[0].Name,
+			Success:        success,
+			Failure:        failure,
+			Skipped:        skipped,
+			Cancelled:      cancelled,
+			ActionRequired: required,
+			Count:          len(v),
 		}
 
 		if w.Count > 0 {

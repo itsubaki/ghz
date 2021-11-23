@@ -27,12 +27,12 @@ func New(version string) *cli.App {
 		&cli.StringFlag{
 			Name:    "owner",
 			Aliases: []string{"o"},
-			Value:   "github",
+			Value:   "google",
 		},
 		&cli.StringFlag{
 			Name:    "repo",
 			Aliases: []string{"r"},
-			Value:   "docs",
+			Value:   "go-github",
 		},
 		&cli.StringFlag{
 			Name:    "state",
