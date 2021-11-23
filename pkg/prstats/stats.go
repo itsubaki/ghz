@@ -112,7 +112,7 @@ func GetPRList(ctx context.Context, in *GetStatsInput, begin time.Time) ([]*gith
 	return out, nil
 }
 
-func GetMergedCount(list []*github.PullRequest) (int, float64) {
+func GetMergedCount(list []*github.PullRequest) (int, float64, float64) {
 	var count int
 	var total float64
 	for _, r := range list {
@@ -124,7 +124,12 @@ func GetMergedCount(list []*github.PullRequest) (int, float64) {
 		total += r.MergedAt.Sub(*r.CreatedAt).Hours()
 	}
 
-	return count, total
+	percount := 0.0
+	if count > 0 {
+		percount = total / float64(count)
+	}
+
+	return count, total, percount
 }
 
 func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time) ([]WorkflowRun, error) {
@@ -227,34 +232,39 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 }
 
 func GetStats(in *GetStatsInput, days int) (*PRStats, error) {
-	var out PRStats
-	out.Owner = in.Owner
-	out.Repo = in.Repo
-	out.Range.End = time.Now()
-	out.Range.Beg = out.Range.End.AddDate(0, 0, -1*days)
-	out.Range.Days = days
+	end := time.Now()
+	beg := end.AddDate(0, 0, -1*days)
 
 	ctx := context.Background()
-	list, err := GetPRList(ctx, in, out.Range.Beg)
+	created, err := GetPRList(ctx, in, beg)
 	if err != nil {
 		return nil, fmt.Errorf("get PR list: %v", err)
 	}
-	out.Created.Count = len(list)
-	out.Created.CountPerDay = float64(out.Created.Count) / float64(days)
+	merged, total, percount := GetMergedCount(created)
 
-	count, total := GetMergedCount(list)
-	out.Merged.Count = count
-	out.Merged.TotalHours = total
-	out.Merged.CountPerDay = float64(out.Merged.Count) / float64(days)
-	if count > 0 {
-		out.Merged.HoursPerCount = total / float64(count)
-	}
-
-	runs, err := GetWorflowRunsList(ctx, in, out.Range.Beg)
+	runs, err := GetWorflowRunsList(ctx, in, beg)
 	if err != nil {
 		return nil, fmt.Errorf("get WorkflowRuns list: %v", err)
 	}
-	out.WorkflowRuns = runs
 
-	return &out, nil
+	return &PRStats{
+		Owner: in.Owner,
+		Repo:  in.Repo,
+		Range: Range{
+			Beg:  beg,
+			End:  end,
+			Days: days,
+		},
+		Created: Created{
+			CountPerDay: float64(len(created)) / float64(days),
+			Count:       len(created),
+		},
+		Merged: Merged{
+			CountPerDay:   float64(merged) / float64(days),
+			HoursPerCount: percount,
+			TotalHours:    total,
+			Count:         merged,
+		},
+		WorkflowRuns: runs,
+	}, nil
 }
