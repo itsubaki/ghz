@@ -26,20 +26,19 @@ type PRStats struct {
 	Repo  string `json:"repo"`
 
 	Range struct {
-		Beg *time.Time `json:"beg"`
-		End *time.Time `json:"end"`
+		Beg  time.Time `json:"beg"`
+		End  time.Time `json:"end"`
+		Days int       `json:"days"`
 	} `json:"range"`
 
 	PerDay struct {
 		CountPerDay float64 `json:"count_per_day"`
 		Count       int     `json:"count"`
-		Days        int     `json:"days"`
 	} `json:"pr"`
 
 	Merged struct {
 		CountPerDay   float64 `json:"count_per_day"`
 		Count         int     `json:"count"`
-		Days          int     `json:"days"`
 		HoursPerCount int     `json:"hours_per_count"`
 		TotalHours    int     `json:"total_hours"`
 	} `json:"merged"`
@@ -80,6 +79,12 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 	}
 
 	var out PRStats
+	out.Owner = in.Owner
+	out.Repo = in.Repo
+	out.Range.End = time.Now()
+	out.Range.Beg = out.Range.End.AddDate(0, 0, -7*in.Week)
+	out.Range.Days = 7 * in.Week
+
 	{
 		opt := github.PullRequestListOptions{
 			State: in.State,
@@ -88,6 +93,7 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 			},
 		}
 
+		skip := false
 		list := make([]*github.PullRequest, 0)
 		for {
 			pr, resp, err := client.PullRequests.List(ctx, in.Owner, in.Repo, &opt)
@@ -95,40 +101,46 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 				return nil, fmt.Errorf("list PR: %v", err)
 			}
 
-			list = append(list, pr...)
-			if resp.NextPage == 0 {
+			for i := range pr {
+				if pr[i].CreatedAt.Unix() < out.Range.Beg.Unix() {
+					skip = true
+					break
+				}
+
+				list = append(list, pr[i])
+			}
+
+			if resp.NextPage == 0 || skip {
 				break
 			}
 
 			opt.Page = resp.NextPage
 		}
 
-		out.Owner = in.Owner
-		out.Repo = in.Repo
-		out.Range.Beg = list[0].CreatedAt
-		out.Range.End = list[len(list)-1].CreatedAt
-
 		out.PerDay.Count = len(list)
-		out.PerDay.Days = int(list[0].CreatedAt.Sub(*list[len(list)-1].CreatedAt).Hours() / 24)
-		out.PerDay.CountPerDay = float64(out.PerDay.Count) / float64(out.PerDay.Days)
+		out.PerDay.CountPerDay = float64(out.PerDay.Count) / float64(out.Range.Days)
 
 		var count int
-		var sum float64
+		var total float64
 		for _, r := range list {
 			if r.MergedAt == nil {
 				continue
 			}
 
+			if r.MergedAt.Unix() < out.Range.Beg.Unix() {
+				continue
+			}
+
 			count++
-			sum += r.MergedAt.Sub(*r.CreatedAt).Hours()
+			total += r.MergedAt.Sub(*r.CreatedAt).Hours()
 		}
 
 		out.Merged.Count = count
-		out.Merged.Days = int(list[0].MergedAt.Sub(*list[len(list)-1].MergedAt).Hours() / 24)
-		out.Merged.CountPerDay = float64(out.Merged.Count) / float64(out.Merged.Days)
-
-		out.Merged.HoursPerCount = int(sum / float64(count))
-		out.Merged.TotalHours = int(sum)
+		out.Merged.CountPerDay = float64(out.Merged.Count) / float64(out.Range.Days)
+		out.Merged.TotalHours = int(total)
+		if count > 0 {
+			out.Merged.HoursPerCount = int(total / float64(count))
+		}
 	}
 
 	{
@@ -138,6 +150,7 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 			},
 		}
 
+		skip := false
 		wmap := make(map[int64][]*github.WorkflowRun)
 		for {
 			runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, in.Owner, in.Repo, &opt)
@@ -150,6 +163,11 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 					continue
 				}
 
+				if r.UpdatedAt.Unix() < out.Range.Beg.Unix() {
+					skip = true
+					break
+				}
+
 				runs, ok := wmap[*r.WorkflowID]
 				if !ok {
 					wmap[*r.WorkflowID] = make([]*github.WorkflowRun, 0)
@@ -158,7 +176,7 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 				wmap[*r.WorkflowID] = append(runs, r)
 			}
 
-			if resp.NextPage == 0 {
+			if resp.NextPage == 0 || skip {
 				break
 			}
 

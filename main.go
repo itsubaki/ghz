@@ -42,7 +42,7 @@ func New(version string) *cli.App {
 		&cli.IntFlag{
 			Name:    "perpage",
 			Aliases: []string{"p"},
-			Value:   100,
+			Value:   30,
 		},
 		&cli.StringFlag{
 			Name:    "format",
