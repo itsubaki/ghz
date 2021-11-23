@@ -13,6 +13,7 @@ import (
 type WorkflowRun struct {
 	ID          int64   `json:"id"`
 	Name        string  `json:"name"`
+	CountPerDay float64 `json:"count_per_day"`
 	FailureRate float64 `json:"failure_rate"`
 	Success     int     `json:"success"`
 	Failure     int     `json:"failure"`
@@ -245,6 +246,10 @@ func GetStats(in *GetStatsInput, days int) (*PRStats, error) {
 	runs, err := GetWorflowRunsList(ctx, in, beg)
 	if err != nil {
 		return nil, fmt.Errorf("get WorkflowRuns list: %v", err)
+	}
+
+	for i := range runs {
+		runs[i].CountPerDay = float64(runs[i].Count) / float64(days)
 	}
 
 	return &PRStats{
