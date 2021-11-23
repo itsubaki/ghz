@@ -10,7 +10,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type Workflow struct {
+type WorkflowRun struct {
 	ID          int64   `json:"id"`
 	Name        string  `json:"name"`
 	FailureRate float64 `json:"failure_rate"`
@@ -40,12 +40,12 @@ type Merged struct {
 }
 
 type PRStats struct {
-	Owner    string     `json:"owner"`
-	Repo     string     `json:"repo"`
-	Range    Range      `json:"range"`
-	Created  Created    `json:"created"`
-	Merged   Merged     `json:"merged"`
-	Workflow []Workflow `json:"workflow"`
+	Owner        string        `json:"owner"`
+	Repo         string        `json:"repo"`
+	Range        Range         `json:"range"`
+	Created      Created       `json:"created"`
+	Merged       Merged        `json:"merged"`
+	WorkflowRuns []WorkflowRun `json:"workflow_runs"`
 }
 
 func (s PRStats) String() string {
@@ -127,7 +127,7 @@ func GetMergedCount(list []*github.PullRequest) (int, float64) {
 	return count, total
 }
 
-func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time) ([]Workflow, error) {
+func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time) ([]WorkflowRun, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -175,7 +175,7 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 		opt.Page = resp.NextPage
 	}
 
-	out := make([]Workflow, 0)
+	out := make([]WorkflowRun, 0)
 	for k, v := range list {
 		if len(v) < 1 {
 			continue
@@ -206,7 +206,7 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 			return nil, fmt.Errorf("invalid conclusion=%v", *r.Conclusion)
 		}
 
-		w := Workflow{
+		w := WorkflowRun{
 			ID:        k,
 			Name:      *v[0].Name,
 			Count:     len(v),
@@ -254,7 +254,7 @@ func GetStats(in *GetStatsInput, days int) (*PRStats, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get WorkflowRuns list: %v", err)
 	}
-	out.Workflow = runs
+	out.WorkflowRuns = runs
 
 	return &out, nil
 }
