@@ -21,28 +21,30 @@ type Workflow struct {
 	Cancelled   int     `json:"cancelled"`
 }
 
+type Range struct {
+	Beg  time.Time `json:"beg"`
+	End  time.Time `json:"end"`
+	Days int       `json:"days"`
+}
+
+type Created struct {
+	CountPerDay float64 `json:"count_per_day"`
+	Count       int     `json:"count"`
+}
+
+type Merged struct {
+	CountPerDay   float64 `json:"count_per_day"`
+	HoursPerCount float64 `json:"hours_per_count"`
+	TotalHours    float64 `json:"total_hours"`
+	Count         int     `json:"count"`
+}
+
 type PRStats struct {
-	Owner string `json:"owner"`
-	Repo  string `json:"repo"`
-
-	Range struct {
-		Beg  time.Time `json:"beg"`
-		End  time.Time `json:"end"`
-		Days int       `json:"days"`
-	} `json:"range"`
-
-	PerDay struct {
-		CountPerDay float64 `json:"count_per_day"`
-		Count       int     `json:"count"`
-	} `json:"pr"`
-
-	Merged struct {
-		CountPerDay   float64 `json:"count_per_day"`
-		Count         int     `json:"count"`
-		HoursPerCount int     `json:"hours_per_count"`
-		TotalHours    int     `json:"total_hours"`
-	} `json:"merged"`
-
+	Owner    string     `json:"owner"`
+	Repo     string     `json:"repo"`
+	Range    Range      `json:"range"`
+	Created  Created    `json:"created"`
+	Merged   Merged     `json:"merged"`
 	Workflow []Workflow `json:"workflow"`
 }
 
@@ -238,15 +240,15 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 	if err != nil {
 		return nil, fmt.Errorf("get PR list: %v", err)
 	}
-	out.PerDay.Count = len(list)
-	out.PerDay.CountPerDay = float64(out.PerDay.Count) / float64(out.Range.Days)
+	out.Created.Count = len(list)
+	out.Created.CountPerDay = float64(out.Created.Count) / float64(out.Range.Days)
 
 	count, total := GetMergedCount(list)
 	out.Merged.Count = count
-	out.Merged.TotalHours = int(total)
+	out.Merged.TotalHours = total
 	out.Merged.CountPerDay = float64(out.Merged.Count) / float64(out.Range.Days)
 	if count > 0 {
-		out.Merged.HoursPerCount = int(total / float64(count))
+		out.Merged.HoursPerCount = total / float64(count)
 	}
 
 	runs, err := GetWorflowRunsList(ctx, in, out.Range.Beg)

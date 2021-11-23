@@ -1,11 +1,13 @@
 package prlist
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
 
+	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/prstats/pkg/prstats"
 	"github.com/urfave/cli/v2"
 )
@@ -33,16 +35,16 @@ func (r PR) JSON() string {
 }
 
 func Action(c *cli.Context) error {
-	in := prstats.ListPRInput{
+	in := prstats.GetStatsInput{
 		Owner:   c.String("owner"),
 		Repo:    c.String("repo"),
 		PAT:     c.String("pat"),
 		State:   c.String("state"),
-		Days:    c.Int("days"),
 		PerPage: c.Int("perpage"),
 	}
 
-	list, err := prstats.ListPR(&in)
+	ctx := context.Background()
+	list, err := prstats.GetPRList(ctx, &in, time.Unix(0, 0))
 	if err != nil {
 		return fmt.Errorf("list PR: %v", err)
 	}
@@ -55,7 +57,7 @@ func Action(c *cli.Context) error {
 	return nil
 }
 
-func print(format string, list []prstats.PR) error {
+func print(format string, list []*github.PullRequest) error {
 	if format == "json" {
 		for _, r := range list {
 			fmt.Println(r)
@@ -68,7 +70,7 @@ func print(format string, list []prstats.PR) error {
 		fmt.Println("id, title, created_at, merged_at, lead_time(hours), ")
 
 		for _, r := range list {
-			fmt.Printf("%v, %v, %v, %v, ", r.ID, r.Title, r.CreatedAt, r.MergedAt)
+			fmt.Printf("%v, %v, %v, %v, ", *r.ID, strings.ReplaceAll(*r.Title, ",", ""), r.CreatedAt, r.MergedAt)
 			if r.MergedAt != nil {
 				fmt.Printf("%.4f, ", r.MergedAt.Sub(*r.CreatedAt).Hours())
 			}
