@@ -19,6 +19,10 @@ $ prstats --owner itsubaki --repo q --days 365 | jq .
     "end": "2021-11-23T20:35:49.08844+09:00",
     "days": 365
   },
+  "created": {
+    "count_per_day": 0.0027397260273972603,
+    "count": 1
+  },
   "merged": {
     "count_per_day": 0.0027397260273972603,
     "hours_per_count": 70.39944444444444,
