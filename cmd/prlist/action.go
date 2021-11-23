@@ -2,7 +2,6 @@ package prlist
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 	"time"
@@ -11,28 +10,6 @@ import (
 	"github.com/itsubaki/prstats/pkg/prstats"
 	"github.com/urfave/cli/v2"
 )
-
-type PR struct {
-	ID        int64      `json:"id"`
-	Title     string     `json:"title"`
-	CreatedAt *time.Time `json:"created_at"`
-	UpdatedAt *time.Time `json:"updated_at"`
-	MergedAt  *time.Time `json:"merged_at"`
-	ClosedAt  *time.Time `json:"closed_at"`
-}
-
-func (r PR) String() string {
-	return r.JSON()
-}
-
-func (r PR) JSON() string {
-	b, err := json.Marshal(r)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(b)
-}
 
 func Action(c *cli.Context) error {
 	in := prstats.GetStatsInput{

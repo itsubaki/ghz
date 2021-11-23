@@ -66,7 +66,6 @@ type GetStatsInput struct {
 	Repo    string
 	PAT     string
 	State   string
-	Days    int
 	PerPage int
 }
 
@@ -227,13 +226,13 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 	return out, nil
 }
 
-func GetStats(in *GetStatsInput) (*PRStats, error) {
+func GetStats(in *GetStatsInput, days int) (*PRStats, error) {
 	var out PRStats
 	out.Owner = in.Owner
 	out.Repo = in.Repo
 	out.Range.End = time.Now()
-	out.Range.Beg = out.Range.End.AddDate(0, 0, -1*in.Days)
-	out.Range.Days = in.Days
+	out.Range.Beg = out.Range.End.AddDate(0, 0, -1*days)
+	out.Range.Days = days
 
 	ctx := context.Background()
 	list, err := GetPRList(ctx, in, out.Range.Beg)
@@ -241,12 +240,12 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 		return nil, fmt.Errorf("get PR list: %v", err)
 	}
 	out.Created.Count = len(list)
-	out.Created.CountPerDay = float64(out.Created.Count) / float64(out.Range.Days)
+	out.Created.CountPerDay = float64(out.Created.Count) / float64(days)
 
 	count, total := GetMergedCount(list)
 	out.Merged.Count = count
 	out.Merged.TotalHours = total
-	out.Merged.CountPerDay = float64(out.Merged.Count) / float64(out.Range.Days)
+	out.Merged.CountPerDay = float64(out.Merged.Count) / float64(days)
 	if count > 0 {
 		out.Merged.HoursPerCount = total / float64(count)
 	}

@@ -66,11 +66,10 @@ func Action(c *cli.Context) error {
 		Repo:    c.String("repo"),
 		PAT:     c.String("pat"),
 		State:   c.String("state"),
-		Days:    c.Int("days"),
 		PerPage: c.Int("perpage"),
 	}
 
-	stats, err := prstats.GetStats(&in)
+	stats, err := prstats.GetStats(&in, c.Int("days"))
 	if err != nil {
 		return fmt.Errorf("get stats: %v", err)
 	}
