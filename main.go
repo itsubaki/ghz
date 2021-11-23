@@ -22,6 +22,7 @@ func New(version string) *cli.App {
 		&cli.StringFlag{
 			Name:    "pat",
 			EnvVars: []string{"PAT"},
+			Usage:   "Personal Access Token",
 		},
 		&cli.StringFlag{
 			Name:    "owner",
