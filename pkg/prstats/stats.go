@@ -35,10 +35,11 @@ type Created struct {
 }
 
 type Merged struct {
-	CountPerDay   float64 `json:"count_per_day"`
-	HoursPerCount float64 `json:"hours_per_count"`
-	TotalHours    float64 `json:"total_hours"`
-	Count         int     `json:"count"`
+	CountPerCreated float64 `json:"count_per_created"`
+	CountPerDay     float64 `json:"count_per_day"`
+	HoursPerCount   float64 `json:"hours_per_count"`
+	TotalHours      float64 `json:"total_hours"`
+	Count           int     `json:"count"`
 }
 
 type PRStats struct {
@@ -272,10 +273,11 @@ func GetStats(in *GetStatsInput, days int) (*PRStats, error) {
 			Count:       len(created),
 		},
 		Merged: Merged{
-			CountPerDay:   float64(merged) / float64(days),
-			HoursPerCount: percount,
-			TotalHours:    total,
-			Count:         merged,
+			CountPerCreated: float64(merged) / float64(len(created)),
+			CountPerDay:     float64(merged) / float64(days),
+			HoursPerCount:   percount,
+			TotalHours:      total,
+			Count:           merged,
 		},
 		WorkflowRuns: runs,
 	}, nil
