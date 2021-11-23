@@ -1,5 +1,6 @@
 # prstats
-CLI for Github PR stats
+
+* One of the indicators of productivity
 
 ## Install
 
