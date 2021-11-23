@@ -1,64 +1,12 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/itsubaki/prstats/pkg/prstats"
 	"github.com/urfave/cli/v2"
 )
-
-type PRStats struct {
-	Owner string `json:"owner"`
-	Repo  string `json:"repo"`
-
-	Range struct {
-		Beg *time.Time `json:"beg"`
-		End *time.Time `json:"end"`
-	} `json:"range"`
-
-	PerDay struct {
-		CountPerDay float64 `json:"count_per_day"`
-		Count       int     `json:"count"`
-		Days        int     `json:"days"`
-	} `json:"pr"`
-
-	Merged struct {
-		CountPerDay   float64 `json:"count_per_day"`
-		Count         int     `json:"count"`
-		Days          int     `json:"days"`
-		HoursPerCount int     `json:"hours_per_count"`
-		TotalHours    int     `json:"total_hours"`
-	} `json:"merged"`
-
-	Workflow []Workflow `json:"workflow"`
-}
-
-type Workflow struct {
-	ID          int64   `json:"id"`
-	Name        string  `json:"name"`
-	FailureRate float64 `json:"failure_rate"`
-	Count       int     `json:"count"`
-	Success     int     `json:"success"`
-	Failure     int     `json:"failure"`
-	Skipped     int     `json:"skipped"`
-	Cancelled   int     `json:"cancelled"`
-}
-
-func (s PRStats) String() string {
-	return s.JSON()
-}
-
-func (s PRStats) JSON() string {
-	b, err := json.Marshal(s)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(b)
-}
 
 func Action(c *cli.Context) error {
 	in := prstats.GetStatsInput{

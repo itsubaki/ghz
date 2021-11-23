@@ -20,8 +20,7 @@ func Action(c *cli.Context) error {
 		PerPage: c.Int("perpage"),
 	}
 
-	ctx := context.Background()
-	list, err := prstats.GetPRList(ctx, &in, time.Unix(0, 0))
+	list, err := prstats.GetPRList(context.Background(), &in, time.Unix(0, 0))
 	if err != nil {
 		return fmt.Errorf("list PR: %v", err)
 	}
