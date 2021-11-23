@@ -16,7 +16,7 @@ type ListPRInput struct {
 	Repo    string
 	PAT     string
 	State   string
-	Week    int
+	Days    int
 	PerPage int
 }
 

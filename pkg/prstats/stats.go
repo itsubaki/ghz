@@ -64,11 +64,11 @@ type GetStatsInput struct {
 	Repo    string
 	PAT     string
 	State   string
-	Week    int
+	Days    int
 	PerPage int
 }
 
-func GetStats(in *GetStatsInput) (*PRStats, error) {
+func GetPRList(in *GetStatsInput, begin time.Time) ([]*github.PullRequest, error) {
 	ctx := context.Background()
 	client := github.NewClient(nil)
 
@@ -78,153 +78,183 @@ func GetStats(in *GetStatsInput) (*PRStats, error) {
 		)))
 	}
 
+	opt := github.PullRequestListOptions{
+		State: in.State,
+		ListOptions: github.ListOptions{
+			PerPage: in.PerPage,
+		},
+	}
+
+	skip := false
+	out := make([]*github.PullRequest, 0)
+	for {
+		pr, resp, err := client.PullRequests.List(ctx, in.Owner, in.Repo, &opt)
+		if err != nil {
+			return nil, fmt.Errorf("list PR: %v", err)
+		}
+
+		for i := range pr {
+			if pr[i].CreatedAt.Unix() < begin.Unix() {
+				skip = true
+				break
+			}
+
+			out = append(out, pr[i])
+		}
+
+		if resp.NextPage == 0 || skip {
+			break
+		}
+
+		opt.Page = resp.NextPage
+	}
+
+	return out, nil
+}
+
+func GetMergedCount(list []*github.PullRequest) (int, float64) {
+	var count int
+	var total float64
+	for _, r := range list {
+		if r.MergedAt == nil {
+			continue
+		}
+
+		count++
+		total += r.MergedAt.Sub(*r.CreatedAt).Hours()
+	}
+
+	return count, total
+}
+
+func GetWorflowRunsList(in *GetStatsInput, begin time.Time) ([]Workflow, error) {
+	ctx := context.Background()
+	client := github.NewClient(nil)
+
+	if in.PAT != "" {
+		client = github.NewClient(oauth2.NewClient(ctx, oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: in.PAT},
+		)))
+	}
+
+	opt := github.ListWorkflowRunsOptions{
+		ListOptions: github.ListOptions{
+			PerPage: in.PerPage,
+		},
+	}
+
+	skip := false
+	list := make(map[int64][]*github.WorkflowRun)
+	for {
+		runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, in.Owner, in.Repo, &opt)
+		if err != nil {
+			return nil, fmt.Errorf("list Workflow Runs: %v", err)
+		}
+
+		for _, r := range runs.WorkflowRuns {
+			if r.Conclusion == nil {
+				continue
+			}
+
+			if r.UpdatedAt.Unix() < begin.Unix() {
+				skip = true
+				break
+			}
+
+			runs, ok := list[*r.WorkflowID]
+			if !ok {
+				list[*r.WorkflowID] = make([]*github.WorkflowRun, 0)
+			}
+
+			list[*r.WorkflowID] = append(runs, r)
+		}
+
+		if resp.NextPage == 0 || skip {
+			break
+		}
+
+		opt.Page = resp.NextPage
+	}
+
+	out := make([]Workflow, 0)
+	for k, v := range list {
+		if len(v) < 1 {
+			continue
+		}
+
+		var success, failure, skipped, cancelled int
+		for _, r := range v {
+			if *r.Conclusion == "success" {
+				success++
+				continue
+			}
+
+			if *r.Conclusion == "failure" {
+				failure++
+				continue
+			}
+
+			if *r.Conclusion == "skipped" {
+				skipped++
+				continue
+			}
+
+			if *r.Conclusion == "cancelled" {
+				cancelled++
+				continue
+			}
+
+			return nil, fmt.Errorf("invalid conclusion=%v", *r.Conclusion)
+		}
+
+		w := Workflow{
+			ID:        k,
+			Name:      *v[0].Name,
+			Count:     len(v),
+			Success:   success,
+			Failure:   failure,
+			Skipped:   skipped,
+			Cancelled: cancelled,
+		}
+
+		if w.Count > 0 {
+			w.FailureRate = float64(w.Failure) / float64(w.Count)
+		}
+
+		out = append(out, w)
+	}
+
+	return out, nil
+}
+
+func GetStats(in *GetStatsInput) (*PRStats, error) {
 	var out PRStats
 	out.Owner = in.Owner
 	out.Repo = in.Repo
 	out.Range.End = time.Now()
-	out.Range.Beg = out.Range.End.AddDate(0, 0, -7*in.Week)
-	out.Range.Days = 7 * in.Week
+	out.Range.Beg = out.Range.End.AddDate(0, 0, -1*in.Days)
+	out.Range.Days = in.Days
 
-	{
-		opt := github.PullRequestListOptions{
-			State: in.State,
-			ListOptions: github.ListOptions{
-				PerPage: in.PerPage,
-			},
-		}
+	list, err := GetPRList(in, out.Range.Beg)
+	if err != nil {
+		return nil, fmt.Errorf("get PR list: %v", err)
+	}
+	out.PerDay.Count = len(list)
+	out.PerDay.CountPerDay = float64(out.PerDay.Count) / float64(out.Range.Days)
 
-		skip := false
-		list := make([]*github.PullRequest, 0)
-		for {
-			pr, resp, err := client.PullRequests.List(ctx, in.Owner, in.Repo, &opt)
-			if err != nil {
-				return nil, fmt.Errorf("list PR: %v", err)
-			}
-
-			for i := range pr {
-				if pr[i].CreatedAt.Unix() < out.Range.Beg.Unix() {
-					skip = true
-					break
-				}
-
-				list = append(list, pr[i])
-			}
-
-			if resp.NextPage == 0 || skip {
-				break
-			}
-
-			opt.Page = resp.NextPage
-		}
-
-		out.PerDay.Count = len(list)
-		out.PerDay.CountPerDay = float64(out.PerDay.Count) / float64(out.Range.Days)
-
-		var count int
-		var total float64
-		for _, r := range list {
-			if r.MergedAt == nil {
-				continue
-			}
-
-			if r.MergedAt.Unix() < out.Range.Beg.Unix() {
-				continue
-			}
-
-			count++
-			total += r.MergedAt.Sub(*r.CreatedAt).Hours()
-		}
-
-		out.Merged.Count = count
-		out.Merged.CountPerDay = float64(out.Merged.Count) / float64(out.Range.Days)
-		out.Merged.TotalHours = int(total)
-		if count > 0 {
-			out.Merged.HoursPerCount = int(total / float64(count))
-		}
+	count, total := GetMergedCount(list)
+	out.Merged.Count = count
+	out.Merged.TotalHours = int(total)
+	out.Merged.CountPerDay = float64(out.Merged.Count) / float64(out.Range.Days)
+	if count > 0 {
+		out.Merged.HoursPerCount = int(total / float64(count))
 	}
 
-	{
-		opt := github.ListWorkflowRunsOptions{
-			ListOptions: github.ListOptions{
-				PerPage: in.PerPage,
-			},
-		}
-
-		skip := false
-		wmap := make(map[int64][]*github.WorkflowRun)
-		for {
-			runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, in.Owner, in.Repo, &opt)
-			if err != nil {
-				return nil, fmt.Errorf("list Workflow Runs: %v", err)
-			}
-
-			for _, r := range runs.WorkflowRuns {
-				if r.Conclusion == nil {
-					continue
-				}
-
-				if r.UpdatedAt.Unix() < out.Range.Beg.Unix() {
-					skip = true
-					break
-				}
-
-				runs, ok := wmap[*r.WorkflowID]
-				if !ok {
-					wmap[*r.WorkflowID] = make([]*github.WorkflowRun, 0)
-				}
-
-				wmap[*r.WorkflowID] = append(runs, r)
-			}
-
-			if resp.NextPage == 0 || skip {
-				break
-			}
-
-			opt.Page = resp.NextPage
-		}
-
-		for k, v := range wmap {
-			if len(v) < 1 {
-				continue
-			}
-
-			var success, failure, skipped, cancelled int
-			for _, r := range v {
-				if *r.Conclusion == "success" {
-					success++
-					continue
-				}
-
-				if *r.Conclusion == "failure" {
-					failure++
-					continue
-				}
-
-				if *r.Conclusion == "skipped" {
-					skipped++
-					continue
-				}
-
-				if *r.Conclusion == "cancelled" {
-					cancelled++
-					continue
-				}
-
-				return nil, fmt.Errorf("invalid conclusion=%v", *r.Conclusion)
-			}
-
-			out.Workflow = append(out.Workflow, Workflow{
-				ID:          k,
-				Name:        *v[0].Name,
-				FailureRate: float64(failure) / float64(len(v)),
-				Count:       len(v),
-				Success:     success,
-				Failure:     failure,
-				Skipped:     skipped,
-				Cancelled:   cancelled,
-			})
-		}
+	runs, err := GetWorflowRunsList(in, out.Range.Beg)
+	if err != nil {
+		return nil, fmt.Errorf("get WorkflowRuns list: %v", err)
 	}
+	out.Workflow = runs
 
 	return &out, nil
 }

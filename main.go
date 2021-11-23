@@ -51,9 +51,17 @@ func New(version string) *cli.App {
 			Usage:   "json, csv",
 		},
 		&cli.IntFlag{
-			Name:    "week",
-			Aliases: []string{"w"},
-			Value:   1,
+			Name:    "days",
+			Aliases: []string{"d"},
+			Value:   7,
+		},
+		&cli.StringFlag{
+			Name:    "begin",
+			Aliases: []string{"b"},
+		},
+		&cli.StringFlag{
+			Name:    "end",
+			Aliases: []string{"e"},
 		},
 	}
 
@@ -62,14 +70,6 @@ func New(version string) *cli.App {
 		Aliases: []string{"p"},
 		Action:  prlist.Action,
 		Usage:   "PR list",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "format",
-				Aliases: []string{"f"},
-				Value:   "json",
-				Usage:   "json, csv",
-			},
-		},
 	}
 
 	app.Commands = []*cli.Command{

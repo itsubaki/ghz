@@ -10,24 +10,23 @@ go install github.com/itsubaki/prstats@latest
 ## Example
 
 ```shell
-$ prstats --owner itsubaki --repo q | jq .
+$ prstats --owner itsubaki --repo q --days 365 | jq .
 {
   "owner": "itsubaki",
   "repo": "q",
   "range": {
-    "beg": "2021-07-27T13:40:39Z",
-    "end": "2018-07-29T12:41:02Z"
+    "beg": "2020-11-23T19:55:57.09835+09:00",
+    "end": "2021-11-23T19:55:57.09835+09:00",
+    "days": 365
   },
   "pr": {
-    "count_per_day": 0.003656307129798903,
-    "count": 4,
-    "days": 1094
+    "count_per_day": 0.0027397260273972603,
+    "count": 1
   },
   "merged": {
-    "count_per_day": 0.0018248175182481751,
-    "count": 2,
-    "days": 1096,
-    "hours_per_count": 35,
+    "count_per_day": 0.0027397260273972603,
+    "count": 1,
+    "hours_per_count": 70,
     "total_hours": 70
   },
   "workflow": [
@@ -47,7 +46,7 @@ $ prstats --owner itsubaki --repo q | jq .
 
 
 ```shell
-$ prstats --owner itsubaki --repo mackerel-server-go list --format csv | column -t -s, | less -S
+$ prstats --owner itsubaki --repo mackerel-server-go --format csv list | column -t -s, | less -S
 id          title                        created_at                      merged_at                       lead_time(hours)   
 545593516   gorm v2                      2020-12-25 13:37:55 +0000 UTC   2020-12-26 08:58:26 +0000 UTC   19.3419            
 473905785   Feature/godog v0.10.0        2020-08-26 13:25:52 +0000 UTC   2020-08-26 13:26:12 +0000 UTC   0.0056             

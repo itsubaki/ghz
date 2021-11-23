@@ -38,7 +38,7 @@ func Action(c *cli.Context) error {
 		Repo:    c.String("repo"),
 		PAT:     c.String("pat"),
 		State:   c.String("state"),
-		Week:    c.Int("week"),
+		Days:    c.Int("days"),
 		PerPage: c.Int("perpage"),
 	}
 
