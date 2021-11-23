@@ -14,11 +14,11 @@ type Workflow struct {
 	ID          int64   `json:"id"`
 	Name        string  `json:"name"`
 	FailureRate float64 `json:"failure_rate"`
-	Count       int     `json:"count"`
 	Success     int     `json:"success"`
 	Failure     int     `json:"failure"`
 	Skipped     int     `json:"skipped"`
 	Cancelled   int     `json:"cancelled"`
+	Count       int     `json:"count"`
 }
 
 type Range struct {
