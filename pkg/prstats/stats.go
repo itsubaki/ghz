@@ -15,6 +15,7 @@ type WorkflowRun struct {
 	Name           string  `json:"name"`
 	CountPerDay    float64 `json:"count_per_day"`
 	FailureRate    float64 `json:"failure_rate"`
+	DurationHours  float64 `json:"duration_hours"`
 	Success        int     `json:"success"`
 	Failure        int     `json:"failure"`
 	Skipped        int     `json:"skipped"`
@@ -189,8 +190,11 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 			continue
 		}
 
-		var success, failure, skipped, cancelled, required int
+		var success, failure, skipped, cancelled, required, startupfailure int
+		var duration time.Duration
 		for _, r := range v {
+			duration += r.UpdatedAt.Time.Sub(r.CreatedAt.Time)
+
 			if *r.Conclusion == "success" {
 				success++
 				continue
@@ -216,6 +220,11 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 				continue
 			}
 
+			if *r.Conclusion == "startup_failure" {
+				startupfailure++
+				continue
+			}
+
 			return nil, fmt.Errorf("invalid conclusion=%v", *r.Conclusion)
 		}
 
@@ -232,6 +241,7 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 
 		if w.Count > 0 {
 			w.FailureRate = float64(w.Failure) / float64(w.Count)
+			w.DurationHours = duration.Hours() / float64(w.Count)
 		}
 
 		out = append(out, w)
