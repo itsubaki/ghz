@@ -12,21 +12,21 @@ go install github.com/itsubaki/prstats@latest
 ## Example
 
 ```shell
-$ prstats --owner itsubaki --repo q --days 365 | jq .
+$ prstats --owner itsubaki --repo q --begin 2019-01-01 --end 2019-12-31 | jq .
 {
   "owner": "itsubaki",
   "repo": "q",
   "range": {
-    "beg": "2020-11-24T10:30:28.70222+09:00",
-    "end": "2021-11-24T10:30:28.70222+09:00",
-    "days": 365
+    "beg": "2019-01-01T00:00:00Z",
+    "end": "2019-12-31T00:00:00Z",
+    "days": 364
   },
   "created": {
-    "count_per_day": 0.0027,
-    "count": 1
+    "count_per_day": 0.0082,
+    "count": 3
   },
   "merged": {
-    "count_per_created": 1,
+    "count_per_created": 0.33,
     "count_per_day": 0.0027,
     "hours_per_count": 70.39,
     "total_hours": 70.39,
