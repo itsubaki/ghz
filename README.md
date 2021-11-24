@@ -12,22 +12,22 @@ go install github.com/itsubaki/prstats@latest
 ## Example
 
 ```shell
-$ prstats --owner itsubaki --repo q --begin 2019-01-01 --end 2020-01-01 | jq .
+prstats --owner itsubaki --repo q --begin 2021-01-01 --end 2021-11-01 | jq .
 {
   "owner": "itsubaki",
   "repo": "q",
   "range": {
-    "beg": "2019-01-01T00:00:00Z",
-    "end": "2020-01-01T00:00:00Z",
-    "days": 365
+    "beg": "2021-01-01T00:00:00Z",
+    "end": "2021-11-01T00:00:00Z",
+    "days": 304
   },
   "created": {
-    "count_per_day": 0.00821917808219178,
-    "count": 3
+    "count_per_day": 0.003289473684210526,
+    "count": 1
   },
   "merged": {
-    "count_per_created": 0.3333333333333333,
-    "count_per_day": 0.0027397260273972603,
+    "count_per_created": 1,
+    "count_per_day": 0.003289473684210526,
     "hours_per_count": 70.39944444444444,
     "total_hours": 70.39944444444444,
     "count": 1
@@ -36,17 +36,19 @@ $ prstats --owner itsubaki --repo q --begin 2019-01-01 --end 2020-01-01 | jq .
     {
       "id": 5841880,
       "name": "tests",
-      "count_per_day": 0.2958904109589041,
-      "failure_rate": 0.037037037037037035,
-      "hours_per_count": 0.027191358024691355,
-      "success": 104,
-      "failure": 4,
-      "skipped": 0,
-      "cancelled": 0,
-      "action_required": 0,
-      "startup_failure": 0,
-      "total_hours": 2.9366666666666665,
-      "count": 108
+      "count_per_day": 0.3519736842105263,
+      "failure_rate": 0.037383177570093455,
+      "hours_per_count": 0.02632398753894081,
+      "total_hours": 2.8166666666666664,
+      "count": 107,
+      "conclusion": {
+        "success": 103,
+        "failure": 4,
+        "skipped": 0,
+        "cancelled": 0,
+        "action_required": 0,
+        "startup_failure": 0
+      }
     }
   ]
 }
