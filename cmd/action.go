@@ -11,17 +11,17 @@ import (
 )
 
 func Action(c *cli.Context) error {
+	end, begin, err := timerange(c.Int("days"), c.String("end"), c.String("begin"))
+	if err != nil {
+		return fmt.Errorf("timerange: %v", err)
+	}
+
 	in := prstats.GetStatsInput{
 		Owner:   c.String("owner"),
 		Repo:    c.String("repo"),
 		PAT:     c.String("pat"),
 		State:   c.String("state"),
 		PerPage: c.Int("perpage"),
-	}
-
-	end, begin, err := timerange(c.Int("days"), c.String("end"), c.String("begin"))
-	if err != nil {
-		return fmt.Errorf("timerange: %v", err)
 	}
 
 	stats, err := prstats.GetStats(context.Background(), &in, end, begin)
