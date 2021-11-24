@@ -19,12 +19,12 @@ func Action(c *cli.Context) error {
 		PerPage: c.Int("perpage"),
 	}
 
-	beg, end, err := timerange(c.Int("days"), c.String("end"), c.String("begin"))
+	end, begin, err := timerange(c.Int("days"), c.String("end"), c.String("begin"))
 	if err != nil {
 		return fmt.Errorf("timerange: %v", err)
 	}
 
-	stats, err := prstats.GetStats(context.Background(), &in, beg, end)
+	stats, err := prstats.GetStats(context.Background(), &in, end, begin)
 	if err != nil {
 		return fmt.Errorf("get stats: %v", err)
 	}
