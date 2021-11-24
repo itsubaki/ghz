@@ -79,7 +79,7 @@ type GetStatsInput struct {
 	PerPage int
 }
 
-func GetList(ctx context.Context, in *GetStatsInput, begin time.Time) ([]*github.PullRequest, error) {
+func GetList(ctx context.Context, in *GetStatsInput, end, begin time.Time) ([]*github.PullRequest, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -104,6 +104,10 @@ func GetList(ctx context.Context, in *GetStatsInput, begin time.Time) ([]*github
 		}
 
 		for i := range pr {
+			if pr[i].CreatedAt.Unix() > end.Unix() {
+				continue
+			}
+
 			if pr[i].CreatedAt.Unix() < begin.Unix() {
 				skip = true
 				break
@@ -142,7 +146,7 @@ func GetMergedCount(list []*github.PullRequest) (int, float64, float64) {
 	return count, total, percount
 }
 
-func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time) ([]WorkflowRun, error) {
+func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, end, begin time.Time) ([]WorkflowRun, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -167,6 +171,10 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 
 		for _, r := range runs.WorkflowRuns {
 			if r.Conclusion == nil {
+				continue
+			}
+
+			if r.UpdatedAt.Unix() > end.Unix() {
 				continue
 			}
 
@@ -262,13 +270,13 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 func GetStats(ctx context.Context, in *GetStatsInput, end, begin time.Time) (*Stats, error) {
 	days := int(end.Sub(begin).Hours() / 24)
 
-	created, err := GetList(ctx, in, begin)
+	created, err := GetList(ctx, in, end, begin)
 	if err != nil {
 		return nil, fmt.Errorf("get PR list: %v", err)
 	}
 	merged, total, percount := GetMergedCount(created)
 
-	runs, err := GetWorflowRunsList(ctx, in, begin)
+	runs, err := GetWorflowRunsList(ctx, in, end, begin)
 	if err != nil {
 		return nil, fmt.Errorf("get WorkflowRuns list: %v", err)
 	}
