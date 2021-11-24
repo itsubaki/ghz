@@ -50,7 +50,6 @@ $ prstats --owner itsubaki --repo q --days 365 | jq .
 }
 ```
 
-
 ```shell
 $ prstats --owner itsubaki --repo mackerel-server-go --format csv list | column -t -s, | less -S
 id          title                        created_at                      merged_at                       lead_time(hours)   
