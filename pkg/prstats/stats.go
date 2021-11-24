@@ -42,7 +42,7 @@ type Merged struct {
 	Count           int     `json:"count"`
 }
 
-type PRStats struct {
+type Stats struct {
 	Owner        string        `json:"owner"`
 	Repo         string        `json:"repo"`
 	Range        Range         `json:"range"`
@@ -51,11 +51,11 @@ type PRStats struct {
 	WorkflowRuns []WorkflowRun `json:"workflow_runs"`
 }
 
-func (s PRStats) String() string {
+func (s Stats) String() string {
 	return s.JSON()
 }
 
-func (s PRStats) JSON() string {
+func (s Stats) JSON() string {
 	b, err := json.Marshal(s)
 	if err != nil {
 		panic(err)
@@ -72,7 +72,7 @@ type GetStatsInput struct {
 	PerPage int
 }
 
-func GetPRList(ctx context.Context, in *GetStatsInput, begin time.Time) ([]*github.PullRequest, error) {
+func GetList(ctx context.Context, in *GetStatsInput, begin time.Time) ([]*github.PullRequest, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -240,18 +240,16 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 	return out, nil
 }
 
-func GetStats(in *GetStatsInput, days int) (*PRStats, error) {
-	end := time.Now()
-	beg := end.AddDate(0, 0, -1*days)
+func GetStats(ctx context.Context, in *GetStatsInput, end, begin time.Time) (*Stats, error) {
+	days := int(end.Sub(begin).Hours() / 24)
 
-	ctx := context.Background()
-	created, err := GetPRList(ctx, in, beg)
+	created, err := GetList(ctx, in, begin)
 	if err != nil {
 		return nil, fmt.Errorf("get PR list: %v", err)
 	}
 	merged, total, percount := GetMergedCount(created)
 
-	runs, err := GetWorflowRunsList(ctx, in, beg)
+	runs, err := GetWorflowRunsList(ctx, in, begin)
 	if err != nil {
 		return nil, fmt.Errorf("get WorkflowRuns list: %v", err)
 	}
@@ -260,11 +258,11 @@ func GetStats(in *GetStatsInput, days int) (*PRStats, error) {
 		runs[i].CountPerDay = float64(runs[i].Count) / float64(days)
 	}
 
-	return &PRStats{
+	return &Stats{
 		Owner: in.Owner,
 		Repo:  in.Repo,
 		Range: Range{
-			Beg:  beg,
+			Beg:  begin,
 			End:  end,
 			Days: days,
 		},

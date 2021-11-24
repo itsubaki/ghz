@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/itsubaki/prstats/pkg/prstats"
 	"github.com/urfave/cli/v2"
@@ -17,7 +19,12 @@ func Action(c *cli.Context) error {
 		PerPage: c.Int("perpage"),
 	}
 
-	stats, err := prstats.GetStats(&in, c.Int("days"))
+	beg, end, err := timerange(c.Int("days"), c.String("end"), c.String("begin"))
+	if err != nil {
+		return fmt.Errorf("timerange: %v", err)
+	}
+
+	stats, err := prstats.GetStats(context.Background(), &in, beg, end)
 	if err != nil {
 		return fmt.Errorf("get stats: %v", err)
 	}
@@ -30,7 +37,26 @@ func Action(c *cli.Context) error {
 	return nil
 }
 
-func print(format string, stats *prstats.PRStats) error {
+func timerange(days int, end, begin string) (time.Time, time.Time, error) {
+	now := time.Now()
+	if begin == "" || end == "" {
+		return now, now.AddDate(0, 0, -1*days), nil
+	}
+
+	pbegin, err := time.Parse("2006-01-02", begin)
+	if err != nil {
+		return now, now, fmt.Errorf("parse time=%s: %v", begin, err)
+	}
+
+	pend, err := time.Parse("2006-01-02", end)
+	if err != nil {
+		return now, now, fmt.Errorf("parse time=%s: %v", end, err)
+	}
+
+	return pend, pbegin, nil
+}
+
+func print(format string, stats *prstats.Stats) error {
 	if format == "json" {
 		fmt.Println(stats)
 		return nil
