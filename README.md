@@ -16,30 +16,33 @@ $ prstats --owner itsubaki --repo q --days 365 | jq .
   "owner": "itsubaki",
   "repo": "q",
   "range": {
-    "beg": "2020-11-23T20:35:49.08844+09:00",
-    "end": "2021-11-23T20:35:49.08844+09:00",
+    "beg": "2020-11-24T10:30:28.70222+09:00",
+    "end": "2021-11-24T10:30:28.70222+09:00",
     "days": 365
   },
   "created": {
-    "count_per_day": 0.0027397260273972603,
+    "count_per_day": 0.0027,
     "count": 1
   },
   "merged": {
-    "count_per_day": 0.0027397260273972603,
-    "hours_per_count": 70.39944444444444,
-    "total_hours": 70.39944444444444,
+    "count_per_created": 1,
+    "count_per_day": 0.0027,
+    "hours_per_count": 70.39,
+    "total_hours": 70.39,
     "count": 1
   },
   "workflow_runs": [
     {
       "id": 5841880,
       "name": "tests",
-      "count_per_day": 0.29863013698630136,
-      "failure_rate": 0.03669724770642202,
+      "count_per_day": 0.29,
+      "failure_rate": 0.036,
+      "duration_hours": 6.51,
       "success": 105,
       "failure": 4,
       "skipped": 0,
       "cancelled": 0,
+      "action_required": 0,
       "count": 109
     }
   ]
