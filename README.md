@@ -36,15 +36,15 @@ $ prstats --owner itsubaki --repo q --begin 2019-01-01 --end 2020-01-01 | jq .
     {
       "id": 5841880,
       "name": "tests",
-      "count_per_day": 0.29863013698630136,
-      "failure_rate": 0.03669724770642202,
-      "duration_hours_per_count": 6.5184250764525995,
-      "success": 105,
+      "count_per_day": 0.2958904109589041,
+      "failure_rate": 0.037037037037037035,
+      "duration_hours_per_count": 0.027191358024691355,
+      "success": 104,
       "failure": 4,
       "skipped": 0,
       "cancelled": 0,
       "action_required": 0,
-      "count": 109
+      "count": 108
     }
   ]
 }
