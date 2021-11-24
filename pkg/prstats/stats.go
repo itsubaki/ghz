@@ -11,18 +11,19 @@ import (
 )
 
 type WorkflowRun struct {
-	ID                    int64   `json:"id"`
-	Name                  string  `json:"name"`
-	CountPerDay           float64 `json:"count_per_day"`
-	FailureRate           float64 `json:"failure_rate"`
-	DurationHoursPerCount float64 `json:"duration_hours_per_count"`
-	Success               int     `json:"success"`
-	Failure               int     `json:"failure"`
-	Skipped               int     `json:"skipped"`
-	Cancelled             int     `json:"cancelled"`
-	ActionRequired        int     `json:"action_required"`
-	StartupFailure        int     `json:"startup_failure"`
-	Count                 int     `json:"count"`
+	ID             int64   `json:"id"`
+	Name           string  `json:"name"`
+	CountPerDay    float64 `json:"count_per_day"`
+	FailureRate    float64 `json:"failure_rate"`
+	HoursPerCount  float64 `json:"hours_per_count"`
+	Success        int     `json:"success"`
+	Failure        int     `json:"failure"`
+	Skipped        int     `json:"skipped"`
+	Cancelled      int     `json:"cancelled"`
+	ActionRequired int     `json:"action_required"`
+	StartupFailure int     `json:"startup_failure"`
+	TotalHours     float64 `json:"total_hours"`
+	Count          int     `json:"count"`
 }
 
 type Range struct {
@@ -238,12 +239,13 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 			Cancelled:      cancelled,
 			ActionRequired: required,
 			StartupFailure: startupfailure,
+			TotalHours:     duration.Hours(),
 			Count:          len(v),
 		}
 
 		if w.Count > 0 {
 			w.FailureRate = float64(w.Failure) / float64(w.Count)
-			w.DurationHoursPerCount = duration.Hours() / float64(w.Count)
+			w.HoursPerCount = w.TotalHours / float64(w.Count)
 		}
 
 		out = append(out, w)
