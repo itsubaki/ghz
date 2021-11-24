@@ -21,6 +21,7 @@ type WorkflowRun struct {
 	Skipped               int     `json:"skipped"`
 	Cancelled             int     `json:"cancelled"`
 	ActionRequired        int     `json:"action_required"`
+	StartupFailure        int     `json:"startup_failure"`
 	Count                 int     `json:"count"`
 }
 
@@ -236,6 +237,7 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 			Skipped:        skipped,
 			Cancelled:      cancelled,
 			ActionRequired: required,
+			StartupFailure: startupfailure,
 			Count:          len(v),
 		}
 
