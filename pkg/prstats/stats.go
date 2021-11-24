@@ -11,19 +11,23 @@ import (
 )
 
 type WorkflowRun struct {
-	ID             int64   `json:"id"`
-	Name           string  `json:"name"`
-	CountPerDay    float64 `json:"count_per_day"`
-	FailureRate    float64 `json:"failure_rate"`
-	HoursPerCount  float64 `json:"hours_per_count"`
-	Success        int     `json:"success"`
-	Failure        int     `json:"failure"`
-	Skipped        int     `json:"skipped"`
-	Cancelled      int     `json:"cancelled"`
-	ActionRequired int     `json:"action_required"`
-	StartupFailure int     `json:"startup_failure"`
-	TotalHours     float64 `json:"total_hours"`
-	Count          int     `json:"count"`
+	ID            int64      `json:"id"`
+	Name          string     `json:"name"`
+	CountPerDay   float64    `json:"count_per_day"`
+	FailureRate   float64    `json:"failure_rate"`
+	HoursPerCount float64    `json:"hours_per_count"`
+	TotalHours    float64    `json:"total_hours"`
+	Count         int        `json:"count"`
+	Conclusion    Conclusion `json:"conclusion"`
+}
+
+type Conclusion struct {
+	Success        int `json:"success"`
+	Failure        int `json:"failure"`
+	Skipped        int `json:"skipped"`
+	Cancelled      int `json:"cancelled"`
+	ActionRequired int `json:"action_required"`
+	StartupFailure int `json:"startup_failure"`
 }
 
 type Range struct {
@@ -195,9 +199,8 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 		var success, failure, skipped, cancelled, required, startupfailure int
 		var duration time.Duration
 		for _, r := range v {
-			duration += r.UpdatedAt.Time.Sub(r.CreatedAt.Time)
-
 			if *r.Conclusion == "success" {
+				duration += r.UpdatedAt.Time.Sub(r.CreatedAt.Time)
 				success++
 				continue
 			}
@@ -231,20 +234,22 @@ func GetWorflowRunsList(ctx context.Context, in *GetStatsInput, begin time.Time)
 		}
 
 		w := WorkflowRun{
-			ID:             k,
-			Name:           *v[0].Name,
-			Success:        success,
-			Failure:        failure,
-			Skipped:        skipped,
-			Cancelled:      cancelled,
-			ActionRequired: required,
-			StartupFailure: startupfailure,
-			TotalHours:     duration.Hours(),
-			Count:          len(v),
+			ID:         k,
+			Name:       *v[0].Name,
+			TotalHours: duration.Hours(),
+			Count:      len(v),
+			Conclusion: Conclusion{
+				Success:        success,
+				Failure:        failure,
+				Skipped:        skipped,
+				Cancelled:      cancelled,
+				ActionRequired: required,
+				StartupFailure: startupfailure,
+			},
 		}
 
 		if w.Count > 0 {
-			w.FailureRate = float64(w.Failure) / float64(w.Count)
+			w.FailureRate = float64(w.Conclusion.Failure) / float64(w.Count)
 			w.HoursPerCount = w.TotalHours / float64(w.Count)
 		}
 
