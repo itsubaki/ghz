@@ -49,24 +49,33 @@ func New(version string) *cli.App {
 	}
 
 	prlist := cli.Command{
-		Name:   "prlist",
-		Action: prlist.Action,
-		Usage:  "List PullRequests",
-		Flags:  flags,
+		Name:    "prlist",
+		Aliases: []string{"pl"},
+		Action:  prlist.Action,
+		Usage:   "List PullRequests",
+		Flags:   flags,
 	}
 
 	runslist := cli.Command{
-		Name:   "runslist",
-		Action: runslist.Action,
-		Usage:  "List WorkflowRuns",
-		Flags:  flags,
+		Name:    "runslist",
+		Aliases: []string{"rl"},
+		Action:  runslist.Action,
+		Usage:   "List WorkflowRuns",
+		Flags:   flags,
 	}
 
 	analyze := cli.Command{
-		Name:   "analyze",
-		Action: analyze.Action,
-		Usage:  "Analyze Productivity",
-		Flags:  flags,
+		Name:    "analyze",
+		Aliases: []string{"a"},
+		Action:  analyze.Action,
+		Usage:   "Analyze Productivity",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "path",
+				Aliases: []string{"p"},
+				Value:   "out.json",
+			},
+		},
 	}
 
 	app.Commands = []*cli.Command{
