@@ -82,7 +82,7 @@ func print(format string, list []*github.WorkflowRun) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("workflow_ID, name, number, run_ID, conclusion, status, created_at, updated_at, duration(min)")
+		fmt.Println("workflow_ID, name, number, run_ID, conclusion, status, created_at, updated_at, duration(m)")
 
 		for _, r := range list {
 			fmt.Println(CSV(r))
