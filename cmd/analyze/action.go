@@ -22,6 +22,19 @@ type RunStats struct {
 	DurationMinAvg float64   `json:"duration_min_avg"`
 }
 
+func (s RunStats) CSV() string {
+	return fmt.Sprintf(
+		"%v, %v, %v, %v, %v, %v, %v",
+		s.WorkflowID,
+		s.Name,
+		s.Start,
+		s.End,
+		s.RunPerDay,
+		s.FailureRate,
+		s.DurationMinAvg,
+	)
+}
+
 func (s RunStats) String() string {
 	return s.JSON()
 }
@@ -96,13 +109,36 @@ func Action(c *cli.Context) error {
 		runstats[k] = run
 	}
 
-	for _, s := range runstats {
-		for _, v := range s {
-			fmt.Println(v)
-		}
+	format := strings.ToLower(c.String("format"))
+	if err := print(format, runstats); err != nil {
+		return fmt.Errorf("print: %v", err)
 	}
 
 	return nil
+}
+
+func print(format string, list map[int64][]RunStats) error {
+	if format == "json" {
+		for _, s := range list {
+			for _, v := range s {
+				fmt.Println(v)
+			}
+		}
+		return nil
+	}
+
+	if format == "csv" {
+		fmt.Println("workflow_ID, name, start, end, run_per_day, failure_rate, duration_avg(min)")
+		for _, s := range list {
+			for _, v := range s {
+				fmt.Println(v.CSV())
+			}
+		}
+
+		return nil
+	}
+
+	return fmt.Errorf("invalid format=%v", format)
 }
 
 func GetRunStats(runs []github.WorkflowRun, weeks int) ([]RunStats, error) {

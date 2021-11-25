@@ -80,6 +80,12 @@ func New(version string) *cli.App {
 				Aliases: []string{"w"},
 				Value:   "52",
 			},
+			&cli.StringFlag{
+				Name:    "format",
+				Aliases: []string{"f"},
+				Value:   "json",
+				Usage:   "json, csv",
+			},
 		},
 	}
 

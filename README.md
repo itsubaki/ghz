@@ -13,16 +13,14 @@ go install github.com/itsubaki/prstats@latest
 
 ```shell
 $ prstats runslist --owner itsubaki --repo q  > out.json
-$ prstats analyze
+$ prstats analyze --path out.json --format csv | column -t -s, | less -S
 ...
-{"workflow_id":5841880,"name":"tests","start":"2021-03-14T00:00:00Z","end":"2021-03-21T00:00:00Z","run_per_day":0.42857142857142855,"failure_rate":0,"duration_avg":0.0162962962962963}
-{"workflow_id":5841880,"name":"tests","start":"2021-07-18T00:00:00Z","end":"2021-07-25T00:00:00Z","run_per_day":0.14285714285714285,"failure_rate":0,"duration_avg":0.017777777777777778}
-{"workflow_id":5841880,"name":"tests","start":"2021-07-25T00:00:00Z","end":"2021-08-01T00:00:00Z","run_per_day":5.428571428571429,"failure_rate":0.05263157894736842,"duration_avg":0.01610380116959064}
-{"workflow_id":5841880,"name":"tests","start":"2021-08-01T00:00:00Z","end":"2021-08-08T00:00:00Z","run_per_day":0.2857142857142857,"failure_rate":0,"duration_avg":0.016805555555555556}
-{"workflow_id":5841880,"name":"tests","start":"2021-08-08T00:00:00Z","end":"2021-08-15T00:00:00Z","run_per_day":0.5714285714285714,"failure_rate":0,"duration_avg":0.01513888888888889}
-{"workflow_id":5841880,"name":"tests","start":"2021-08-15T00:00:00Z","end":"2021-08-22T00:00:00Z","run_per_day":0,"failure_rate":0,"duration_avg":0}
-{"workflow_id":5841880,"name":"tests","start":"2021-08-22T00:00:00Z","end":"2021-08-29T00:00:00Z","run_per_day":1,"failure_rate":0,"duration_avg":0.02107142857142857}
-{"workflow_id":5841880,"name":"tests","start":"2021-08-29T00:00:00Z","end":"2021-09-05T00:00:00Z","run_per_day":0.14285714285714285,"failure_rate":0,"duration_avg":0.015}
+workflow_ID   name    start                           end                             run_per_day           failure_rate           duration_avg(min)
+5841880       tests   2021-02-14 00:00:00 +0000 UTC   2021-02-21 00:00:00 +0000 UTC   0.2857142857142857    0                      0.5916666666666667
+5841880       tests   2021-02-21 00:00:00 +0000 UTC   2021-02-28 00:00:00 +0000 UTC   0.5714285714285714    0                      0.7291666666666666
+5841880       tests   2021-02-28 00:00:00 +0000 UTC   2021-03-07 00:00:00 +0000 UTC   2.142857142857143     0.06666666666666667    2.4655555555555555
+5841880       tests   2021-03-07 00:00:00 +0000 UTC   2021-03-14 00:00:00 +0000 UTC   3.7142857142857144    0.038461538461538464   2.532051282051282
+5841880       tests   2021-03-14 00:00:00 +0000 UTC   2021-03-21 00:00:00 +0000 UTC   0.42857142857142855   0                      0.9777777777777779
 ...
 ```
 
