@@ -10,33 +10,43 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func Action(c *cli.Context) error {
-	path := c.String("path")
+func deserialize(path string) ([]github.WorkflowRun, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return fmt.Errorf("file not found: %v", path)
+		return nil, fmt.Errorf("file not found: %v", path)
 	}
 
 	read, err := os.ReadFile(path)
 	if err != nil {
-		return fmt.Errorf("read %s: %v", path, err)
+		return nil, fmt.Errorf("read %s: %v", path, err)
 	}
 
 	runs := make([]github.WorkflowRun, 0)
 	for _, r := range strings.Split(string(read), "\n") {
 		if len(r) < 1 {
+			// skip empty line
 			continue
 		}
 
 		var run github.WorkflowRun
 		if err := json.Unmarshal([]byte(r), &run); err != nil {
-			return fmt.Errorf("unmarshal: %v", err)
+			return nil, fmt.Errorf("unmarshal: %v", err)
 		}
 
 		runs = append(runs, run)
 	}
 
+	return runs, nil
+}
+
+func Action(c *cli.Context) error {
+	runs, err := deserialize(c.String("path"))
+	if err != nil {
+		return fmt.Errorf("deserialize: %v", err)
+	}
+
+	fmt.Println("workflow_ID, name, number, run_ID, conclusion, status, created_at, updated_at, duration(hours)")
 	for _, r := range runs {
-		fmt.Printf("%v\n", r.RunNumber)
+		fmt.Printf("%v, %v, %v, %v, %v, %v, %v, %v, %v\n", *r.WorkflowID, *r.Name, *r.RunNumber, *r.ID, *r.Conclusion, *r.Status, r.CreatedAt, r.UpdatedAt, r.UpdatedAt.Sub(r.CreatedAt.Time).Hours())
 	}
 
 	return nil
