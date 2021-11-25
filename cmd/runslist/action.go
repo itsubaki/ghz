@@ -85,13 +85,28 @@ func print(format string, list []*github.WorkflowRun) error {
 		fmt.Println("workflow_ID, name, number, run_ID, conclusion, status, created_at, updated_at, duration(min)")
 
 		for _, r := range list {
-			fmt.Printf("%v, %v, %v, %v, %v, %v, %v, %v, %v\n", *r.WorkflowID, *r.Name, *r.RunNumber, *r.ID, *r.Conclusion, *r.Status, r.CreatedAt, r.UpdatedAt, r.UpdatedAt.Sub(r.CreatedAt.Time).Minutes())
+			fmt.Println(CSV(r))
 		}
 
 		return nil
 	}
 
 	return fmt.Errorf("invalid format=%v", format)
+}
+
+func CSV(r *github.WorkflowRun) string {
+	return fmt.Sprintf(
+		"%v, %v, %v, %v, %v, %v, %v, %v, %v",
+		*r.WorkflowID,
+		*r.Name,
+		*r.RunNumber,
+		*r.ID,
+		*r.Conclusion,
+		*r.Status,
+		r.CreatedAt,
+		r.UpdatedAt,
+		r.UpdatedAt.Sub(r.CreatedAt.Time).Minutes(),
+	)
 }
 
 func JSON(v interface{}) string {

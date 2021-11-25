@@ -86,18 +86,22 @@ func print(format string, list []*github.PullRequest) error {
 		fmt.Println("id, title, created_at, merged_at, duration(min), ")
 
 		for _, r := range list {
-			fmt.Printf("%v, %v, %v, %v, ", *r.ID, strings.ReplaceAll(*r.Title, ",", ""), r.CreatedAt, r.MergedAt)
-			if r.MergedAt != nil {
-				fmt.Printf("%.4f, ", r.MergedAt.Sub(*r.CreatedAt).Minutes())
-			}
-
-			fmt.Println()
+			fmt.Println(CSV(r))
 		}
 
 		return nil
 	}
 
 	return fmt.Errorf("invalid format=%v", format)
+}
+
+func CSV(r *github.PullRequest) string {
+	out := fmt.Sprintf("%v, %v, %v, %v, ", *r.ID, strings.ReplaceAll(*r.Title, ",", ""), r.CreatedAt, r.MergedAt)
+	if r.MergedAt != nil {
+		out = out + fmt.Sprintf("%.4f, ", r.MergedAt.Sub(*r.CreatedAt).Minutes())
+	}
+
+	return out
 }
 
 func JSON(v interface{}) string {
