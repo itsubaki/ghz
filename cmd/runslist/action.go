@@ -1,4 +1,4 @@
-package prlist
+package runslist
 
 import (
 	"context"
@@ -11,14 +11,14 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type ListPullRequestsInput struct {
+type ListWorkflowRunsInput struct {
 	Owner   string
 	Repo    string
 	PAT     string
 	PerPage int
 }
 
-func ListPullRequests(ctx context.Context, in *ListPullRequestsInput) ([]*github.PullRequest, error) {
+func ListWorkflowRuns(ctx context.Context, in *ListWorkflowRunsInput) ([]*github.WorkflowRun, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -27,21 +27,20 @@ func ListPullRequests(ctx context.Context, in *ListPullRequestsInput) ([]*github
 		)))
 	}
 
-	opt := github.PullRequestListOptions{
-		State: "all",
+	opt := github.ListWorkflowRunsOptions{
 		ListOptions: github.ListOptions{
 			PerPage: in.PerPage,
 		},
 	}
 
-	out := make([]*github.PullRequest, 0)
+	list := make([]*github.WorkflowRun, 0)
 	for {
-		pr, resp, err := client.PullRequests.List(ctx, in.Owner, in.Repo, &opt)
+		runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, in.Owner, in.Repo, &opt)
 		if err != nil {
-			return nil, fmt.Errorf("list PullRequests: %v", err)
+			return nil, fmt.Errorf("list WorkflowRuns: %v", err)
 		}
 
-		out = append(out, pr...)
+		list = append(list, runs.WorkflowRuns...)
 		if resp.NextPage == 0 {
 			break
 		}
@@ -49,20 +48,20 @@ func ListPullRequests(ctx context.Context, in *ListPullRequestsInput) ([]*github
 		opt.Page = resp.NextPage
 	}
 
-	return out, nil
+	return list, nil
 }
 
 func Action(c *cli.Context) error {
-	in := ListPullRequestsInput{
+	in := ListWorkflowRunsInput{
 		Owner:   c.String("owner"),
 		Repo:    c.String("repo"),
 		PAT:     c.String("pat"),
 		PerPage: c.Int("perpage"),
 	}
 
-	list, err := ListPullRequests(context.Background(), &in)
+	list, err := ListWorkflowRuns(context.Background(), &in)
 	if err != nil {
-		return fmt.Errorf("get PullRequest List: %v", err)
+		return fmt.Errorf("get WorkflowRuns List: %v", err)
 	}
 
 	format := strings.ToLower(c.String("format"))
@@ -73,7 +72,7 @@ func Action(c *cli.Context) error {
 	return nil
 }
 
-func print(format string, list []*github.PullRequest) error {
+func print(format string, list []*github.WorkflowRun) error {
 	if format == "json" {
 		for _, r := range list {
 			fmt.Println(JSON(r))
@@ -83,15 +82,10 @@ func print(format string, list []*github.PullRequest) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("id, title, created_at, merged_at, lead_time(hours), ")
+		fmt.Println("workflow_ID, name, number, run_ID, conclusion, status, created_at, updated_at, duration(hours)")
 
 		for _, r := range list {
-			fmt.Printf("%v, %v, %v, %v, ", *r.ID, strings.ReplaceAll(*r.Title, ",", ""), r.CreatedAt, r.MergedAt)
-			if r.MergedAt != nil {
-				fmt.Printf("%.4f, ", r.MergedAt.Sub(*r.CreatedAt).Hours())
-			}
-
-			fmt.Println()
+			fmt.Printf("%v, %v, %v, %v, %v, %v, %v, %v, %v\n", *r.WorkflowID, *r.Name, *r.RunNumber, *r.ID, *r.Conclusion, *r.Status, r.CreatedAt, r.UpdatedAt, r.UpdatedAt.Sub(r.CreatedAt.Time).Hours())
 		}
 
 		return nil

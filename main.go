@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/itsubaki/prstats/cmd"
 	"github.com/itsubaki/prstats/cmd/prlist"
+	"github.com/itsubaki/prstats/cmd/runslist"
 	"github.com/urfave/cli/v2"
 )
 
@@ -17,8 +17,8 @@ func New(version string) *cli.App {
 	app.Name = "prstats"
 	app.Usage = "Github PR stats"
 	app.Version = version
-	app.Action = cmd.Action
-	app.Flags = []cli.Flag{
+
+	flags := []cli.Flag{
 		&cli.StringFlag{
 			Name:    "pat",
 			EnvVars: []string{"PAT"},
@@ -34,12 +34,6 @@ func New(version string) *cli.App {
 			Aliases: []string{"r"},
 			Value:   "go-github",
 		},
-		&cli.StringFlag{
-			Name:    "state",
-			Aliases: []string{"s"},
-			Value:   "all",
-			Usage:   "all, open, closed",
-		},
 		&cli.IntFlag{
 			Name:    "perpage",
 			Aliases: []string{"p"},
@@ -51,30 +45,25 @@ func New(version string) *cli.App {
 			Value:   "json",
 			Usage:   "json, csv",
 		},
-		&cli.IntFlag{
-			Name:    "days",
-			Aliases: []string{"d"},
-			Value:   7,
-		},
-		&cli.StringFlag{
-			Name:    "begin",
-			Aliases: []string{"b"},
-		},
-		&cli.StringFlag{
-			Name:    "end",
-			Aliases: []string{"e"},
-		},
 	}
 
 	prlist := cli.Command{
-		Name:    "list",
-		Aliases: []string{"p"},
-		Action:  prlist.Action,
-		Usage:   "PR list",
+		Name:   "prlist",
+		Action: prlist.Action,
+		Usage:  "List PullRequests",
+		Flags:  flags,
+	}
+
+	runslist := cli.Command{
+		Name:   "runslist",
+		Action: runslist.Action,
+		Usage:  "List WorkflowRuns",
+		Flags:  flags,
 	}
 
 	app.Commands = []*cli.Command{
 		&prlist,
+		&runslist,
 	}
 
 	return app
