@@ -83,12 +83,12 @@ func print(format string, list []*github.PullRequest) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("id, title, created_at, merged_at, duration(hours), ")
+		fmt.Println("id, title, created_at, merged_at, duration(min), ")
 
 		for _, r := range list {
 			fmt.Printf("%v, %v, %v, %v, ", *r.ID, strings.ReplaceAll(*r.Title, ",", ""), r.CreatedAt, r.MergedAt)
 			if r.MergedAt != nil {
-				fmt.Printf("%.4f, ", r.MergedAt.Sub(*r.CreatedAt).Hours())
+				fmt.Printf("%.4f, ", r.MergedAt.Sub(*r.CreatedAt).Minutes())
 			}
 
 			fmt.Println()

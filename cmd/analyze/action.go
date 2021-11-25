@@ -13,13 +13,13 @@ import (
 )
 
 type RunStats struct {
-	WorkflowID  int64     `json:"workflow_id"`
-	Name        string    `json:"name"`
-	Start       time.Time `json:"start"`
-	End         time.Time `json:"end"`
-	RunPerDay   float64   `json:"run_per_day"`
-	FailureRate float64   `json:"failure_rate"`
-	DurationAvg float64   `json:"duration_avg"`
+	WorkflowID     int64     `json:"workflow_id"`
+	Name           string    `json:"name"`
+	Start          time.Time `json:"start"`
+	End            time.Time `json:"end"`
+	RunPerDay      float64   `json:"run_per_day"`
+	FailureRate    float64   `json:"failure_rate"`
+	DurationMinAvg float64   `json:"duration_min_avg"`
 }
 
 func (s RunStats) String() string {
@@ -144,16 +144,16 @@ func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time) (RunStats,
 	var rate, avg float64
 	if count > 0 {
 		rate = failure / count
-		avg = duration.Hours() / count
+		avg = duration.Minutes() / count
 	}
 
 	return RunStats{
-		WorkflowID:  *runs[0].WorkflowID,
-		Name:        *runs[0].Name,
-		Start:       start,
-		End:         end,
-		RunPerDay:   count / (end.Sub(start).Hours() / 24),
-		FailureRate: rate,
-		DurationAvg: avg,
+		WorkflowID:     *runs[0].WorkflowID,
+		Name:           *runs[0].Name,
+		Start:          start,
+		End:            end,
+		RunPerDay:      count / (end.Sub(start).Hours() / 24),
+		FailureRate:    rate,
+		DurationMinAvg: avg,
 	}, nil
 }
