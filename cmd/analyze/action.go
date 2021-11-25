@@ -44,9 +44,21 @@ func Action(c *cli.Context) error {
 		return fmt.Errorf("deserialize: %v", err)
 	}
 
-	fmt.Println("workflow_ID, name, number, run_ID, conclusion, status, created_at, updated_at, duration(hours)")
+	idmap := make(map[int64][]github.WorkflowRun)
 	for _, r := range runs {
-		fmt.Printf("%v, %v, %v, %v, %v, %v, %v, %v, %v\n", *r.WorkflowID, *r.Name, *r.RunNumber, *r.ID, *r.Conclusion, *r.Status, r.CreatedAt, r.UpdatedAt, r.UpdatedAt.Sub(r.CreatedAt.Time).Hours())
+		runs, ok := idmap[*r.WorkflowID]
+		if !ok {
+			idmap[*r.WorkflowID] = make([]github.WorkflowRun, 0)
+		}
+
+		idmap[*r.WorkflowID] = append(runs, r)
+	}
+
+	fmt.Println("workflow_ID, name, number, run_ID, conclusion, status, created_at, updated_at, duration(hours)")
+	for _, v := range idmap {
+		for _, r := range v {
+			fmt.Printf("%v, %v, %v, %v, %v, %v, %v, %v, %v\n", *r.WorkflowID, *r.Name, *r.RunNumber, *r.ID, *r.Conclusion, *r.Status, r.CreatedAt, r.UpdatedAt, r.UpdatedAt.Sub(r.CreatedAt.Time).Hours())
+		}
 	}
 
 	return nil
