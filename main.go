@@ -15,7 +15,7 @@ func New(version string) *cli.App {
 	app := cli.NewApp()
 
 	app.Name = "prstats"
-	app.Usage = "Github PR stats"
+	app.Usage = "Github productivity stats"
 	app.Version = version
 
 	flags := []cli.Flag{
