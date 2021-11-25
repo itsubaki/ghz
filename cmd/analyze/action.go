@@ -124,6 +124,7 @@ func print(format string, list map[int64][]RunStats) error {
 				fmt.Println(v)
 			}
 		}
+
 		return nil
 	}
 
@@ -144,8 +145,15 @@ func print(format string, list map[int64][]RunStats) error {
 func GetRunStats(runs []github.WorkflowRun, weeks int) ([]RunStats, error) {
 	out := make([]RunStats, 0)
 	for _, d := range calendar.LastNWeeks(weeks) {
-		start, _ := calendar.Parse(d.Start)
-		end, _ := calendar.Parse(d.End)
+		start, err := calendar.Parse(d.Start)
+		if err != nil {
+			return nil, fmt.Errorf("parse %v: %v", d.Start, err)
+		}
+
+		end, err := calendar.Parse(d.End)
+		if err != nil {
+			return nil, fmt.Errorf("parse %v: %v", d.End, err)
+		}
 
 		stats, err := GetRunStatsWith(runs, end, start)
 		if err != nil {
