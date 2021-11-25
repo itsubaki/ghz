@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/itsubaki/prstats/cmd/analyze"
 	"github.com/itsubaki/prstats/cmd/prlist"
 	"github.com/itsubaki/prstats/cmd/runslist"
 	"github.com/urfave/cli/v2"
@@ -15,7 +16,7 @@ func New(version string) *cli.App {
 	app := cli.NewApp()
 
 	app.Name = "prstats"
-	app.Usage = "Github productivity stats"
+	app.Usage = "Github Productivity Stats"
 	app.Version = version
 
 	flags := []cli.Flag{
@@ -61,9 +62,17 @@ func New(version string) *cli.App {
 		Flags:  flags,
 	}
 
+	analyze := cli.Command{
+		Name:   "analyze",
+		Action: analyze.Action,
+		Usage:  "Analyze Productivity",
+		Flags:  flags,
+	}
+
 	app.Commands = []*cli.Command{
 		&prlist,
 		&runslist,
+		&analyze,
 	}
 
 	return app
