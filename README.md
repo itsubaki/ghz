@@ -12,6 +12,21 @@ go install github.com/itsubaki/prstats@latest
 ## Example
 
 ```shell
+$ prstats runslist --owner itsubaki --repo q  > out.json
+$ prstats analyze
+...
+{"workflow_id":5841880,"name":"tests","start":"2021-03-14T00:00:00Z","end":"2021-03-21T00:00:00Z","run_per_day":0.42857142857142855,"failure_rate":0,"duration_avg":0.0162962962962963}
+{"workflow_id":5841880,"name":"tests","start":"2021-07-18T00:00:00Z","end":"2021-07-25T00:00:00Z","run_per_day":0.14285714285714285,"failure_rate":0,"duration_avg":0.017777777777777778}
+{"workflow_id":5841880,"name":"tests","start":"2021-07-25T00:00:00Z","end":"2021-08-01T00:00:00Z","run_per_day":5.428571428571429,"failure_rate":0.05263157894736842,"duration_avg":0.01610380116959064}
+{"workflow_id":5841880,"name":"tests","start":"2021-08-01T00:00:00Z","end":"2021-08-08T00:00:00Z","run_per_day":0.2857142857142857,"failure_rate":0,"duration_avg":0.016805555555555556}
+{"workflow_id":5841880,"name":"tests","start":"2021-08-08T00:00:00Z","end":"2021-08-15T00:00:00Z","run_per_day":0.5714285714285714,"failure_rate":0,"duration_avg":0.01513888888888889}
+{"workflow_id":5841880,"name":"tests","start":"2021-08-15T00:00:00Z","end":"2021-08-22T00:00:00Z","run_per_day":0,"failure_rate":0,"duration_avg":0}
+{"workflow_id":5841880,"name":"tests","start":"2021-08-22T00:00:00Z","end":"2021-08-29T00:00:00Z","run_per_day":1,"failure_rate":0,"duration_avg":0.02107142857142857}
+{"workflow_id":5841880,"name":"tests","start":"2021-08-29T00:00:00Z","end":"2021-09-05T00:00:00Z","run_per_day":0.14285714285714285,"failure_rate":0,"duration_avg":0.015}
+...
+```
+
+```shell
 $ prstats runslist --owner itsubaki --repo mackerel-server-go --format csv | column -t -s, | less -S
 workflow_ID   name    number   run_ID       conclusion   status      created_at                      updated_at                      duration(hours)
 6067686       tests   77       1429354728   success      completed   2021-11-06 15:04:28 +0000 UTC   2021-11-06 15:07:13 +0000 UTC   0.04583333333333333

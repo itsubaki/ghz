@@ -126,14 +126,20 @@ func LastNDaysWith(now time.Time, n int) []Date {
 	return out
 }
 
+func Last12Weeks() []Date {
+	return LastNWeeks(12)
+}
+
 func LastNWeeks(n int) []Date {
 	return LastNWeeksWith(time.Now(), n)
 }
 
 func LastNWeeksWith(now time.Time, n int) []Date {
+	laststartday := now.AddDate(0, 0, -int(now.Weekday()))
+
 	days := make([]time.Time, 0)
 	for i := 1; i < n+1; i++ {
-		days = append(days, now.AddDate(0, 0, -i*7))
+		days = append(days, laststartday.AddDate(0, 0, -i*7))
 	}
 
 	tmp := make([]Date, 0)

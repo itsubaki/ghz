@@ -75,6 +75,11 @@ func New(version string) *cli.App {
 				Aliases: []string{"p"},
 				Value:   "out.json",
 			},
+			&cli.StringFlag{
+				Name:    "weeks",
+				Aliases: []string{"w"},
+				Value:   "52",
+			},
 		},
 	}
 
