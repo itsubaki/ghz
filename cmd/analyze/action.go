@@ -5,10 +5,21 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/google/go-github/v40/github"
 	"github.com/urfave/cli/v2"
 )
+
+type RunStats struct {
+	WorkflowID  string
+	Name        string
+	Begin       time.Time
+	End         time.Time
+	RunPerDay   float64
+	FailureRate float64
+	DurationAvg float64
+}
 
 func deserialize(path string) ([]github.WorkflowRun, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -61,5 +72,37 @@ func Action(c *cli.Context) error {
 		}
 	}
 
+	runstats := make(map[int64][]RunStats)
+	for k, v := range idmap {
+		run, err := GetRunStats(v)
+		if err != nil {
+			return fmt.Errorf("get RunStats: %v", err)
+		}
+
+		runstats[k] = run
+	}
+
+	for _, s := range runstats {
+		for _, v := range s {
+			fmt.Printf("%v\n", v)
+		}
+	}
+
 	return nil
+}
+
+func GetRunStats(runs []github.WorkflowRun) ([]RunStats, error) {
+	out := make([]RunStats, 0)
+
+	date := calender.Last12Months()
+	for _, d := range date {
+		fmt.Printf("%v %v %v\n", d.Period, d.Start, d.End)
+	}
+
+	return out, nil
+}
+
+func GetRunStatsWith(runs []github.WorkflowRun, end, begin string) ([]RunStats, error) {
+
+	return nil, nil
 }
