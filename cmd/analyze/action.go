@@ -196,7 +196,7 @@ func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time) (RunStats,
 		Name:        *runs[0].Name,
 		Start:       start,
 		End:         end,
-		RunPerDay:   count / (end.Sub(start).Hours() / 24),
+		RunPerDay:   count / (end.Sub(start).Hours()/24 - 2), // exclude (saturday, sunday)
 		FailureRate: rate,
 		DurationAvg: avg,
 	}, nil
