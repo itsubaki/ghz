@@ -95,13 +95,6 @@ func Action(c *cli.Context) error {
 		idmap[*r.WorkflowID] = append(runs, r)
 	}
 
-	// fmt.Println("workflow_ID, name, number, run_ID, conclusion, status, created_at, updated_at, duration(hours)")
-	// for _, v := range idmap {
-	// 	for _, r := range v {
-	// 		fmt.Printf("%v, %v, %v, %v, %v, %v, %v, %v, %v\n", *r.WorkflowID, *r.Name, *r.RunNumber, *r.ID, *r.Conclusion, *r.Status, r.CreatedAt, r.UpdatedAt, r.UpdatedAt.Sub(r.CreatedAt.Time).Hours())
-	// 	}
-	// }
-
 	runstats := make(map[int64][]RunStats)
 	for k, v := range idmap {
 		run, err := GetRunStats(v, c.Int("weeks"))

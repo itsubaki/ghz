@@ -59,13 +59,14 @@ func Action(c *cli.Context) error {
 		PerPage: c.Int("perpage"),
 	}
 
-	list, err := ListWorkflowRuns(context.Background(), &in)
+	ctx := context.Background()
+	runs, err := ListWorkflowRuns(ctx, &in)
 	if err != nil {
 		return fmt.Errorf("get WorkflowRuns List: %v", err)
 	}
 
 	format := strings.ToLower(c.String("format"))
-	if err := print(format, list); err != nil {
+	if err := print(format, runs); err != nil {
 		return fmt.Errorf("print: %v", err)
 	}
 
@@ -116,4 +117,37 @@ func JSON(v interface{}) string {
 	}
 
 	return string(b)
+}
+
+func ListWorkflowJobs(ctx context.Context, in *ListWorkflowRunsInput, runID int64) ([]*github.WorkflowJob, error) {
+	client := github.NewClient(nil)
+
+	if in.PAT != "" {
+		client = github.NewClient(oauth2.NewClient(ctx, oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: in.PAT},
+		)))
+	}
+
+	opt := github.ListWorkflowJobsOptions{
+		ListOptions: github.ListOptions{
+			PerPage: in.PerPage,
+		},
+	}
+
+	list := make([]*github.WorkflowJob, 0)
+	for {
+		jobs, resp, err := client.Actions.ListWorkflowJobs(ctx, in.Owner, in.Repo, runID, &opt)
+		if err != nil {
+			return nil, fmt.Errorf("list WorkflowJobs: %v", err)
+		}
+
+		list = append(list, jobs.Jobs...)
+		if resp.NextPage == 0 {
+			break
+		}
+
+		opt.Page = resp.NextPage
+	}
+
+	return list, nil
 }

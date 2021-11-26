@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/itsubaki/prstats/cmd/analyze"
+	"github.com/itsubaki/prstats/cmd/jobslist"
 	"github.com/itsubaki/prstats/cmd/prlist"
 	"github.com/itsubaki/prstats/cmd/runslist"
 	"github.com/urfave/cli/v2"
@@ -26,65 +27,65 @@ func New(version string) *cli.App {
 			Usage:   "Personal Access Token",
 		},
 		&cli.StringFlag{
-			Name:    "owner",
-			Aliases: []string{"o"},
-			Value:   "google",
+			Name:  "owner",
+			Value: "google",
 		},
 		&cli.StringFlag{
-			Name:    "repo",
-			Aliases: []string{"r"},
-			Value:   "go-github",
+			Name:  "repo",
+			Value: "go-github",
 		},
 		&cli.IntFlag{
-			Name:    "perpage",
-			Aliases: []string{"p"},
-			Value:   30,
+			Name:  "perpage",
+			Value: 100,
 		},
 		&cli.StringFlag{
-			Name:    "format",
-			Aliases: []string{"f"},
-			Value:   "json",
-			Usage:   "json, csv",
+			Name:  "format",
+			Value: "json",
+			Usage: "json, csv",
 		},
 	}
 
 	prlist := cli.Command{
-		Name:    "prlist",
-		Aliases: []string{"pl"},
-		Action:  prlist.Action,
-		Usage:   "List PullRequests",
-		Flags:   flags,
+		Name:   "prlist",
+		Action: prlist.Action,
+		Usage:  "List PullRequests",
+		Flags:  flags,
 	}
 
 	runslist := cli.Command{
-		Name:    "runslist",
-		Aliases: []string{"rl"},
-		Action:  runslist.Action,
-		Usage:   "List WorkflowRuns",
-		Flags:   flags,
+		Name:   "runslist",
+		Action: runslist.Action,
+		Usage:  "List WorkflowRuns",
+		Flags:  flags,
+	}
+
+	jobslist := cli.Command{
+		Name:   "jobslist",
+		Action: jobslist.Action,
+		Usage:  "List WorkflowRun Jobs",
+		Flags: append(flags, &cli.StringFlag{
+			Name:  "path",
+			Value: "out.json",
+		}),
 	}
 
 	analyze := cli.Command{
-		Name:    "analyze",
-		Aliases: []string{"a"},
-		Action:  analyze.Action,
-		Usage:   "Analyze Productivity",
+		Name:   "analyze",
+		Action: analyze.Action,
+		Usage:  "Analyze Productivity",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:    "path",
-				Aliases: []string{"p"},
-				Value:   "out.json",
+				Name:  "path",
+				Value: "out.json",
 			},
 			&cli.StringFlag{
-				Name:    "weeks",
-				Aliases: []string{"w"},
-				Value:   "52",
+				Name:  "weeks",
+				Value: "52",
 			},
 			&cli.StringFlag{
-				Name:    "format",
-				Aliases: []string{"f"},
-				Value:   "json",
-				Usage:   "json, csv",
+				Name:  "format",
+				Value: "json",
+				Usage: "json, csv",
 			},
 		},
 	}
@@ -92,6 +93,7 @@ func New(version string) *cli.App {
 	app.Commands = []*cli.Command{
 		&prlist,
 		&runslist,
+		&jobslist,
 		&analyze,
 	}
 
