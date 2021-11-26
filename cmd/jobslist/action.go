@@ -70,6 +70,7 @@ func Action(c *cli.Context) error {
 		PerPage: c.Int("perpage"),
 	}
 
+	fmt.Println("workflow_name, run_id, run_number, job_id, job_name, conclusion, status, started_at, completed_at, duration(minutes)")
 	ctx := context.Background()
 	for _, runs := range idmap {
 		for _, r := range runs {
@@ -79,7 +80,7 @@ func Action(c *cli.Context) error {
 			}
 
 			for _, j := range jobs {
-				fmt.Printf("%v %v %v %v %v [%v] %v %v \n", *r.ID, *r.RunNumber, *r.Name, *j.RunID, *j.ID, *j.Name, *j.Conclusion, *j.Status)
+				fmt.Println(CSV(r, *j))
 			}
 		}
 	}
@@ -118,4 +119,20 @@ func ListWorkflowJobs(ctx context.Context, in *ListJobsInput, runID int64) ([]*g
 	}
 
 	return list, nil
+}
+
+func CSV(r github.WorkflowRun, j github.WorkflowJob) string {
+	return fmt.Sprintf(
+		"%v, %v, %v, %v, %v, %v, %v, %v, %v, %v",
+		*r.Name,
+		*r.ID,
+		*r.RunNumber,
+		*j.ID,
+		*j.Name,
+		*j.Conclusion,
+		*j.Status,
+		*j.StartedAt,
+		*j.CompletedAt,
+		j.CompletedAt.Sub(j.StartedAt.Time).Minutes(),
+	)
 }

@@ -63,10 +63,12 @@ func New(version string) *cli.App {
 		Name:   "jobslist",
 		Action: jobslist.Action,
 		Usage:  "List WorkflowRun Jobs",
-		Flags: append(flags, &cli.StringFlag{
-			Name:  "path",
-			Value: "out.json",
-		}),
+		Flags: append(flags, []cli.Flag{
+			&cli.StringFlag{
+				Name:  "path",
+				Value: "out.json",
+			},
+		}...),
 	}
 
 	analyze := cli.Command{
