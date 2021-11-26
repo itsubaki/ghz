@@ -3,6 +3,7 @@ package analyze
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"strings"
 	"time"
@@ -20,11 +21,12 @@ type RunStats struct {
 	RunPerDay   float64   `json:"run_per_day"`
 	FailureRate float64   `json:"failure_rate"`
 	DurationAvg float64   `json:"duration_avg"`
+	DurationVar float64   `json:"duration_var"`
 }
 
 func (s RunStats) CSV() string {
 	return fmt.Sprintf(
-		"%v, %v, %v, %v, %v, %v, %v",
+		"%v, %v, %v, %v, %v, %v, %v, %v",
 		s.WorkflowID,
 		s.Name,
 		s.Start,
@@ -32,6 +34,7 @@ func (s RunStats) CSV() string {
 		s.RunPerDay,
 		s.FailureRate,
 		s.DurationAvg,
+		s.DurationVar,
 	)
 }
 
@@ -129,7 +132,7 @@ func print(format string, list map[int64][]RunStats) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("workflow_ID, name, start, end, run_per_day, failure_rate, duration_avg(m)")
+		fmt.Println("workflow_ID, name, start, end, run_per_day, failure_rate, duration_avg(m), duration_var(m)")
 		for _, s := range list {
 			for _, v := range s {
 				fmt.Println(v.CSV())
@@ -185,10 +188,25 @@ func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time) (RunStats,
 		}
 	}
 
-	var rate, avg float64
+	var rate, avg, variant float64
 	if count > 0 {
 		rate = failure / count
 		avg = duration.Minutes() / count
+
+		var sum float64
+		for _, r := range runs {
+			if !r.UpdatedAt.Time.Before(end) || !r.UpdatedAt.Time.After(start) {
+				continue
+			}
+
+			if *r.Conclusion != "success" {
+				continue
+			}
+
+			sum = sum + math.Pow((r.UpdatedAt.Time.Sub(r.CreatedAt.Time).Minutes()-avg), 2.0)
+		}
+
+		variant = sum / count
 	}
 
 	return RunStats{
@@ -199,5 +217,6 @@ func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time) (RunStats,
 		RunPerDay:   count / (end.Sub(start).Hours()/24 - 2), // exclude (saturday, sunday)
 		FailureRate: rate,
 		DurationAvg: avg,
+		DurationVar: variant,
 	}, nil
 }
