@@ -14,7 +14,7 @@ go install github.com/itsubaki/prstats@latest
 ```shell
 $ prstats runslist --owner itsubaki --repo q  > out.json
 $ prstats analyze --path out.json --format csv | column -t -s, | less -S
-workflow_ID   name    start                           end                             run_per_day   failure_rate   duration_avg(m)
+workflow_ID   name    start                           end                             runs_per_day   failure_rate   duration_avg(m)
 ...
 5841880       tests   2021-02-14 00:00:00 +0000 UTC   2021-02-21 00:00:00 +0000 UTC   0.28          0              0.59
 5841880       tests   2021-02-21 00:00:00 +0000 UTC   2021-02-28 00:00:00 +0000 UTC   0.57          0              0.72

@@ -18,7 +18,7 @@ type RunStats struct {
 	Name        string    `json:"name"`
 	Start       time.Time `json:"start"`
 	End         time.Time `json:"end"`
-	RunPerDay   float64   `json:"run_per_day"`
+	RunsPerDay  float64   `json:"runs_per_day"`
 	FailureRate float64   `json:"failure_rate"`
 	DurationAvg float64   `json:"duration_avg"`
 	DurationVar float64   `json:"duration_var"`
@@ -31,7 +31,7 @@ func (s RunStats) CSV() string {
 		s.Name,
 		s.Start,
 		s.End,
-		s.RunPerDay,
+		s.RunsPerDay,
 		s.FailureRate,
 		s.DurationAvg,
 		s.DurationVar,
@@ -125,7 +125,7 @@ func print(format string, list map[int64][]RunStats) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("workflow_ID, name, start, end, run_per_day, failure_rate, duration_avg(m), duration_var(m)")
+		fmt.Println("workflow_ID, name, start, end, runs_per_day, failure_rate, duration_avg(m), duration_var(m)")
 		for _, s := range list {
 			for _, v := range s {
 				fmt.Println(v.CSV())
@@ -207,7 +207,7 @@ func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time) (RunStats,
 		Name:        *runs[0].Name,
 		Start:       start,
 		End:         end,
-		RunPerDay:   count / (end.Sub(start).Hours()/24 - 2), // exclude (saturday, sunday)
+		RunsPerDay:  count / (end.Sub(start).Hours()/24 - 2), // exclude (saturday, sunday)
 		FailureRate: rate,
 		DurationAvg: avg,
 		DurationVar: variant,
