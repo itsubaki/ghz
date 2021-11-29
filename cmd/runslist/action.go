@@ -104,8 +104,8 @@ func CSV(r *github.WorkflowRun) string {
 		*r.ID,
 		*r.Conclusion,
 		*r.Status,
-		r.CreatedAt,
-		r.UpdatedAt,
+		r.CreatedAt.Format("2006-01-02 15:04:05"),
+		r.UpdatedAt.Format("2006-01-02 15:04:05"),
 		r.UpdatedAt.Sub(r.CreatedAt.Time).Minutes(),
 	)
 }
