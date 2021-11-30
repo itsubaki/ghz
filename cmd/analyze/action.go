@@ -38,10 +38,6 @@ func (s RunStats) CSV() string {
 	)
 }
 
-func (s RunStats) String() string {
-	return s.JSON()
-}
-
 func (s RunStats) JSON() string {
 	b, err := json.Marshal(s)
 	if err != nil {
@@ -204,7 +200,7 @@ func print(format string, list map[int64][]RunStats) error {
 	if format == "json" {
 		for _, s := range list {
 			for _, v := range s {
-				fmt.Println(v)
+				fmt.Println(v.JSON())
 			}
 		}
 
