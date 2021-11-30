@@ -118,36 +118,3 @@ func JSON(v interface{}) string {
 
 	return string(b)
 }
-
-func ListWorkflowJobs(ctx context.Context, in *ListWorkflowRunsInput, runID int64) ([]*github.WorkflowJob, error) {
-	client := github.NewClient(nil)
-
-	if in.PAT != "" {
-		client = github.NewClient(oauth2.NewClient(ctx, oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: in.PAT},
-		)))
-	}
-
-	opt := github.ListWorkflowJobsOptions{
-		ListOptions: github.ListOptions{
-			PerPage: in.PerPage,
-		},
-	}
-
-	list := make([]*github.WorkflowJob, 0)
-	for {
-		jobs, resp, err := client.Actions.ListWorkflowJobs(ctx, in.Owner, in.Repo, runID, &opt)
-		if err != nil {
-			return nil, fmt.Errorf("list WorkflowJobs: %v", err)
-		}
-
-		list = append(list, jobs.Jobs...)
-		if resp.NextPage == 0 {
-			break
-		}
-
-		opt.Page = resp.NextPage
-	}
-
-	return list, nil
-}

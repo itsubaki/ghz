@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/itsubaki/prstats/cmd/analyze"
+	"github.com/itsubaki/prstats/cmd/events"
 	"github.com/itsubaki/prstats/cmd/jobslist"
 	"github.com/itsubaki/prstats/cmd/prlist"
 	"github.com/itsubaki/prstats/cmd/runslist"
@@ -71,6 +72,13 @@ func New(version string) *cli.App {
 		}...),
 	}
 
+	events := cli.Command{
+		Name:   "events",
+		Action: events.Action,
+		Usage:  "List Events",
+		Flags:  flags,
+	}
+
 	analyze := cli.Command{
 		Name:   "analyze",
 		Action: analyze.Action,
@@ -96,6 +104,7 @@ func New(version string) *cli.App {
 		&prlist,
 		&runslist,
 		&jobslist,
+		&events,
 		&analyze,
 	}
 
