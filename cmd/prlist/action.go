@@ -27,7 +27,7 @@ func ListPullRequests(ctx context.Context, in *ListPullRequestsInput) ([]*github
 		)))
 	}
 
-	opt := github.PullRequestListOptions{
+	opts := github.PullRequestListOptions{
 		State: "all",
 		ListOptions: github.ListOptions{
 			PerPage: in.PerPage,
@@ -36,7 +36,7 @@ func ListPullRequests(ctx context.Context, in *ListPullRequestsInput) ([]*github
 
 	out := make([]*github.PullRequest, 0)
 	for {
-		pr, resp, err := client.PullRequests.List(ctx, in.Owner, in.Repo, &opt)
+		pr, resp, err := client.PullRequests.List(ctx, in.Owner, in.Repo, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list PullRequests: %v", err)
 		}
@@ -46,7 +46,7 @@ func ListPullRequests(ctx context.Context, in *ListPullRequestsInput) ([]*github
 			break
 		}
 
-		opt.Page = resp.NextPage
+		opts.Page = resp.NextPage
 	}
 
 	return out, nil

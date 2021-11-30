@@ -24,25 +24,30 @@ func New(version string) *cli.App {
 	flags := []cli.Flag{
 		&cli.StringFlag{
 			Name:    "pat",
+			Aliases: []string{"t"},
 			EnvVars: []string{"PAT"},
 			Usage:   "Personal Access Token",
 		},
 		&cli.StringFlag{
-			Name:  "owner",
-			Value: "google",
+			Name:    "owner",
+			Aliases: []string{"o"},
+			Value:   "google",
 		},
 		&cli.StringFlag{
-			Name:  "repo",
-			Value: "go-github",
+			Name:    "repo",
+			Aliases: []string{"r"},
+			Value:   "go-github",
 		},
 		&cli.IntFlag{
-			Name:  "perpage",
-			Value: 100,
+			Name:    "perpage",
+			Aliases: []string{"pp"},
+			Value:   100,
 		},
 		&cli.StringFlag{
-			Name:  "format",
-			Value: "json",
-			Usage: "json, csv",
+			Name:    "format",
+			Aliases: []string{"f"},
+			Value:   "json",
+			Usage:   "json, csv",
 		},
 	}
 
@@ -85,17 +90,25 @@ func New(version string) *cli.App {
 		Usage:  "Analyze Productivity",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
-				Name:  "path",
-				Value: "out.json",
+				Name:    "path",
+				Aliases: []string{"p"},
+				Value:   "out.json",
 			},
 			&cli.StringFlag{
-				Name:  "weeks",
-				Value: "52",
+				Name:    "weeks",
+				Aliases: []string{"w"},
+				Value:   "52",
 			},
 			&cli.StringFlag{
-				Name:  "format",
-				Value: "json",
-				Usage: "json, csv",
+				Name:    "format",
+				Aliases: []string{"f"},
+				Value:   "json",
+				Usage:   "json, csv",
+			},
+			&cli.BoolFlag{
+				Name:    "excludingWeekends",
+				Aliases: []string{"ew"},
+				Value:   false,
 			},
 		},
 	}

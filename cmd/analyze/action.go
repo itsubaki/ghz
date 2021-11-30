@@ -51,7 +51,7 @@ func (s RunStats) JSON() string {
 	return string(b)
 }
 
-func GetRunStats(runs []github.WorkflowRun, weeks int) ([]RunStats, error) {
+func GetRunStats(runs []github.WorkflowRun, weeks int, excludingWeekends bool) ([]RunStats, error) {
 	out := make([]RunStats, 0)
 	for _, d := range calendar.LastNWeeks(weeks) {
 		start, err := calendar.Parse(d.Start)
@@ -64,7 +64,9 @@ func GetRunStats(runs []github.WorkflowRun, weeks int) ([]RunStats, error) {
 			return nil, fmt.Errorf("parse %v: %v", d.End, err)
 		}
 
-		stats, err := GetRunStatsWith(runs, end, start)
+		stats, err := GetRunStatsWith(runs, end, start, &GetRunStatsWithOptions{
+			ExcludingWeekends: excludingWeekends,
+		})
 		if err != nil {
 			return nil, fmt.Errorf("get RunStatsWith(%v~%v): %v", d.End, d.Start, err)
 		}
@@ -75,7 +77,11 @@ func GetRunStats(runs []github.WorkflowRun, weeks int) ([]RunStats, error) {
 	return out, nil
 }
 
-func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time) (RunStats, error) {
+type GetRunStatsWithOptions struct {
+	ExcludingWeekends bool
+}
+
+func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time, opts *GetRunStatsWithOptions) (RunStats, error) {
 	var count, failure float64
 	var duration time.Duration
 	for _, r := range runs {
@@ -115,12 +121,17 @@ func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time) (RunStats,
 		variant = sum / count
 	}
 
+	runperday := count / (end.Sub(start).Hours() / 24)
+	if opts != nil && opts.ExcludingWeekends {
+		runperday = count / (end.Sub(start).Hours()/24 - 2) // saturday, sunday
+	}
+
 	return RunStats{
 		WorkflowID:  *runs[0].WorkflowID,
 		Name:        *runs[0].Name,
 		Start:       start,
 		End:         end,
-		RunsPerDay:  count / (end.Sub(start).Hours()/24 - 2), // exclude (saturday, sunday)
+		RunsPerDay:  runperday,
 		FailureRate: rate,
 		DurationAvg: avg,
 		DurationVar: variant,
@@ -145,7 +156,7 @@ func Action(c *cli.Context) error {
 
 	runstats := make(map[int64][]RunStats)
 	for k, v := range idmap {
-		run, err := GetRunStats(v, c.Int("weeks"))
+		run, err := GetRunStats(v, c.Int("weeks"), c.Bool("excludingWeekends"))
 		if err != nil {
 			return fmt.Errorf("get RunStats: %v", err)
 		}

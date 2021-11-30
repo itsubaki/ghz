@@ -28,7 +28,7 @@ func ListWorkflowJobs(ctx context.Context, in *ListJobsInput, runID int64) ([]*g
 		)))
 	}
 
-	opt := github.ListWorkflowJobsOptions{
+	opts := github.ListWorkflowJobsOptions{
 		ListOptions: github.ListOptions{
 			PerPage: in.PerPage,
 		},
@@ -36,7 +36,7 @@ func ListWorkflowJobs(ctx context.Context, in *ListJobsInput, runID int64) ([]*g
 
 	list := make([]*github.WorkflowJob, 0)
 	for {
-		jobs, resp, err := client.Actions.ListWorkflowJobs(ctx, in.Owner, in.Repo, runID, &opt)
+		jobs, resp, err := client.Actions.ListWorkflowJobs(ctx, in.Owner, in.Repo, runID, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list WorkflowJobs: %v", err)
 		}
@@ -46,7 +46,7 @@ func ListWorkflowJobs(ctx context.Context, in *ListJobsInput, runID int64) ([]*g
 			break
 		}
 
-		opt.Page = resp.NextPage
+		opts.Page = resp.NextPage
 	}
 
 	return list, nil

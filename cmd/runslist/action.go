@@ -27,7 +27,7 @@ func ListWorkflowRuns(ctx context.Context, in *ListWorkflowRunsInput) ([]*github
 		)))
 	}
 
-	opt := github.ListWorkflowRunsOptions{
+	opts := github.ListWorkflowRunsOptions{
 		ListOptions: github.ListOptions{
 			PerPage: in.PerPage,
 		},
@@ -35,7 +35,7 @@ func ListWorkflowRuns(ctx context.Context, in *ListWorkflowRunsInput) ([]*github
 
 	list := make([]*github.WorkflowRun, 0)
 	for {
-		runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, in.Owner, in.Repo, &opt)
+		runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, in.Owner, in.Repo, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list WorkflowRuns: %v", err)
 		}
@@ -45,7 +45,7 @@ func ListWorkflowRuns(ctx context.Context, in *ListWorkflowRunsInput) ([]*github
 			break
 		}
 
-		opt.Page = resp.NextPage
+		opts.Page = resp.NextPage
 	}
 
 	return list, nil

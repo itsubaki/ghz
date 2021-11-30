@@ -25,13 +25,13 @@ func ListEvents(ctx context.Context, in *ListEventsInput) ([]*github.Event, erro
 		)))
 	}
 
-	opt := github.ListOptions{
+	opts := github.ListOptions{
 		PerPage: in.PerPage,
 	}
 
 	list := make([]*github.Event, 0)
 	for {
-		events, resp, err := client.Activity.ListRepositoryEvents(ctx, in.Owner, in.Repo, &opt)
+		events, resp, err := client.Activity.ListRepositoryEvents(ctx, in.Owner, in.Repo, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list WorkflowRuns: %v", err)
 		}
@@ -41,7 +41,7 @@ func ListEvents(ctx context.Context, in *ListEventsInput) ([]*github.Event, erro
 			break
 		}
 
-		opt.Page = resp.NextPage
+		opts.Page = resp.NextPage
 	}
 
 	return list, nil
