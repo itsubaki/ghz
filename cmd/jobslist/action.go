@@ -16,6 +16,7 @@ type ListJobsInput struct {
 	Owner   string
 	Repo    string
 	PAT     string
+	Page    int
 	PerPage int
 }
 
@@ -30,6 +31,7 @@ func ListWorkflowJobs(ctx context.Context, in *ListJobsInput, runID int64) ([]*g
 
 	opts := github.ListWorkflowJobsOptions{
 		ListOptions: github.ListOptions{
+			Page:    in.Page,
 			PerPage: in.PerPage,
 		},
 	}
@@ -72,6 +74,7 @@ func Action(c *cli.Context) error {
 		Owner:   c.String("owner"),
 		Repo:    c.String("repo"),
 		PAT:     c.String("pat"),
+		Page:    c.Int("page"),
 		PerPage: c.Int("perpage"),
 	}
 

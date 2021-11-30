@@ -15,6 +15,7 @@ type ListWorkflowRunsInput struct {
 	Owner   string
 	Repo    string
 	PAT     string
+	Page    int
 	PerPage int
 }
 
@@ -29,6 +30,7 @@ func ListWorkflowRuns(ctx context.Context, in *ListWorkflowRunsInput) ([]*github
 
 	opts := github.ListWorkflowRunsOptions{
 		ListOptions: github.ListOptions{
+			Page:    in.Page,
 			PerPage: in.PerPage,
 		},
 	}
@@ -56,6 +58,7 @@ func Action(c *cli.Context) error {
 		Owner:   c.String("owner"),
 		Repo:    c.String("repo"),
 		PAT:     c.String("pat"),
+		Page:    c.Int("page"),
 		PerPage: c.Int("perpage"),
 	}
 

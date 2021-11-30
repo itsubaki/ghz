@@ -39,9 +39,12 @@ func New(version string) *cli.App {
 			Value:   "go-github",
 		},
 		&cli.IntFlag{
-			Name:    "perpage",
-			Aliases: []string{"pp"},
-			Value:   100,
+			Name:  "page",
+			Value: 0,
+		},
+		&cli.IntFlag{
+			Name:  "perpage",
+			Value: 100,
 		},
 		&cli.StringFlag{
 			Name:    "format",
@@ -55,7 +58,13 @@ func New(version string) *cli.App {
 		Name:   "prlist",
 		Action: prlist.Action,
 		Usage:  "List PullRequests",
-		Flags:  flags,
+		Flags: append(flags, []cli.Flag{
+			&cli.StringFlag{
+				Name:  "state",
+				Value: "all",
+				Usage: "all, open, closed",
+			},
+		}...),
 	}
 
 	runslist := cli.Command{

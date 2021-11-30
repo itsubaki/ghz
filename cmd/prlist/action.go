@@ -15,7 +15,9 @@ type ListPullRequestsInput struct {
 	Owner   string
 	Repo    string
 	PAT     string
+	Page    int
 	PerPage int
+	State   string
 }
 
 func ListPullRequests(ctx context.Context, in *ListPullRequestsInput) ([]*github.PullRequest, error) {
@@ -28,8 +30,9 @@ func ListPullRequests(ctx context.Context, in *ListPullRequestsInput) ([]*github
 	}
 
 	opts := github.PullRequestListOptions{
-		State: "all",
+		State: in.State,
 		ListOptions: github.ListOptions{
+			Page:    in.Page,
 			PerPage: in.PerPage,
 		},
 	}
@@ -57,7 +60,9 @@ func Action(c *cli.Context) error {
 		Owner:   c.String("owner"),
 		Repo:    c.String("repo"),
 		PAT:     c.String("pat"),
+		Page:    c.Int("page"),
 		PerPage: c.Int("perpage"),
+		State:   c.String("state"),
 	}
 
 	list, err := ListPullRequests(context.Background(), &in)
