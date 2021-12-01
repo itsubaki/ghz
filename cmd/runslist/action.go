@@ -7,54 +7,12 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v40/github"
+	"github.com/itsubaki/prstats/pkg/prstats"
 	"github.com/urfave/cli/v2"
-	"golang.org/x/oauth2"
 )
 
-type ListWorkflowRunsInput struct {
-	Owner   string
-	Repo    string
-	PAT     string
-	Page    int
-	PerPage int
-}
-
-func ListWorkflowRuns(ctx context.Context, in *ListWorkflowRunsInput) ([]*github.WorkflowRun, error) {
-	client := github.NewClient(nil)
-
-	if in.PAT != "" {
-		client = github.NewClient(oauth2.NewClient(ctx, oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: in.PAT},
-		)))
-	}
-
-	opts := github.ListWorkflowRunsOptions{
-		ListOptions: github.ListOptions{
-			Page:    in.Page,
-			PerPage: in.PerPage,
-		},
-	}
-
-	list := make([]*github.WorkflowRun, 0)
-	for {
-		runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, in.Owner, in.Repo, &opts)
-		if err != nil {
-			return nil, fmt.Errorf("list WorkflowRuns: %v", err)
-		}
-
-		list = append(list, runs.WorkflowRuns...)
-		if resp.NextPage == 0 {
-			break
-		}
-
-		opts.Page = resp.NextPage
-	}
-
-	return list, nil
-}
-
 func Action(c *cli.Context) error {
-	in := ListWorkflowRunsInput{
+	in := prstats.ListWorkflowRunsInput{
 		Owner:   c.String("owner"),
 		Repo:    c.String("repo"),
 		PAT:     c.String("pat"),
@@ -63,7 +21,7 @@ func Action(c *cli.Context) error {
 	}
 
 	ctx := context.Background()
-	runs, err := ListWorkflowRuns(ctx, &in)
+	runs, err := prstats.ListWorkflowRuns(ctx, &in)
 	if err != nil {
 		return fmt.Errorf("get WorkflowRuns List: %v", err)
 	}

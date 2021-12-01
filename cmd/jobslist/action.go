@@ -8,109 +8,9 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v40/github"
+	"github.com/itsubaki/prstats/pkg/prstats"
 	"github.com/urfave/cli/v2"
-	"golang.org/x/oauth2"
 )
-
-type ListJobsInput struct {
-	Owner   string
-	Repo    string
-	PAT     string
-	Page    int
-	PerPage int
-}
-
-func ListWorkflowJobs(ctx context.Context, in *ListJobsInput, runID int64) ([]*github.WorkflowJob, error) {
-	client := github.NewClient(nil)
-
-	if in.PAT != "" {
-		client = github.NewClient(oauth2.NewClient(ctx, oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: in.PAT},
-		)))
-	}
-
-	opts := github.ListWorkflowJobsOptions{
-		ListOptions: github.ListOptions{
-			Page:    in.Page,
-			PerPage: in.PerPage,
-		},
-	}
-
-	list := make([]*github.WorkflowJob, 0)
-	for {
-		jobs, resp, err := client.Actions.ListWorkflowJobs(ctx, in.Owner, in.Repo, runID, &opts)
-		if err != nil {
-			return nil, fmt.Errorf("list WorkflowJobs: %v", err)
-		}
-
-		list = append(list, jobs.Jobs...)
-		if resp.NextPage == 0 {
-			break
-		}
-
-		opts.Page = resp.NextPage
-	}
-
-	return list, nil
-}
-
-func Action(c *cli.Context) error {
-	runs, err := deserialize(c.String("path"))
-	if err != nil {
-		return fmt.Errorf("deserialize: %v", err)
-	}
-
-	idmap := make(map[int64][]github.WorkflowRun)
-	for _, r := range runs {
-		runs, ok := idmap[*r.WorkflowID]
-		if !ok {
-			idmap[*r.WorkflowID] = make([]github.WorkflowRun, 0)
-		}
-
-		idmap[*r.WorkflowID] = append(runs, r)
-	}
-
-	in := ListJobsInput{
-		Owner:   c.String("owner"),
-		Repo:    c.String("repo"),
-		PAT:     c.String("pat"),
-		Page:    c.Int("page"),
-		PerPage: c.Int("perpage"),
-	}
-
-	fmt.Println("workflow_name, run_id, run_number, job_id, job_name, conclusion, status, started_at, completed_at, duration(minutes)")
-	ctx := context.Background()
-	for _, runs := range idmap {
-		for _, r := range runs {
-			jobs, err := ListWorkflowJobs(ctx, &in, *r.ID)
-			if err != nil {
-				return fmt.Errorf("get WorkflowJobs List: %v", err)
-			}
-
-			for _, j := range jobs {
-				fmt.Println(CSV(r, *j))
-			}
-		}
-	}
-
-	return nil
-}
-
-func CSV(r github.WorkflowRun, j github.WorkflowJob) string {
-	return fmt.Sprintf(
-		"%v, %v, %v, %v, %v, %v, %v, %v, %v, %v",
-		*r.Name,
-		*r.ID,
-		*r.RunNumber,
-		*j.ID,
-		*j.Name,
-		*j.Conclusion,
-		*j.Status,
-		*j.StartedAt,
-		*j.CompletedAt,
-		j.CompletedAt.Sub(j.StartedAt.Time).Minutes(),
-	)
-}
 
 func deserialize(path string) ([]github.WorkflowRun, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -138,4 +38,108 @@ func deserialize(path string) ([]github.WorkflowRun, error) {
 	}
 
 	return runs, nil
+}
+
+func Action(c *cli.Context) error {
+	runs, err := deserialize(c.String("path"))
+	if err != nil {
+		return fmt.Errorf("deserialize: %v", err)
+	}
+
+	idmap := make(map[int64][]github.WorkflowRun)
+	for _, r := range runs {
+		runs, ok := idmap[*r.WorkflowID]
+		if !ok {
+			idmap[*r.WorkflowID] = make([]github.WorkflowRun, 0)
+		}
+
+		idmap[*r.WorkflowID] = append(runs, r)
+	}
+
+	in := prstats.ListJobsInput{
+		Owner:   c.String("owner"),
+		Repo:    c.String("repo"),
+		PAT:     c.String("pat"),
+		Page:    c.Int("page"),
+		PerPage: c.Int("perpage"),
+	}
+
+	ctx := context.Background()
+
+	list := make([]WorkflowJob, 0)
+	for _, runs := range idmap {
+		for i := range runs {
+			jobs, err := prstats.ListWorkflowJobs(ctx, &in, *runs[i].ID)
+			if err != nil {
+				return fmt.Errorf("get WorkflowJobs List: %v", err)
+			}
+
+			list = append(list, WorkflowJob{
+				WorkflowRun: runs[i],
+				WorkflowJob: jobs,
+			})
+		}
+	}
+
+	format := strings.ToLower(c.String("format"))
+	if err := print(format, list); err != nil {
+		return fmt.Errorf("print: %v", err)
+	}
+
+	return nil
+}
+
+type WorkflowJob struct {
+	WorkflowRun github.WorkflowRun
+	WorkflowJob []*github.WorkflowJob
+}
+
+func print(format string, list []WorkflowJob) error {
+	if format == "json" {
+		for _, r := range list {
+			for _, j := range r.WorkflowJob {
+				fmt.Println(JSON(j))
+			}
+		}
+
+		return nil
+	}
+
+	if format == "csv" {
+		fmt.Println("workflow_name, run_id, run_number, job_id, job_name, conclusion, status, started_at, completed_at, duration(minutes)")
+		for _, r := range list {
+			for _, j := range r.WorkflowJob {
+				fmt.Println(CSV(r.WorkflowRun, j))
+			}
+		}
+
+		return nil
+	}
+
+	return fmt.Errorf("invalid format=%v", format)
+}
+
+func CSV(r github.WorkflowRun, j *github.WorkflowJob) string {
+	return fmt.Sprintf(
+		"%v, %v, %v, %v, %v, %v, %v, %v, %v, %v",
+		*r.Name,
+		*r.ID,
+		*r.RunNumber,
+		*j.ID,
+		*j.Name,
+		*j.Conclusion,
+		*j.Status,
+		*j.StartedAt,
+		*j.CompletedAt,
+		j.CompletedAt.Sub(j.StartedAt.Time).Minutes(),
+	)
+}
+
+func JSON(v interface{}) string {
+	b, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(b)
 }
