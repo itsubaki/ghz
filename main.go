@@ -44,7 +44,7 @@ func New(version string) *cli.App {
 		},
 		&cli.IntFlag{
 			Name:  "perpage",
-			Value: 100,
+			Value: 1000,
 		},
 		&cli.StringFlag{
 			Name:    "format",

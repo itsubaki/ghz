@@ -24,6 +24,20 @@ workflow_ID   name    start        end          runs_per_day   failure_rate   du
 ...
 ```
 
+
+```shell
+$ prstats runslist --owner itsubaki --repo q > out.json
+$ prstats jobslist --owner itsubaki --repo q --path out.json --format csv | column -t -s, | less -S
+workflow_name   run_id       run_number   job_id       job_name               conclusion       status      started_at            completed_at          duration(minutes)
+tests           1429332756   109          4126276932   test (ubuntu-latest)   success          completed   2021-11-06 14:52:00   2021-11-06 14:52:53   0.88
+tests           1299800366   108          3780280583   test (ubuntu-latest)   success          completed   2021-10-03 05:11:05   2021-10-03 05:11:43   0.63
+tests           1200937783   107          3513358909   test (ubuntu-latest)   success          completed   2021-09-04 12:41:10   2021-09-04 12:41:53   0.72
+tests           1174489906   106          3443854949   test (ubuntu-latest)   success          completed   2021-08-27 14:00:47   2021-08-27 14:01:36   0.82
+tests           1169027869   105          3428886296   test (ubuntu-latest)   success          completed   2021-08-26 03:51:14   2021-08-26 03:51:56   0.7
+tests           1166653588   104          3422345982   test (ubuntu-latest)   success          completed   2021-08-25 13:20:52   2021-08-25 13:21:54   1.03
+...
+```
+
 ```shell
 $ prstats runslist --owner itsubaki --repo mackerel-server-go --format csv | column -t -s, | less -S
 workflow_ID   name    number   run_ID       conclusion   status      created_at            updated_at            duration(m)
