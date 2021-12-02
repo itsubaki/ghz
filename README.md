@@ -1,7 +1,7 @@
 # prstats
 
 * One of the indicators of productivity
-* [DORA Four Keys](https://github.com/GoogleCloudPlatform/fourkeys)
+* [DORA's Four Keys](https://github.com/GoogleCloudPlatform/fourkeys)
 
 ## Install
 
