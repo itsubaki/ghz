@@ -85,7 +85,7 @@ func print(format string, list map[string][]prstats.JobStats) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("name, start, end, runs_per_day, failure_rate, duration_avg(m), duration_var(m)")
+		fmt.Println("name, start, end, runs_per_day, failure_rate, duration_avg(minutes), duration_var(minutes)")
 		for _, s := range list {
 			for _, v := range s {
 				fmt.Println(v.CSV())

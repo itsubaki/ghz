@@ -44,7 +44,7 @@ func print(format string, list []*github.PullRequest) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("id, title, created_at, merged_at, duration(m), ")
+		fmt.Println("id, title, created_at, merged_at, duration(minutes), ")
 
 		for _, r := range list {
 			fmt.Println(CSV(r))
