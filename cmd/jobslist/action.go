@@ -12,34 +12,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-func deserialize(path string) ([]github.WorkflowRun, error) {
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return nil, fmt.Errorf("file not found: %v", path)
-	}
-
-	read, err := os.ReadFile(path)
-	if err != nil {
-		return nil, fmt.Errorf("read %s: %v", path, err)
-	}
-
-	runs := make([]github.WorkflowRun, 0)
-	for _, r := range strings.Split(string(read), "\n") {
-		if len(r) < 1 {
-			// skip empty line
-			continue
-		}
-
-		var run github.WorkflowRun
-		if err := json.Unmarshal([]byte(r), &run); err != nil {
-			return nil, fmt.Errorf("unmarshal: %v", err)
-		}
-
-		runs = append(runs, run)
-	}
-
-	return runs, nil
-}
-
 func Action(c *cli.Context) error {
 	runs, err := deserialize(c.String("path"))
 	if err != nil {
@@ -87,6 +59,34 @@ func Action(c *cli.Context) error {
 	}
 
 	return nil
+}
+
+func deserialize(path string) ([]github.WorkflowRun, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return nil, fmt.Errorf("file not found: %v", path)
+	}
+
+	read, err := os.ReadFile(path)
+	if err != nil {
+		return nil, fmt.Errorf("read %s: %v", path, err)
+	}
+
+	runs := make([]github.WorkflowRun, 0)
+	for _, r := range strings.Split(string(read), "\n") {
+		if len(r) < 1 {
+			// skip empty line
+			continue
+		}
+
+		var run github.WorkflowRun
+		if err := json.Unmarshal([]byte(r), &run); err != nil {
+			return nil, fmt.Errorf("unmarshal: %v", err)
+		}
+
+		runs = append(runs, run)
+	}
+
+	return runs, nil
 }
 
 type WorkflowJob struct {

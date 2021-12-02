@@ -78,7 +78,7 @@ func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time, opts *GetR
 	var count, failure float64
 	var duration time.Duration
 	for _, r := range runs {
-		if !r.UpdatedAt.Time.Before(end) || !r.UpdatedAt.Time.After(start) {
+		if !r.UpdatedAt.Before(end) || !r.UpdatedAt.After(start) {
 			continue
 		}
 
@@ -89,7 +89,7 @@ func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time, opts *GetR
 		}
 
 		if *r.Conclusion == "success" {
-			duration += r.UpdatedAt.Time.Sub(r.CreatedAt.Time)
+			duration += r.UpdatedAt.Sub(r.CreatedAt.Time)
 		}
 	}
 
@@ -100,7 +100,7 @@ func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time, opts *GetR
 
 		var sum float64
 		for _, r := range runs {
-			if !r.UpdatedAt.Time.Before(end) || !r.UpdatedAt.Time.After(start) {
+			if !r.UpdatedAt.Before(end) || !r.UpdatedAt.After(start) {
 				continue
 			}
 
@@ -108,7 +108,7 @@ func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time, opts *GetR
 				continue
 			}
 
-			sum = sum + math.Pow((r.UpdatedAt.Time.Sub(r.CreatedAt.Time).Minutes()-avg), 2.0)
+			sum = sum + math.Pow((r.UpdatedAt.Sub(r.CreatedAt.Time).Minutes()-avg), 2.0)
 		}
 
 		variant = sum / count

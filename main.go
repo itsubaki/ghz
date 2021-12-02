@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/itsubaki/prstats/cmd/analyze"
+	"github.com/itsubaki/prstats/cmd/analyzejobs"
 	"github.com/itsubaki/prstats/cmd/events"
 	"github.com/itsubaki/prstats/cmd/jobslist"
 	"github.com/itsubaki/prstats/cmd/prlist"
@@ -93,10 +94,10 @@ func New(version string) *cli.App {
 		Flags:  flags,
 	}
 
-	analyze := cli.Command{
+	runstats := cli.Command{
 		Name:   "analyze",
 		Action: analyze.Action,
-		Usage:  "Analyze Productivity",
+		Usage:  "Analyze Productivity with Runslist",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "path",
@@ -122,12 +123,42 @@ func New(version string) *cli.App {
 		},
 	}
 
+	jobstats := cli.Command{
+		Name:   "analyze-jobs",
+		Action: analyzejobs.Action,
+		Usage:  "Analyze Productivity with Jobslist",
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "path",
+				Aliases: []string{"p"},
+				Value:   "out_jobs.json",
+			},
+			&cli.StringFlag{
+				Name:    "weeks",
+				Aliases: []string{"w"},
+				Value:   "52",
+			},
+			&cli.StringFlag{
+				Name:    "format",
+				Aliases: []string{"f"},
+				Value:   "json",
+				Usage:   "json, csv",
+			},
+			&cli.BoolFlag{
+				Name:    "excludingWeekends",
+				Aliases: []string{"ew"},
+				Value:   false,
+			},
+		},
+	}
+
 	app.Commands = []*cli.Command{
 		&prlist,
 		&runslist,
 		&jobslist,
 		&events,
-		&analyze,
+		&runstats,
+		&jobstats,
 	}
 
 	return app
