@@ -84,6 +84,11 @@ func New(version string) *cli.App {
 				Name:  "path",
 				Value: "out.json",
 			},
+			&cli.Int64Flag{
+				Name:    "workflow_id",
+				Aliases: []string{"wid"},
+				Value:   -1,
+			},
 		}...),
 	}
 
@@ -116,7 +121,7 @@ func New(version string) *cli.App {
 				Usage:   "json, csv",
 			},
 			&cli.BoolFlag{
-				Name:    "excludingWeekends",
+				Name:    "excluding_weekends",
 				Aliases: []string{"ew"},
 				Value:   false,
 			},
@@ -145,7 +150,7 @@ func New(version string) *cli.App {
 				Usage:   "json, csv",
 			},
 			&cli.BoolFlag{
-				Name:    "excludingWeekends",
+				Name:    "excluding_weekends",
 				Aliases: []string{"ew"},
 				Value:   false,
 			},

@@ -35,12 +35,16 @@ func Action(c *cli.Context) error {
 		Page:    c.Int("page"),
 		PerPage: c.Int("perpage"),
 	}
+	wid := c.Int64("workflow_id")
 
 	ctx := context.Background()
-
 	list := make([]WorkflowJob, 0)
 	for _, runs := range idmap {
 		for i := range runs {
+			if wid > 0 && *runs[i].WorkflowID != wid {
+				continue
+			}
+
 			jobs, err := prstats.ListWorkflowJobs(ctx, &in, *runs[i].ID)
 			if err != nil {
 				return fmt.Errorf("get WorkflowJobs List: %v", err)
@@ -106,7 +110,7 @@ func print(format string, list []WorkflowJob) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("workflow_name, run_id, run_number, job_id, job_name, conclusion, status, started_at, completed_at, duration(minutes)")
+		fmt.Println("workflow_id, workflow_name, run_id, run_number, job_id, job_name, conclusion, status, started_at, completed_at, duration(minutes)")
 		for _, r := range list {
 			for _, j := range r.WorkflowJob {
 				fmt.Println(CSV(r.WorkflowRun, j))
@@ -121,7 +125,8 @@ func print(format string, list []WorkflowJob) error {
 
 func CSV(r github.WorkflowRun, j *github.WorkflowJob) string {
 	return fmt.Sprintf(
-		"%v, %v, %v, %v, %v, %v, %v, %v, %v, %v",
+		"%v, %v, %v, %v, %v, %v, %v, %v, %v, %v, %v",
+		*r.WorkflowID,
 		*r.Name,
 		*r.ID,
 		*r.RunNumber,
