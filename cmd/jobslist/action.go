@@ -110,7 +110,7 @@ func print(format string, list []WorkflowJob) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("workflow_id, workflow_name, run_id, run_number, job_id, job_name, conclusion, status, started_at, completed_at, duration(minutes)")
+		fmt.Println("workflow_id, workflow_name, run_id, run_number, job_id, job_name, status, conclusion, started_at, completed_at, duration(minutes)")
 		for _, r := range list {
 			for _, j := range r.WorkflowJob {
 				fmt.Println(CSV(r.WorkflowRun, j))
@@ -132,8 +132,8 @@ func CSV(r github.WorkflowRun, j *github.WorkflowJob) string {
 		*r.RunNumber,
 		*j.ID,
 		*j.Name,
-		*j.Conclusion,
 		*j.Status,
+		*j.Conclusion,
 		j.StartedAt.Format("2006-01-02 15:04:05"),
 		j.CompletedAt.Format("2006-01-02 15:04:05"),
 		j.CompletedAt.Sub(j.StartedAt.Time).Minutes(),

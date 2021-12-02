@@ -85,7 +85,7 @@ func print(format string, list map[int64][]prstats.RunStats) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("workflow_ID, name, start, end, runs_per_day, failure_rate, duration_avg(m), duration_var(m)")
+		fmt.Println("workflow_id, name, start, end, runs_per_day, failure_rate, duration_avg(m), duration_var(m)")
 		for _, s := range list {
 			for _, v := range s {
 				fmt.Println(v.CSV())
