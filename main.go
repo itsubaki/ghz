@@ -4,12 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/itsubaki/prstats/cmd/analyze"
-	"github.com/itsubaki/prstats/cmd/analyzejobs"
-	"github.com/itsubaki/prstats/cmd/events"
-	"github.com/itsubaki/prstats/cmd/jobslist"
-	"github.com/itsubaki/prstats/cmd/prlist"
-	"github.com/itsubaki/prstats/cmd/runslist"
+	"github.com/itsubaki/prstats/cmd/actions/jobs"
+	"github.com/itsubaki/prstats/cmd/actions/runs"
 	"github.com/urfave/cli/v2"
 )
 
@@ -17,153 +13,163 @@ var date, hash, goversion string
 
 func New(version string) *cli.App {
 	app := cli.NewApp()
-
 	app.Name = "prstats"
 	app.Usage = "Github Productivity Stats"
 	app.Version = version
 
-	flags := []cli.Flag{
-		&cli.StringFlag{
-			Name:    "pat",
-			Aliases: []string{"t"},
-			EnvVars: []string{"PAT"},
-			Usage:   "Personal Access Token",
-		},
-		&cli.StringFlag{
-			Name:    "owner",
-			Aliases: []string{"o"},
-			Value:   "google",
-		},
-		&cli.StringFlag{
-			Name:    "repo",
-			Aliases: []string{"r"},
-			Value:   "go-github",
-		},
-		&cli.IntFlag{
-			Name:  "page",
-			Value: 0,
-		},
-		&cli.IntFlag{
-			Name:  "perpage",
-			Value: 1000,
-		},
-		&cli.StringFlag{
-			Name:    "format",
-			Aliases: []string{"f"},
-			Value:   "json",
-			Usage:   "json, csv",
-		},
+	dir := cli.StringFlag{
+		Name:    "dir",
+		Aliases: []string{"d"},
+		Value:   fmt.Sprintf("/var/tmp/%v", app.Name),
 	}
 
-	prlist := cli.Command{
-		Name:   "prlist",
-		Action: prlist.Action,
-		Usage:  "List PullRequests",
-		Flags: append(flags, []cli.Flag{
-			&cli.StringFlag{
-				Name:  "state",
-				Value: "all",
-				Usage: "all, open, closed",
-			},
-		}...),
+	own := cli.StringFlag{
+		Name:    "owner",
+		Aliases: []string{"o"},
+		Value:   "itsubaki",
 	}
 
-	runslist := cli.Command{
-		Name:   "runslist",
-		Action: runslist.Action,
-		Usage:  "List WorkflowRuns",
-		Flags:  flags,
+	repo := cli.StringFlag{
+		Name:    "repo",
+		Aliases: []string{"r"},
+		Value:   "q",
 	}
 
-	jobslist := cli.Command{
-		Name:   "jobslist",
-		Action: jobslist.Action,
-		Usage:  "List WorkflowRun Jobs",
-		Flags: append(flags, []cli.Flag{
-			&cli.StringFlag{
-				Name:  "path",
-				Value: "out.json",
-			},
-			&cli.Int64Flag{
-				Name:    "workflow_id",
-				Aliases: []string{"wid"},
-				Value:   -1,
-			},
-		}...),
+	format := cli.StringFlag{
+		Name:    "format",
+		Aliases: []string{"f"},
+		Value:   "json",
+		Usage:   "json, csv",
 	}
 
-	events := cli.Command{
-		Name:   "events",
-		Action: events.Action,
-		Usage:  "List Events",
-		Flags:  flags,
+	pat := cli.StringFlag{
+		Name:    "pat",
+		Aliases: []string{"t"},
+		EnvVars: []string{"PAT"},
+		Usage:   "Personal Access Token",
 	}
 
-	runstats := cli.Command{
-		Name:   "analyze",
-		Action: analyze.Action,
-		Usage:  "Analyze Productivity with Runslist",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "path",
-				Aliases: []string{"p"},
-				Value:   "out.json",
-			},
-			&cli.StringFlag{
-				Name:    "weeks",
-				Aliases: []string{"w"},
-				Value:   "52",
-			},
-			&cli.StringFlag{
-				Name:    "format",
+	page := cli.IntFlag{
+		Name:  "page",
+		Value: 0,
+	}
+
+	perpage := cli.IntFlag{
+		Name:  "perpage",
+		Value: 1000,
+	}
+
+	runs := cli.Command{
+		Name:    "runs",
+		Aliases: []string{"r"},
+		Subcommands: []*cli.Command{
+			{
+				Name:    "fetch",
 				Aliases: []string{"f"},
-				Value:   "json",
-				Usage:   "json, csv",
+				Action:  runs.Fetch,
+				Flags: []cli.Flag{
+					&dir,
+					&own,
+					&repo,
+					&pat,
+					&page,
+					&perpage,
+				},
 			},
-			&cli.BoolFlag{
-				Name:    "excluding_weekends",
-				Aliases: []string{"ew"},
-				Value:   false,
+			{
+				Name:    "list",
+				Aliases: []string{"l"},
+				Action:  runs.List,
+				Flags: []cli.Flag{
+					&dir,
+					&own,
+					&repo,
+					&format,
+				},
+			},
+			{
+				Name:    "analyze",
+				Aliases: []string{"a"},
+				Action:  runs.Analyze,
+				Flags: []cli.Flag{
+					&dir,
+					&own,
+					&repo,
+					&format,
+					&cli.Int64Flag{
+						Name:  "weeks",
+						Value: 52,
+					},
+					&cli.BoolFlag{
+						Name:  "excluding_weekends",
+						Value: false,
+					},
+				},
 			},
 		},
 	}
 
-	jobstats := cli.Command{
-		Name:   "analyze-jobs",
-		Action: analyzejobs.Action,
-		Usage:  "Analyze Productivity with Jobslist",
-		Flags: []cli.Flag{
-			&cli.StringFlag{
-				Name:    "path",
-				Aliases: []string{"p"},
-				Value:   "out_jobs.json",
-			},
-			&cli.StringFlag{
-				Name:    "weeks",
-				Aliases: []string{"w"},
-				Value:   "52",
-			},
-			&cli.StringFlag{
-				Name:    "format",
+	jobs := cli.Command{
+		Name:    "jobs",
+		Aliases: []string{"j"},
+		Subcommands: []*cli.Command{
+			{
+				Name:    "fetch",
 				Aliases: []string{"f"},
-				Value:   "json",
-				Usage:   "json, csv",
+				Action:  jobs.Fetch,
+				Flags: []cli.Flag{
+					&dir,
+					&own,
+					&repo,
+					&pat,
+					&page,
+					&perpage,
+				},
 			},
-			&cli.BoolFlag{
-				Name:    "excluding_weekends",
-				Aliases: []string{"ew"},
-				Value:   false,
+			{
+				Name:    "list",
+				Aliases: []string{"l"},
+				Action:  jobs.List,
+				Flags: []cli.Flag{
+					&dir,
+					&own,
+					&repo,
+					&format,
+				},
 			},
+			{
+				Name:    "analyze",
+				Aliases: []string{"a"},
+				Action:  jobs.Analyze,
+				Flags: []cli.Flag{
+					&dir,
+					&own,
+					&repo,
+					&format,
+					&cli.Int64Flag{
+						Name:  "weeks",
+						Value: 52,
+					},
+					&cli.BoolFlag{
+						Name:  "excluding_weekends",
+						Value: false,
+					},
+				},
+			},
+		},
+	}
+
+	actions := cli.Command{
+		Name:    "actions",
+		Aliases: []string{"a"},
+		Subcommands: []*cli.Command{
+			&jobs,
+			&runs,
 		},
 	}
 
 	app.Commands = []*cli.Command{
-		&prlist,
-		&runslist,
-		&jobslist,
-		&events,
-		&runstats,
-		&jobstats,
+		&actions,
 	}
 
 	return app

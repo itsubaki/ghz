@@ -1,4 +1,4 @@
-package prstats
+package jobs
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	"github.com/itsubaki/prstats/pkg/calendar"
 )
 
-type JobStats struct {
+type Stats struct {
 	Name        string    `json:"name"`
 	Start       time.Time `json:"start"`
 	End         time.Time `json:"end"`
@@ -20,7 +20,7 @@ type JobStats struct {
 	DurationVar float64   `json:"duration_var"`
 }
 
-func (s JobStats) CSV() string {
+func (s Stats) CSV() string {
 	return fmt.Sprintf(
 		"%v, %v, %v, %v, %v, %v, %v",
 		s.Name,
@@ -33,7 +33,7 @@ func (s JobStats) CSV() string {
 	)
 }
 
-func (s JobStats) JSON() string {
+func (s Stats) JSON() string {
 	b, err := json.Marshal(s)
 	if err != nil {
 		panic(err)
@@ -42,8 +42,8 @@ func (s JobStats) JSON() string {
 	return string(b)
 }
 
-func GetJobStats(jobs []github.WorkflowJob, weeks int, excludingWeekends bool) ([]JobStats, error) {
-	out := make([]JobStats, 0)
+func GetStats(jobs []github.WorkflowJob, weeks int, excludingWeekends bool) ([]Stats, error) {
+	out := make([]Stats, 0)
 	for _, d := range calendar.LastNWeeks(weeks) {
 		start, err := calendar.Parse(d.Start)
 		if err != nil {
@@ -55,7 +55,7 @@ func GetJobStats(jobs []github.WorkflowJob, weeks int, excludingWeekends bool) (
 			return nil, fmt.Errorf("parse %v: %v", d.End, err)
 		}
 
-		stats, err := GetJobStatsWith(jobs, end, start, &GetJobStatsWithOptions{
+		stats, err := GetStatsWith(jobs, end, start, &GetStatsWithOptions{
 			ExcludingWeekends: excludingWeekends,
 		})
 		if err != nil {
@@ -68,11 +68,11 @@ func GetJobStats(jobs []github.WorkflowJob, weeks int, excludingWeekends bool) (
 	return out, nil
 }
 
-type GetJobStatsWithOptions struct {
+type GetStatsWithOptions struct {
 	ExcludingWeekends bool
 }
 
-func GetJobStatsWith(jobs []github.WorkflowJob, end, start time.Time, opts *GetJobStatsWithOptions) (JobStats, error) {
+func GetStatsWith(jobs []github.WorkflowJob, end, start time.Time, opts *GetStatsWithOptions) (Stats, error) {
 	var count, failure float64
 	var duration time.Duration
 	for _, j := range jobs {
@@ -117,7 +117,7 @@ func GetJobStatsWith(jobs []github.WorkflowJob, end, start time.Time, opts *GetJ
 		runperday = count / (end.Sub(start).Hours()/24 - 2) // saturday, sunday
 	}
 
-	return JobStats{
+	return Stats{
 		Name:        *jobs[0].Name,
 		Start:       start,
 		End:         end,

@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/itsubaki/prstats/pkg/prstats"
+	"github.com/itsubaki/prstats/pkg/events"
 	"github.com/urfave/cli/v2"
 )
 
-func Action(c *cli.Context) error {
-	in := prstats.ListEventsInput{
+func Fetch(c *cli.Context) error {
+	in := events.ListEventsInput{
 		Owner:   c.String("owner"),
 		Repo:    c.String("repo"),
 		PAT:     c.String("pat"),
@@ -17,7 +17,7 @@ func Action(c *cli.Context) error {
 		PerPage: c.Int("perpage"),
 	}
 
-	events, err := prstats.ListEvents(context.Background(), &in)
+	events, err := events.ListEvents(context.Background(), &in)
 	if err != nil {
 		return fmt.Errorf("get Events List: %v", err)
 	}

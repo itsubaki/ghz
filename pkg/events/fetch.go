@@ -1,4 +1,4 @@
-package prstats
+package events
 
 import (
 	"context"

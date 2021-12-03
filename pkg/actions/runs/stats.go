@@ -1,4 +1,4 @@
-package prstats
+package runs
 
 import (
 	"encoding/json"
@@ -10,7 +10,7 @@ import (
 	"github.com/itsubaki/prstats/pkg/calendar"
 )
 
-type RunStats struct {
+type Stats struct {
 	WorkflowID  int64     `json:"workflow_id"`
 	Name        string    `json:"name"`
 	Start       time.Time `json:"start"`
@@ -21,7 +21,7 @@ type RunStats struct {
 	DurationVar float64   `json:"duration_var"`
 }
 
-func (s RunStats) CSV() string {
+func (s Stats) CSV() string {
 	return fmt.Sprintf(
 		"%v, %v, %v, %v, %v, %v, %v, %v",
 		s.WorkflowID,
@@ -35,7 +35,7 @@ func (s RunStats) CSV() string {
 	)
 }
 
-func (s RunStats) JSON() string {
+func (s Stats) JSON() string {
 	b, err := json.Marshal(s)
 	if err != nil {
 		panic(err)
@@ -44,8 +44,8 @@ func (s RunStats) JSON() string {
 	return string(b)
 }
 
-func GetRunStats(runs []github.WorkflowRun, weeks int, excludingWeekends bool) ([]RunStats, error) {
-	out := make([]RunStats, 0)
+func GetStats(runs []github.WorkflowRun, weeks int, excludingWeekends bool) ([]Stats, error) {
+	out := make([]Stats, 0)
 	for _, d := range calendar.LastNWeeks(weeks) {
 		start, err := calendar.Parse(d.Start)
 		if err != nil {
@@ -57,7 +57,7 @@ func GetRunStats(runs []github.WorkflowRun, weeks int, excludingWeekends bool) (
 			return nil, fmt.Errorf("parse %v: %v", d.End, err)
 		}
 
-		stats, err := GetRunStatsWith(runs, end, start, &GetRunStatsWithOptions{
+		stats, err := GetStatsWith(runs, end, start, &GetStatsWithOptions{
 			ExcludingWeekends: excludingWeekends,
 		})
 		if err != nil {
@@ -70,11 +70,11 @@ func GetRunStats(runs []github.WorkflowRun, weeks int, excludingWeekends bool) (
 	return out, nil
 }
 
-type GetRunStatsWithOptions struct {
+type GetStatsWithOptions struct {
 	ExcludingWeekends bool
 }
 
-func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time, opts *GetRunStatsWithOptions) (RunStats, error) {
+func GetStatsWith(runs []github.WorkflowRun, end, start time.Time, opts *GetStatsWithOptions) (Stats, error) {
 	var count, failure float64
 	var duration time.Duration
 	for _, r := range runs {
@@ -119,7 +119,7 @@ func GetRunStatsWith(runs []github.WorkflowRun, end, start time.Time, opts *GetR
 		runperday = count / (end.Sub(start).Hours()/24 - 2) // saturday, sunday
 	}
 
-	return RunStats{
+	return Stats{
 		WorkflowID:  *runs[0].WorkflowID,
 		Name:        *runs[0].Name,
 		Start:       start,

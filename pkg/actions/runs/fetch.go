@@ -1,4 +1,4 @@
-package prstats
+package runs
 
 import (
 	"context"
@@ -8,15 +8,16 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type ListWorkflowRunsInput struct {
+type FetchInput struct {
 	Owner   string
 	Repo    string
 	PAT     string
 	Page    int
 	PerPage int
+	LastID  int64
 }
 
-func ListWorkflowRuns(ctx context.Context, in *ListWorkflowRunsInput) ([]*github.WorkflowRun, error) {
+func Fetch(ctx context.Context, in *FetchInput) ([]*github.WorkflowRun, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -39,8 +40,17 @@ func ListWorkflowRuns(ctx context.Context, in *ListWorkflowRunsInput) ([]*github
 			return nil, fmt.Errorf("list WorkflowRuns: %v", err)
 		}
 
-		list = append(list, runs.WorkflowRuns...)
-		if resp.NextPage == 0 {
+		var last bool
+		for i := range runs.WorkflowRuns {
+			if *runs.WorkflowRuns[i].ID <= in.LastID {
+				last = true
+				break
+			}
+
+			list = append(list, runs.WorkflowRuns[i])
+		}
+
+		if last || resp.NextPage == 0 {
 			break
 		}
 

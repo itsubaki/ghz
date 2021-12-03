@@ -1,4 +1,4 @@
-package prstats
+package pullreqs
 
 import (
 	"context"
@@ -8,15 +8,16 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type ListJobsInput struct {
+type ListInput struct {
 	Owner   string
 	Repo    string
 	PAT     string
 	Page    int
 	PerPage int
+	State   string
 }
 
-func ListWorkflowJobs(ctx context.Context, in *ListJobsInput, runID int64) ([]*github.WorkflowJob, error) {
+func Fetch(ctx context.Context, in *ListInput) ([]*github.PullRequest, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -25,21 +26,22 @@ func ListWorkflowJobs(ctx context.Context, in *ListJobsInput, runID int64) ([]*g
 		)))
 	}
 
-	opts := github.ListWorkflowJobsOptions{
+	opts := github.PullRequestListOptions{
+		State: in.State,
 		ListOptions: github.ListOptions{
 			Page:    in.Page,
 			PerPage: in.PerPage,
 		},
 	}
 
-	list := make([]*github.WorkflowJob, 0)
+	out := make([]*github.PullRequest, 0)
 	for {
-		jobs, resp, err := client.Actions.ListWorkflowJobs(ctx, in.Owner, in.Repo, runID, &opts)
+		pr, resp, err := client.PullRequests.List(ctx, in.Owner, in.Repo, &opts)
 		if err != nil {
-			return nil, fmt.Errorf("list WorkflowJobs: %v", err)
+			return nil, fmt.Errorf("list PullRequests: %v", err)
 		}
 
-		list = append(list, jobs.Jobs...)
+		out = append(out, pr...)
 		if resp.NextPage == 0 {
 			break
 		}
@@ -47,5 +49,5 @@ func ListWorkflowJobs(ctx context.Context, in *ListJobsInput, runID int64) ([]*g
 		opts.Page = resp.NextPage
 	}
 
-	return list, nil
+	return out, nil
 }
