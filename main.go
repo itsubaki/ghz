@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/itsubaki/prstats/cmd/actions/jobs"
-	"github.com/itsubaki/prstats/cmd/actions/runs"
+	"github.com/itsubaki/ghstats/cmd/actions/jobs"
+	"github.com/itsubaki/ghstats/cmd/actions/runs"
 	"github.com/urfave/cli/v2"
 )
 
@@ -13,8 +13,8 @@ var date, hash, goversion string
 
 func New(version string) *cli.App {
 	app := cli.NewApp()
-	app.Name = "prstats"
-	app.Usage = "Github Productivity Stats"
+	app.Name = "ghstats"
+	app.Usage = "Github Stats"
 	app.Version = version
 
 	dir := cli.StringFlag{

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/go-github/v40/github"
-	"github.com/itsubaki/prstats/pkg/calendar"
+	"github.com/itsubaki/ghstats/pkg/calendar"
 )
 
 type Stats struct {

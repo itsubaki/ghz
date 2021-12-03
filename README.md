@@ -1,19 +1,19 @@
-# prstats
+# ghstats
 
-* One of the indicators of productivity
-* [DORA's Four Keys](https://github.com/GoogleCloudPlatform/fourkeys)
+- One of the indicators of productivity
+- [DORA's Four Keys](https://github.com/GoogleCloudPlatform/fourkeys)
 
 ## Install
 
 ```shell
-go install github.com/itsubaki/prstats@latest
+go install github.com/itsubaki/ghstats@latest
 ```
 
 ## Example
 
 ```shell
-$ prstats actions runs fetch --owner itsubaki --repo q
-$ prstats actions runs list  --owner itsubaki --repo q --format csv | column -t -s, | less -S
+$ ghstats actions runs fetch --owner itsubaki --repo q
+$ ghstats actions runs list  --owner itsubaki --repo q --format csv | column -t -s, | less -S
 workflow_id   workflow_name   run_id       run_number   status      conclusion   created_at            updated_at            duration(minutes)
 5841880       tests           1429332756   109          completed   success      2021-11-06 14:51:50   2021-11-06 14:53:20   1.5
 5841880       tests           1299800366   108          completed   success      2021-10-03 05:10:58   2021-10-03 05:11:45   0.7833333333333333
@@ -26,7 +26,7 @@ workflow_id   workflow_name   run_id       run_number   status      conclusion  
 5841880       tests           1166480252   101          completed   success      2021-08-25 12:28:34   2021-08-25 12:29:38   1.0666666666666667
 ...
 
-$ prstats actions runs analyze --owner itsubaki --repo q --format csv | column -t -s, | less -S
+$ ghstats actions runs analyze --owner itsubaki --repo q --format csv | column -t -s, | less -S
 workflow_id   name    start        end          runs_per_day          failure_rate           duration_avg(minutes)   duration_var(minutes)
 5841880       tests   2021-02-14   2021-02-21   0.2857142857142857    0                      0.5916666666666667      6.944444444444396e-05
 5841880       tests   2021-02-21   2021-02-28   0.5714285714285714    0                      0.7291666666666666      0.07421875
@@ -38,8 +38,8 @@ workflow_id   name    start        end          runs_per_day          failure_ra
 ```
 
 ```shell
-$ prstats actions jobs fetch --owner itsubaki --repo q
-$ prstats actions jobs list  --owner itsubaki --repo q --format csv | column -t -s, | less -S
+$ ghstats actions jobs fetch --owner itsubaki --repo q
+$ ghstats actions jobs list  --owner itsubaki --repo q --format csv | column -t -s, | less -S
 job_id       job_name               status           conclusion   started_at            completed_at          duration(minutes)
 4126276932   test (ubuntu-latest)   completed        success      2021-11-06 14:52:00   2021-11-06 14:52:53   0.8833333333333333
 3780280583   test (ubuntu-latest)   completed        success      2021-10-03 05:11:05   2021-10-03 05:11:43   0.6333333333333333
@@ -54,7 +54,7 @@ job_id       job_name               status           conclusion   started_at    
 3311170395   test (ubuntu-latest)   completed        success      2021-08-12 11:45:28   2021-08-12 11:46:17   0.8166666666666667
 ...
 
-$ prstats actions jobs analyze  --owner itsubaki --repo q --format csv | column -t -s, | less -S
+$ ghstats actions jobs analyze  --owner itsubaki --repo q --format csv | column -t -s, | less -S
 name                   start            end          runs_per_day          failure_rate          duration_avg(minutes)   duration_var(minutes)
 test (ubuntu-latest)   2021-07-04       2021-07-11   0.14285714285714285   0                     0.9                     0
 test (ubuntu-latest)   2021-07-11       2021-07-18   0                     0                     0                       0

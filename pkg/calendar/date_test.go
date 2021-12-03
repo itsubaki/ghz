@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/itsubaki/prstats/pkg/calendar"
+	"github.com/itsubaki/ghstats/pkg/calendar"
 )
 
 func TestLastNWeeks(t *testing.T) {

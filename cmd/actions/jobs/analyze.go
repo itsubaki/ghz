@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v40/github"
-	"github.com/itsubaki/prstats/pkg/actions/jobs"
+	"github.com/itsubaki/ghstats/pkg/actions/jobs"
 	"github.com/urfave/cli/v2"
 )
 

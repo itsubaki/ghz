@@ -5,7 +5,7 @@ GOVERSION := $(shell go version)
 LDFLAGS := -X 'main.date=${DATE}' -X 'main.hash=${HASH}' -X 'main.goversion=${GOVERSION}'
 
 install:
-	-rm ${GOPATH}/bin/prstats
+	-rm ${GOPATH}/bin/ghstats
 	go mod tidy
 	go install -ldflags "${LDFLAGS}"
 
