@@ -9,7 +9,7 @@ import (
 )
 
 func Fetch(c *cli.Context) error {
-	in := events.ListEventsInput{
+	in := events.FetchInput{
 		Owner:   c.String("owner"),
 		Repo:    c.String("repo"),
 		PAT:     c.String("pat"),
@@ -17,9 +17,9 @@ func Fetch(c *cli.Context) error {
 		PerPage: c.Int("perpage"),
 	}
 
-	events, err := events.ListEvents(context.Background(), &in)
+	events, err := events.Fetch(context.Background(), &in)
 	if err != nil {
-		return fmt.Errorf("get Events List: %v", err)
+		return fmt.Errorf("fetch: %v", err)
 	}
 
 	fmt.Println("id, login, name, created_at, type, ")

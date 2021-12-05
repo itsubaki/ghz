@@ -29,7 +29,7 @@ func Analyze(c *cli.Context) error {
 	for k, v := range nmap {
 		run, err := jobs.GetStats(v, c.Int("weeks"), c.Bool("excluding_weekends"))
 		if err != nil {
-			return fmt.Errorf("get JobStats: %v", err)
+			return fmt.Errorf("stats: %v", err)
 		}
 
 		jobstats[k] = run

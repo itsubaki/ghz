@@ -8,7 +8,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type ListEventsInput struct {
+type FetchInput struct {
 	Owner   string
 	Repo    string
 	PAT     string
@@ -16,7 +16,7 @@ type ListEventsInput struct {
 	PerPage int
 }
 
-func ListEvents(ctx context.Context, in *ListEventsInput) ([]*github.Event, error) {
+func Fetch(ctx context.Context, in *FetchInput) ([]*github.Event, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {

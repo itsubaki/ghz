@@ -6,6 +6,7 @@ import (
 
 	"github.com/itsubaki/ghstats/cmd/actions/jobs"
 	"github.com/itsubaki/ghstats/cmd/actions/runs"
+	"github.com/itsubaki/ghstats/cmd/pullreqs"
 	"github.com/urfave/cli/v2"
 )
 
@@ -168,8 +169,38 @@ func New(version string) *cli.App {
 		},
 	}
 
+	state := cli.StringFlag{
+		Name:    "state",
+		Aliases: []string{"s"},
+		Value:   "all",
+		Usage:   "all, open, closed",
+	}
+
+	pullreqs := cli.Command{
+		Name:    "pullreqs",
+		Aliases: []string{"pr"},
+		Subcommands: []*cli.Command{
+			{
+				Name:    "fetch",
+				Aliases: []string{"f"},
+				Action:  pullreqs.Fetch,
+				Flags: []cli.Flag{
+					&dir,
+					&own,
+					&repo,
+					&pat,
+					&page,
+					&perpage,
+					&state,
+					&format,
+				},
+			},
+		},
+	}
+
 	app.Commands = []*cli.Command{
 		&actions,
+		&pullreqs,
 	}
 
 	return app

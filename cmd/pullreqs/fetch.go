@@ -1,4 +1,4 @@
-package prlist
+package pullreqs
 
 import (
 	"context"
@@ -23,7 +23,7 @@ func Fetch(c *cli.Context) error {
 
 	list, err := pullreqs.Fetch(context.Background(), &in)
 	if err != nil {
-		return fmt.Errorf("get PullRequest List: %v", err)
+		return fmt.Errorf("fetch: %v", err)
 	}
 
 	format := strings.ToLower(c.String("format"))

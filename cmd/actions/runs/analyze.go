@@ -30,7 +30,7 @@ func Analyze(c *cli.Context) error {
 	for k, v := range idmap {
 		run, err := runs.GetStats(v, c.Int("weeks"), c.Bool("excluding_weekends"))
 		if err != nil {
-			return fmt.Errorf("runstats: %v", err)
+			return fmt.Errorf("stats: %v", err)
 		}
 
 		runstats[k] = run
