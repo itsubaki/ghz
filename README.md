@@ -1,5 +1,8 @@
 # ghstats
 
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/itsubaki/ghstats)](https://pkg.go.dev/github.com/itsubaki/ghstats)
+[![Go Report Card](https://goreportcard.com/badge/github.com/itsubaki/ghstats?style=flat-square)](https://goreportcard.com/report/github.com/itsubaki/ghstats)
+
 - One of the indicators of productivity
 - [DORA's Four Keys](https://github.com/GoogleCloudPlatform/fourkeys)
 
