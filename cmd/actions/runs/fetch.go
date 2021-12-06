@@ -50,7 +50,7 @@ func Fetch(c *cli.Context) error {
 	}
 
 	if len(list) > 0 {
-		fmt.Printf("%v\n", JSON(list[0]))
+		fmt.Printf("%v %v\n", *list[len(list)-1].ID, *list[0].ID)
 	}
 
 	return nil

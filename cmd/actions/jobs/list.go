@@ -66,7 +66,7 @@ func print(format string, list []github.WorkflowJob) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("job_id, job_name, status, conclusion, started_at, completed_at, duration(minutes)")
+		fmt.Println("run_id, job_id, job_name, status, conclusion, started_at, completed_at, duration(minutes)")
 
 		for _, r := range list {
 			fmt.Println(CSV(r))
@@ -80,7 +80,8 @@ func print(format string, list []github.WorkflowJob) error {
 
 func CSV(j github.WorkflowJob) string {
 	return fmt.Sprintf(
-		"%v, %v, %v, %v, %v, %v, %v",
+		"%v, %v, %v, %v, %v, %v, %v, %v",
+		*j.RunID,
 		*j.ID,
 		*j.Name,
 		*j.Status,

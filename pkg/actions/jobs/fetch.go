@@ -9,12 +9,12 @@ import (
 )
 
 type FetchInput struct {
-	Owner   string
-	Repo    string
-	PAT     string
-	Page    int
-	PerPage int
-	LastID  int64
+	Owner     string
+	Repo      string
+	PAT       string
+	Page      int
+	PerPage   int
+	LastRunID int64
 }
 
 func Fetch(ctx context.Context, in *FetchInput, runID int64) ([]*github.WorkflowJob, error) {
@@ -40,17 +40,8 @@ func Fetch(ctx context.Context, in *FetchInput, runID int64) ([]*github.Workflow
 			return nil, fmt.Errorf("list WorkflowJobs: %v", err)
 		}
 
-		var last bool
-		for i := range jobs.Jobs {
-			if *jobs.Jobs[i].ID <= in.LastID {
-				last = true
-				break
-			}
-
-			list = append(list, jobs.Jobs[i])
-		}
-
-		if last || resp.NextPage == 0 {
+		list = append(list, jobs.Jobs...)
+		if resp.NextPage == 0 {
 			break
 		}
 

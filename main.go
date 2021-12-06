@@ -127,6 +127,11 @@ func New(version string) *cli.App {
 					&pat,
 					&page,
 					&perpage,
+					&cli.Int64Flag{
+						Name:    "workflow_id",
+						Aliases: []string{"wid"},
+						Value:   -1,
+					},
 				},
 			},
 			{

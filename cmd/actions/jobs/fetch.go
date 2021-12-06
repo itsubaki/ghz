@@ -18,19 +18,9 @@ const Filename = "jobs.json"
 
 func Fetch(c *cli.Context) error {
 	runspath := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"), runs.Filename)
-	runslist, err := runs.Deserialize(runspath)
+	runs, err := runs.Deserialize(runspath)
 	if err != nil {
 		return fmt.Errorf("deserialize: %v", err)
-	}
-
-	idmap := make(map[int64][]github.WorkflowRun)
-	for _, r := range runslist {
-		runs, ok := idmap[*r.WorkflowID]
-		if !ok {
-			idmap[*r.WorkflowID] = make([]github.WorkflowRun, 0)
-		}
-
-		idmap[*r.WorkflowID] = append(runs, r)
 	}
 
 	dir := fmt.Sprintf("%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"))
@@ -39,44 +29,46 @@ func Fetch(c *cli.Context) error {
 	}
 
 	path := fmt.Sprintf("%s/%s", dir, Filename)
-	lastID, err := ScanLastID(path)
+	lastRunID, err := ScanLastRunID(path)
 	if err != nil {
 		return fmt.Errorf("last id: %v", err)
 	}
 
 	in := jobs.FetchInput{
-		Owner:   c.String("owner"),
-		Repo:    c.String("repo"),
-		PAT:     c.String("pat"),
-		Page:    c.Int("page"),
-		PerPage: c.Int("perpage"),
-		LastID:  lastID,
+		Owner:     c.String("owner"),
+		Repo:      c.String("repo"),
+		PAT:       c.String("pat"),
+		Page:      c.Int("page"),
+		PerPage:   c.Int("perpage"),
+		LastRunID: lastRunID,
 	}
 	wid := c.Int64("workflow_id")
 
 	fmt.Printf("target: %v/%v\n", in.Owner, in.Repo)
 	fmt.Printf("workflow_id: %v\n", wid)
-	fmt.Printf("last_id: %v\n", lastID)
+	fmt.Printf("last_run_id: %v\n", lastRunID)
 
 	ctx := context.Background()
-	list := make([]*github.WorkflowJob, 0)
-	for _, runs := range idmap {
-		for i := range runs {
-			if wid > 0 && *runs[i].WorkflowID != wid {
-				continue
-			}
-
-			jobs, err := jobs.Fetch(ctx, &in, *runs[i].ID)
-			if err != nil {
-				return fmt.Errorf("fetch: %v", err)
-			}
-
-			list = append(list, jobs...)
+	for i := range runs {
+		if wid > 0 && *runs[i].WorkflowID != wid {
+			continue
 		}
-	}
+		if *runs[i].ID <= in.LastRunID {
+			break
+		}
 
-	if err := serialize(path, list); err != nil {
-		return fmt.Errorf("serialize: %v", err)
+		jobs, err := jobs.Fetch(ctx, &in, *runs[i].ID)
+		if err != nil {
+			return fmt.Errorf("fetch: %v", err)
+		}
+
+		if err := serialize(path, jobs); err != nil {
+			return fmt.Errorf("serialize: %v", err)
+		}
+
+		if len(jobs) > 0 {
+			fmt.Printf("%v\n", *jobs[0].RunID)
+		}
 	}
 
 	return nil
@@ -107,7 +99,7 @@ func serialize(path string, list []*github.WorkflowJob) error {
 	return nil
 }
 
-func ScanLastID(path string) (int64, error) {
+func ScanLastRunID(path string) (int64, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return -1, nil
 	}
@@ -126,7 +118,7 @@ func ScanLastID(path string) (int64, error) {
 			return -1, fmt.Errorf("unmarshal: %v", err)
 		}
 
-		lastID = *job.ID
+		lastID = *job.RunID
 	}
 
 	return lastID, nil
