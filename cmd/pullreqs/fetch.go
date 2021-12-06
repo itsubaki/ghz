@@ -8,6 +8,7 @@ import (
 
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghstats/pkg/pullreqs"
+	"github.com/itsubaki/ghstats/pkg/pullreqs/commits"
 	"github.com/urfave/cli/v2"
 )
 
@@ -21,15 +22,45 @@ func Fetch(c *cli.Context) error {
 		State:   c.String("state"),
 	}
 
-	list, err := pullreqs.Fetch(context.Background(), &in)
+	ctx := context.Background()
+	list, err := pullreqs.Fetch(ctx, &in)
 	if err != nil {
 		return fmt.Errorf("fetch: %v", err)
 	}
 
-	format := strings.ToLower(c.String("format"))
-	if err := print(format, list); err != nil {
-		return fmt.Errorf("print: %v", err)
+	for _, r := range list {
+		if r.MergedAt == nil {
+			continue
+		}
+
+		clist, err := commits.Fetch(ctx, &commits.ListInput{
+			Owner:   c.String("owner"),
+			Repo:    c.String("repo"),
+			PAT:     c.String("pat"),
+			Page:    c.Int("page"),
+			PerPage: c.Int("perpage"),
+			Number:  *r.Number,
+		})
+		if err != nil {
+			return fmt.Errorf("fetch commits: %v", err)
+		}
+
+		for _, c := range clist {
+			fmt.Printf(CSV(r))
+			fmt.Printf("%v, %v, %v, ",
+				*c.SHA,
+				*c.Commit.Author.Name,
+				c.Commit.Author.Date.Format("2006-01-02 15:04:05"),
+			)
+			fmt.Printf("%.4f, ", r.MergedAt.Sub(*c.Commit.Author.Date).Minutes()) // lead time for changes
+			fmt.Println()
+		}
 	}
+
+	// format := strings.ToLower(c.String("format"))
+	// if err := print(format, list); err != nil {
+	// 	return fmt.Errorf("print: %v", err)
+	// }
 
 	return nil
 }
