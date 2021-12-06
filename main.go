@@ -104,8 +104,9 @@ func New(version string) *cli.App {
 						Value: 52,
 					},
 					&cli.BoolFlag{
-						Name:  "excluding_weekends",
-						Value: false,
+						Name:    "excluding_weekends",
+						Aliases: []string{"ew"},
+						Value:   false,
 					},
 				},
 			},
@@ -159,8 +160,9 @@ func New(version string) *cli.App {
 						Value: 52,
 					},
 					&cli.BoolFlag{
-						Name:  "excluding_weekends",
-						Value: false,
+						Name:    "excluding_weekends",
+						Aliases: []string{"ew"},
+						Value:   false,
 					},
 				},
 			},

@@ -42,7 +42,27 @@ func print(format string, list []*github.RepositoryCommit) error {
 		return nil
 	}
 
+	if format == "csv" {
+		fmt.Println("sha, login, date, message")
+
+		for _, c := range list {
+			fmt.Println(CSV(c))
+		}
+
+		return nil
+	}
+
 	return fmt.Errorf("invalid format=%v", format)
+}
+
+func CSV(c *github.RepositoryCommit) string {
+	return fmt.Sprintf(
+		"%v, %v, %v, %v, ",
+		*c.SHA,
+		*c.Commit.Author.Name,
+		c.Commit.Author.Date.Format("2006-01-02 15:04:05"),
+		*c.Commit.Message,
+	)
 }
 
 func JSON(v interface{}) string {

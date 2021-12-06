@@ -44,7 +44,7 @@ func print(format string, list []*github.PullRequest) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("id, title, created_at, merged_at, duration(minutes), ")
+		fmt.Println("id, number, title, created_at, merged_at, duration(minutes), ")
 
 		for _, r := range list {
 			fmt.Println(CSV(r))
@@ -58,8 +58,9 @@ func print(format string, list []*github.PullRequest) error {
 
 func CSV(r *github.PullRequest) string {
 	out := fmt.Sprintf(
-		"%v, %v, %v, ",
+		"%v, %v, %v, %v, ",
 		*r.ID,
+		*r.Number,
 		strings.ReplaceAll(*r.Title, ",", ""),
 		r.CreatedAt.Format("2006-01-02 15:04:05"),
 	)

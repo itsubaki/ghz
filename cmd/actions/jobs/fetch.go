@@ -54,7 +54,7 @@ func Fetch(c *cli.Context) error {
 			continue
 		}
 		if *runs[i].ID <= in.LastRunID {
-			break
+			continue
 		}
 
 		jobs, err := jobs.Fetch(ctx, &in, *runs[i].ID)
