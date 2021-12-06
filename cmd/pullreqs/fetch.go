@@ -12,6 +12,11 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+type PullRequestWithCommits struct {
+	PullRequest github.PullRequest         `json:"pull_request"`
+	Commits     []*github.RepositoryCommit `json:"commits"`
+}
+
 func Fetch(c *cli.Context) error {
 	in := pullreqs.ListInput{
 		Owner:   c.String("owner"),
@@ -23,17 +28,18 @@ func Fetch(c *cli.Context) error {
 	}
 
 	ctx := context.Background()
-	list, err := pullreqs.Fetch(ctx, &in)
+	prs, err := pullreqs.Fetch(ctx, &in)
 	if err != nil {
 		return fmt.Errorf("fetch: %v", err)
 	}
 
-	for _, r := range list {
+	list := make([]PullRequestWithCommits, 0)
+	for i, r := range prs {
 		if r.MergedAt == nil {
 			continue
 		}
 
-		clist, err := commits.Fetch(ctx, &commits.ListInput{
+		cmts, err := commits.Fetch(ctx, &commits.ListInput{
 			Owner:   c.String("owner"),
 			Repo:    c.String("repo"),
 			PAT:     c.String("pat"),
@@ -45,27 +51,21 @@ func Fetch(c *cli.Context) error {
 			return fmt.Errorf("fetch commits: %v", err)
 		}
 
-		for _, c := range clist {
-			fmt.Printf(CSV(r))
-			fmt.Printf("%v, %v, %v, ",
-				*c.SHA,
-				*c.Commit.Author.Name,
-				c.Commit.Author.Date.Format("2006-01-02 15:04:05"),
-			)
-			fmt.Printf("%.4f, ", r.MergedAt.Sub(*c.Commit.Author.Date).Minutes()) // lead time for changes
-			fmt.Println()
-		}
+		list = append(list, PullRequestWithCommits{
+			PullRequest: *prs[i],
+			Commits:     cmts,
+		})
 	}
 
-	// format := strings.ToLower(c.String("format"))
-	// if err := print(format, list); err != nil {
-	// 	return fmt.Errorf("print: %v", err)
-	// }
+	format := strings.ToLower(c.String("format"))
+	if err := print(format, list); err != nil {
+		return fmt.Errorf("print: %v", err)
+	}
 
 	return nil
 }
 
-func print(format string, list []*github.PullRequest) error {
+func print(format string, list []PullRequestWithCommits) error {
 	if format == "json" {
 		for _, r := range list {
 			fmt.Println(JSON(r))
@@ -75,10 +75,19 @@ func print(format string, list []*github.PullRequest) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("id, number, title, created_at, merged_at, duration(minutes), ")
+		fmt.Println("id, number, title, created_at, merged_at, commit.sha, commit.login, commit.date, duration(minutes), ")
 
 		for _, r := range list {
-			fmt.Println(CSV(r))
+			for _, c := range r.Commits {
+				fmt.Printf(CSV(r.PullRequest))
+				fmt.Printf("%v, %v, %v, ",
+					*c.SHA,
+					*c.Commit.Author.Name,
+					c.Commit.Author.Date.Format("2006-01-02 15:04:05"),
+				)
+				fmt.Printf("%.4f, ", r.PullRequest.MergedAt.Sub(*c.Commit.Author.Date).Minutes())
+				fmt.Println()
+			}
 		}
 
 		return nil
@@ -87,21 +96,15 @@ func print(format string, list []*github.PullRequest) error {
 	return fmt.Errorf("invalid format=%v", format)
 }
 
-func CSV(r *github.PullRequest) string {
-	out := fmt.Sprintf(
-		"%v, %v, %v, %v, ",
+func CSV(r github.PullRequest) string {
+	return fmt.Sprintf(
+		"%v, %v, %v, %v, %v, ",
 		*r.ID,
 		*r.Number,
 		strings.ReplaceAll(*r.Title, ",", ""),
 		r.CreatedAt.Format("2006-01-02 15:04:05"),
+		r.MergedAt.Format("2006-01-02 15:04:05"),
 	)
-
-	if r.MergedAt != nil {
-		out = out + fmt.Sprintf("%v, ", r.MergedAt.Format("2006-01-02 15:04:05"))
-		out = out + fmt.Sprintf("%.4f, ", r.MergedAt.Sub(*r.CreatedAt).Minutes())
-	}
-
-	return out
 }
 
 func JSON(v interface{}) string {
