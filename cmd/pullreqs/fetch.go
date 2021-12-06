@@ -58,14 +58,14 @@ func print(format string, list []*github.PullRequest) error {
 
 func CSV(r *github.PullRequest) string {
 	out := fmt.Sprintf(
-		"%v, %v, %v, %v, ",
+		"%v, %v, %v, ",
 		*r.ID,
 		strings.ReplaceAll(*r.Title, ",", ""),
 		r.CreatedAt.Format("2006-01-02 15:04:05"),
-		r.MergedAt.Format("2006-01-02 15:04:05"),
 	)
 
 	if r.MergedAt != nil {
+		out = out + fmt.Sprintf("%v, ", r.MergedAt.Format("2006-01-02 15:04:05"))
 		out = out + fmt.Sprintf("%.4f, ", r.MergedAt.Sub(*r.CreatedAt).Minutes())
 	}
 

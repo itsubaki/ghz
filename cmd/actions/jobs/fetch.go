@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghstats/cmd/actions/runs"
@@ -37,24 +38,10 @@ func Fetch(c *cli.Context) error {
 		os.MkdirAll(dir, os.ModePerm)
 	}
 
-	var lastID int64
 	path := fmt.Sprintf("%s/%s", dir, Filename)
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		file, err := os.Open(path)
-		if err != nil {
-			return fmt.Errorf("open %v: %v", path, err)
-		}
-		defer file.Close()
-
-		scanner := bufio.NewScanner(file)
-		if scanner.Scan() {
-			var run github.WorkflowJob
-			if err := json.Unmarshal([]byte(scanner.Text()), &run); err != nil {
-				return fmt.Errorf("unmarshal: %v", err)
-			}
-
-			lastID = *run.ID
-		}
+	lastID, err := ScanLastID(path)
+	if err != nil {
+		return fmt.Errorf("last id: %v", err)
 	}
 
 	in := jobs.FetchInput{
@@ -67,8 +54,12 @@ func Fetch(c *cli.Context) error {
 	}
 	wid := c.Int64("workflow_id")
 
+	fmt.Printf("target: %v/%v\n", in.Owner, in.Repo)
+	fmt.Printf("workflow_id: %v\n", wid)
+	fmt.Printf("last_id: %v\n", lastID)
+
 	ctx := context.Background()
-	list := make([]WorkflowJob, 0)
+	list := make([]*github.WorkflowJob, 0)
 	for _, runs := range idmap {
 		for i := range runs {
 			if wid > 0 && *runs[i].WorkflowID != wid {
@@ -80,10 +71,7 @@ func Fetch(c *cli.Context) error {
 				return fmt.Errorf("fetch: %v", err)
 			}
 
-			list = append(list, WorkflowJob{
-				WorkflowRun: runs[i],
-				WorkflowJob: jobs,
-			})
+			list = append(list, jobs...)
 		}
 	}
 
@@ -92,11 +80,6 @@ func Fetch(c *cli.Context) error {
 	}
 
 	return nil
-}
-
-type WorkflowJob struct {
-	WorkflowRun github.WorkflowRun
-	WorkflowJob []*github.WorkflowJob
 }
 
 func JSON(v interface{}) string {
@@ -108,18 +91,43 @@ func JSON(v interface{}) string {
 	return string(b)
 }
 
-func serialize(path string, list []WorkflowJob) error {
+func serialize(path string, list []*github.WorkflowJob) error {
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return fmt.Errorf("open file: %v", err)
 	}
 	defer file.Close()
 
-	for _, r := range list {
-		for _, j := range r.WorkflowJob {
-			fmt.Fprintln(file, JSON(j))
-		}
+	sort.Slice(list, func(i, j int) bool { return *list[i].ID < *list[j].ID }) // asc
+
+	for _, j := range list {
+		fmt.Fprintln(file, JSON(j))
 	}
 
 	return nil
+}
+
+func ScanLastID(path string) (int64, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return -1, nil
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return -1, fmt.Errorf("open %v: %v", path, err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var lastID int64
+	for scanner.Scan() {
+		var job github.WorkflowJob
+		if err := json.Unmarshal([]byte(scanner.Text()), &job); err != nil {
+			return -1, fmt.Errorf("unmarshal: %v", err)
+		}
+
+		lastID = *job.ID
+	}
+
+	return lastID, nil
 }

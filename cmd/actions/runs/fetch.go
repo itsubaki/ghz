@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghstats/pkg/actions/runs"
@@ -20,24 +21,10 @@ func Fetch(c *cli.Context) error {
 		os.MkdirAll(dir, os.ModePerm)
 	}
 
-	var lastID int64
 	path := fmt.Sprintf("%s/%s", dir, Filename)
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		file, err := os.Open(path)
-		if err != nil {
-			return fmt.Errorf("open %v: %v", path, err)
-		}
-		defer file.Close()
-
-		scanner := bufio.NewScanner(file)
-		if scanner.Scan() {
-			var run github.WorkflowRun
-			if err := json.Unmarshal([]byte(scanner.Text()), &run); err != nil {
-				return fmt.Errorf("unmarshal: %v", err)
-			}
-
-			lastID = *run.ID
-		}
+	lastID, err := scanLastID(path)
+	if err != nil {
+		return fmt.Errorf("last id: %v", err)
 	}
 
 	in := runs.FetchInput{
@@ -49,6 +36,9 @@ func Fetch(c *cli.Context) error {
 		LastID:  lastID,
 	}
 
+	fmt.Printf("target: %v/%v\n", in.Owner, in.Repo)
+	fmt.Printf("last_id: %v\n", lastID)
+
 	ctx := context.Background()
 	list, err := runs.Fetch(ctx, &in)
 	if err != nil {
@@ -57,6 +47,10 @@ func Fetch(c *cli.Context) error {
 
 	if err := serialize(path, list); err != nil {
 		return fmt.Errorf("serialize: %v", err)
+	}
+
+	if len(list) > 0 {
+		fmt.Printf("%v\n", JSON(list[0]))
 	}
 
 	return nil
@@ -78,9 +72,36 @@ func serialize(path string, list []*github.WorkflowRun) error {
 	}
 	defer file.Close()
 
+	sort.Slice(list, func(i, j int) bool { return *list[i].ID < *list[j].ID }) // asc
+
 	for _, r := range list {
 		fmt.Fprintln(file, JSON(r))
 	}
 
 	return nil
+}
+
+func scanLastID(path string) (int64, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return -1, nil
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return -1, fmt.Errorf("open %v: %v", path, err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var lastID int64
+	for scanner.Scan() {
+		var run github.WorkflowRun
+		if err := json.Unmarshal([]byte(scanner.Text()), &run); err != nil {
+			return -1, fmt.Errorf("unmarshal: %v", err)
+		}
+
+		lastID = *run.ID
+	}
+
+	return lastID, nil
 }

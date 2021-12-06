@@ -171,13 +171,6 @@ func New(version string) *cli.App {
 		},
 	}
 
-	state := cli.StringFlag{
-		Name:    "state",
-		Aliases: []string{"s"},
-		Value:   "all",
-		Usage:   "all, open, closed",
-	}
-
 	pullreqs := cli.Command{
 		Name:    "pullreqs",
 		Aliases: []string{"pr"},
@@ -193,8 +186,13 @@ func New(version string) *cli.App {
 					&pat,
 					&page,
 					&perpage,
-					&state,
 					&format,
+					&cli.StringFlag{
+						Name:    "state",
+						Aliases: []string{"s"},
+						Value:   "all",
+						Usage:   "all, open, closed",
+					},
 				},
 			},
 		},

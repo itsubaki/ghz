@@ -15,6 +15,7 @@ func Analyze(c *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("deserialize: %v", err)
 	}
+
 	nmap := make(map[string][]github.WorkflowJob)
 	for _, j := range list {
 		list, ok := nmap[*j.Name]

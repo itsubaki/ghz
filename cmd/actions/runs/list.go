@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/google/go-github/v40/github"
@@ -16,6 +17,8 @@ func List(c *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("deserialize: %v", err)
 	}
+
+	sort.Slice(list, func(i, j int) bool { return *list[i].ID > *list[j].ID }) // desc
 
 	format := strings.ToLower(c.String("format"))
 	if err := print(format, list); err != nil {
