@@ -17,19 +17,13 @@ import (
 const Filename = "jobs.json"
 
 func Fetch(c *cli.Context) error {
-	runspath := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"), runs.Filename)
-	runs, err := runs.Deserialize(runspath)
-	if err != nil {
-		return fmt.Errorf("deserialize: %v", err)
-	}
-
 	dir := fmt.Sprintf("%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"))
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.MkdirAll(dir, os.ModePerm)
 	}
 
 	path := fmt.Sprintf("%s/%s", dir, Filename)
-	lastRunID, err := ScanLastRunID(path)
+	id, err := scanMaxRunID(path)
 	if err != nil {
 		return fmt.Errorf("last id: %v", err)
 	}
@@ -40,13 +34,20 @@ func Fetch(c *cli.Context) error {
 		PAT:       c.String("pat"),
 		Page:      c.Int("page"),
 		PerPage:   c.Int("perpage"),
-		LastRunID: lastRunID,
+		LastRunID: id,
 	}
 	wid := c.Int64("workflow_id")
 
 	fmt.Printf("target: %v/%v\n", in.Owner, in.Repo)
 	fmt.Printf("workflow_id: %v\n", wid)
-	fmt.Printf("last_run_id: %v\n", lastRunID)
+	fmt.Printf("last_run_id: %v\n", id)
+
+	runspath := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"), runs.Filename)
+	runs, err := runs.Deserialize(runspath)
+	if err != nil {
+		return fmt.Errorf("deserialize: %v", err)
+	}
+	sort.Slice(runs, func(i, j int) bool { return *runs[i].ID < *runs[j].ID })
 
 	ctx := context.Background()
 	for i := range runs {
@@ -90,8 +91,6 @@ func serialize(path string, list []*github.WorkflowJob) error {
 	}
 	defer file.Close()
 
-	sort.Slice(list, func(i, j int) bool { return *list[i].ID < *list[j].ID }) // asc
-
 	for _, j := range list {
 		fmt.Fprintln(file, JSON(j))
 	}
@@ -99,7 +98,7 @@ func serialize(path string, list []*github.WorkflowJob) error {
 	return nil
 }
 
-func ScanLastRunID(path string) (int64, error) {
+func scanMaxRunID(path string) (int64, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return -1, nil
 	}
@@ -111,15 +110,17 @@ func ScanLastRunID(path string) (int64, error) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	var lastID int64
+	var id int64
 	for scanner.Scan() {
 		var job github.WorkflowJob
 		if err := json.Unmarshal([]byte(scanner.Text()), &job); err != nil {
 			return -1, fmt.Errorf("unmarshal: %v", err)
 		}
 
-		lastID = *job.RunID
+		if *job.RunID > id {
+			id = *job.RunID
+		}
 	}
 
-	return lastID, nil
+	return id, nil
 }

@@ -1,4 +1,4 @@
-package runs
+package commits
 
 import (
 	"encoding/json"
@@ -7,7 +7,6 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/google/go-github/v40/github"
 	"github.com/urfave/cli/v2"
 )
 
@@ -18,7 +17,7 @@ func List(c *cli.Context) error {
 		return fmt.Errorf("deserialize: %v", err)
 	}
 
-	sort.Slice(list, func(i, j int) bool { return *list[i].ID > *list[j].ID }) // desc
+	sort.Slice(list, func(i, j int) bool { return list[i].Commit.Author.Date.Unix() < list[i].Commit.Author.Date.Unix() }) // desc
 
 	format := strings.ToLower(c.String("format"))
 	if err := print(format, list); err != nil {
@@ -28,7 +27,7 @@ func List(c *cli.Context) error {
 	return nil
 }
 
-func Deserialize(path string) ([]github.WorkflowRun, error) {
+func Deserialize(path string) ([]CommitWithPRID, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return nil, fmt.Errorf("file not found: %v", path)
 	}
@@ -38,25 +37,25 @@ func Deserialize(path string) ([]github.WorkflowRun, error) {
 		return nil, fmt.Errorf("read %s: %v", path, err)
 	}
 
-	runs := make([]github.WorkflowRun, 0)
+	out := make([]CommitWithPRID, 0)
 	for _, r := range strings.Split(string(read), "\n") {
 		if len(r) < 1 {
 			// skip empty line
 			continue
 		}
 
-		var run github.WorkflowRun
-		if err := json.Unmarshal([]byte(r), &run); err != nil {
+		var commit CommitWithPRID
+		if err := json.Unmarshal([]byte(r), &commit); err != nil {
 			return nil, fmt.Errorf("unmarshal: %v", err)
 		}
 
-		runs = append(runs, run)
+		out = append(out, commit)
 	}
 
-	return runs, nil
+	return out, nil
 }
 
-func print(format string, list []github.WorkflowRun) error {
+func print(format string, list []CommitWithPRID) error {
 	if format == "json" {
 		for _, r := range list {
 			fmt.Println(JSON(r))
@@ -66,32 +65,14 @@ func print(format string, list []github.WorkflowRun) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("workflow_id, workflow_name, run_id, run_number, status, conclusion, created_at, updated_at, head_commit.sha, head_commit.message")
+		fmt.Println("pr_id, pr_number, sha, login, date, message, ")
 
 		for _, r := range list {
-			fmt.Println(CSV(r))
+			fmt.Println(r.CSV())
 		}
 
 		return nil
 	}
 
 	return fmt.Errorf("invalid format=%v", format)
-}
-
-func CSV(r github.WorkflowRun) string {
-	title := strings.Split(strings.ReplaceAll(*r.HeadCommit.Message, ",", " "), "\n")[0]
-
-	return fmt.Sprintf(
-		"%v, %v, %v, %v, %v, %v, %v, %v, %v, %v, ",
-		*r.WorkflowID,
-		*r.Name,
-		*r.ID,
-		*r.RunNumber,
-		*r.Status,
-		*r.Conclusion,
-		r.CreatedAt.Format("2006-01-02 15:04:05"),
-		r.UpdatedAt.Format("2006-01-02 15:04:05"),
-		*r.HeadCommit.ID,
-		title,
-	)
 }
