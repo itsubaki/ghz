@@ -66,7 +66,7 @@ func print(format string, list []github.PullRequest) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("id, number, title, merge_commit_sha, state, created_at, updated_at, merged_at, closed_at,")
+		fmt.Println("id, number, title, state, created_at, updated_at, merged_at, closed_at, merge_commit_sha, ")
 		for _, r := range list {
 			fmt.Println(CSV(r))
 		}
@@ -79,31 +79,36 @@ func print(format string, list []github.PullRequest) error {
 
 func CSV(r github.PullRequest) string {
 	out := fmt.Sprintf(
-		"%v, %v, %v, %v, %v, %v, ",
+		"%v, %v, %v, %v, %v, ",
 		*r.ID,
 		*r.Number,
 		strings.ReplaceAll(*r.Title, ",", ""),
-		*r.MergeCommitSHA,
 		*r.State,
 		r.CreatedAt.Format("2006-01-02 15:04:05"),
 	)
 
 	if r.UpdatedAt == nil {
-		out = out + fmt.Sprintf("N/A, ")
+		out = out + fmt.Sprintf("null, ")
 	} else {
 		out = out + fmt.Sprintf("%v, ", r.UpdatedAt.Format("2006-01-02 15:04:05"))
 	}
 
 	if r.MergedAt == nil {
-		out = out + fmt.Sprintf("N/A, ")
+		out = out + fmt.Sprintf("null, ")
 	} else {
 		out = out + fmt.Sprintf("%v, ", r.MergedAt.Format("2006-01-02 15:04:05"))
 	}
 
 	if r.ClosedAt == nil {
-		out = out + fmt.Sprintf("N/A, ")
+		out = out + fmt.Sprintf("null, ")
 	} else {
 		out = out + fmt.Sprintf("%v, ", r.ClosedAt.Format("2006-01-02 15:04:05"))
+	}
+
+	if r.MergeCommitSHA == nil {
+		out = out + fmt.Sprintf("null, ")
+	} else {
+		out = out + fmt.Sprintf("%v, ", r.MergeCommitSHA)
 	}
 
 	return out
