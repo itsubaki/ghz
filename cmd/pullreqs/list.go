@@ -108,7 +108,7 @@ func CSV(r github.PullRequest) string {
 	if r.MergeCommitSHA == nil {
 		out = out + fmt.Sprintf("null, ")
 	} else {
-		out = out + fmt.Sprintf("%v, ", r.MergeCommitSHA)
+		out = out + fmt.Sprintf("%v, ", *r.MergeCommitSHA)
 	}
 
 	return out

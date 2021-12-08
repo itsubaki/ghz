@@ -25,6 +25,7 @@ func Update(c *cli.Context) error {
 		open = append(open, list[i])
 	}
 
+	fmt.Println("id, number, title, state, created_at, updated_at, merged_at, closed_at, merge_commit_sha, ")
 	ctx := context.Background()
 	for i := range open {
 		in := pullreqs.GetInput{
@@ -39,7 +40,7 @@ func Update(c *cli.Context) error {
 			return fmt.Errorf("pull request: %v", err)
 		}
 
-		fmt.Println(JSON(pr))
+		fmt.Println(CSV(*pr))
 	}
 
 	return nil
