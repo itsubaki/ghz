@@ -261,6 +261,16 @@ func New(version string) *cli.App {
 					&pat,
 					&page,
 					&perpage,
+				},
+			},
+			{
+				Name:    "list",
+				Aliases: []string{"l"},
+				Action:  cmdcommits.List,
+				Flags: []cli.Flag{
+					&dir,
+					&own,
+					&repo,
 					&format,
 				},
 			},
