@@ -6,9 +6,9 @@ import (
 
 	"github.com/itsubaki/ghstats/cmd/actions/jobs"
 	"github.com/itsubaki/ghstats/cmd/actions/runs"
-	"github.com/itsubaki/ghstats/cmd/commits"
 	"github.com/itsubaki/ghstats/cmd/events"
 	"github.com/itsubaki/ghstats/cmd/pullreqs"
+	"github.com/itsubaki/ghstats/cmd/pullreqs/commits"
 	"github.com/urfave/cli/v2"
 )
 
@@ -193,7 +193,6 @@ func New(version string) *cli.App {
 					&pat,
 					&page,
 					&perpage,
-					&format,
 					&cli.StringFlag{
 						Name:    "state",
 						Aliases: []string{"s"},
@@ -202,25 +201,45 @@ func New(version string) *cli.App {
 					},
 				},
 			},
-		},
-	}
-
-	commits := cli.Command{
-		Name:    "commits",
-		Aliases: []string{"c"},
-		Subcommands: []*cli.Command{
 			{
-				Name:    "fetch",
-				Aliases: []string{"f"},
-				Action:  commits.Fetch,
+				Name:    "list",
+				Aliases: []string{"l"},
+				Action:  pullreqs.List,
 				Flags: []cli.Flag{
 					&dir,
 					&own,
 					&repo,
-					&pat,
-					&page,
-					&perpage,
 					&format,
+				},
+			},
+			{
+				Name:    "commits",
+				Aliases: []string{"c"},
+				Subcommands: []*cli.Command{
+					{
+						Name:    "fetch",
+						Aliases: []string{"f"},
+						Action:  commits.Fetch,
+						Flags: []cli.Flag{
+							&dir,
+							&own,
+							&repo,
+							&pat,
+							&page,
+							&perpage,
+						},
+					},
+					{
+						Name:    "list",
+						Aliases: []string{"l"},
+						Action:  commits.List,
+						Flags: []cli.Flag{
+							&dir,
+							&own,
+							&repo,
+							&format,
+						},
+					},
 				},
 			},
 		},
@@ -250,7 +269,6 @@ func New(version string) *cli.App {
 	app.Commands = []*cli.Command{
 		&actions,
 		&pullreqs,
-		&commits,
 		&events,
 	}
 

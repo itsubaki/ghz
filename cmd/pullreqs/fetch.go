@@ -1,23 +1,32 @@
 package pullreqs
 
 import (
+	"bufio"
 	"context"
 	"encoding/json"
 	"fmt"
-	"strings"
+	"os"
+	"sort"
 
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghstats/pkg/pullreqs"
-	"github.com/itsubaki/ghstats/pkg/pullreqs/commits"
 	"github.com/urfave/cli/v2"
 )
 
-type PullRequestWithCommits struct {
-	PullRequest github.PullRequest         `json:"pull_request"`
-	Commits     []*github.RepositoryCommit `json:"commits"`
-}
+const Filename = "pullreqs.json"
 
 func Fetch(c *cli.Context) error {
+	dir := fmt.Sprintf("%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"))
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.MkdirAll(dir, os.ModePerm)
+	}
+
+	path := fmt.Sprintf("%s/%s", dir, Filename)
+	lastID, err := scanLastID(path)
+	if err != nil {
+		return fmt.Errorf("last id: %v", err)
+	}
+
 	in := pullreqs.ListInput{
 		Owner:   c.String("owner"),
 		Repo:    c.String("repo"),
@@ -25,93 +34,66 @@ func Fetch(c *cli.Context) error {
 		Page:    c.Int("page"),
 		PerPage: c.Int("perpage"),
 		State:   c.String("state"),
+		LastID:  lastID,
 	}
 
+	fmt.Printf("target: %v/%v\n", in.Owner, in.Repo)
+	fmt.Printf("last_id: %v\n", lastID)
+
 	ctx := context.Background()
-	prs, err := pullreqs.Fetch(ctx, &in)
+	list, err := pullreqs.Fetch(ctx, &in)
 	if err != nil {
 		return fmt.Errorf("fetch: %v", err)
 	}
 
-	list := make([]PullRequestWithCommits, 0)
-	for i, r := range prs {
-		if r.MergedAt == nil {
-			continue
-		}
-
-		cmts, err := commits.Fetch(ctx, &commits.ListInput{
-			Owner:   c.String("owner"),
-			Repo:    c.String("repo"),
-			PAT:     c.String("pat"),
-			Page:    c.Int("page"),
-			PerPage: c.Int("perpage"),
-			Number:  *r.Number,
-		})
-		if err != nil {
-			return fmt.Errorf("fetch commits: %v", err)
-		}
-
-		list = append(list, PullRequestWithCommits{
-			PullRequest: *prs[i],
-			Commits:     cmts,
-		})
+	if err := serialize(path, list); err != nil {
+		return fmt.Errorf("serialize: %v", err)
 	}
 
-	format := strings.ToLower(c.String("format"))
-	if err := print(format, list); err != nil {
-		return fmt.Errorf("print: %v", err)
+	if len(list) > 0 {
+		fmt.Printf("%v %v\n", *list[len(list)-1].ID, *list[0].ID)
 	}
 
 	return nil
 }
 
-func print(format string, list []PullRequestWithCommits) error {
-	if format == "json" {
-		for _, r := range list {
-			fmt.Println(JSON(r))
-		}
-
-		return nil
-	}
-
-	if format == "csv" {
-		fmt.Println("id, number, title, created_at, merged_at, commit.sha, commit.login, commit.date, duration(minutes), ")
-
-		for _, r := range list {
-			for _, c := range r.Commits {
-				fmt.Printf(CSV(r.PullRequest))
-				fmt.Printf("%v, %v, %v, ",
-					*c.SHA,
-					*c.Commit.Author.Name,
-					c.Commit.Author.Date.Format("2006-01-02 15:04:05"),
-				)
-				fmt.Printf("%.4f, ", r.PullRequest.MergedAt.Sub(*c.Commit.Author.Date).Minutes())
-				fmt.Println()
-			}
-		}
-
-		return nil
-	}
-
-	return fmt.Errorf("invalid format=%v", format)
-}
-
-func CSV(r github.PullRequest) string {
-	return fmt.Sprintf(
-		"%v, %v, %v, %v, %v, ",
-		*r.ID,
-		*r.Number,
-		strings.ReplaceAll(*r.Title, ",", ""),
-		r.CreatedAt.Format("2006-01-02 15:04:05"),
-		r.MergedAt.Format("2006-01-02 15:04:05"),
-	)
-}
-
-func JSON(v interface{}) string {
-	b, err := json.Marshal(v)
+func serialize(path string, list []*github.PullRequest) error {
+	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		panic(err)
+		return fmt.Errorf("open file: %v", err)
+	}
+	defer file.Close()
+
+	sort.Slice(list, func(i, j int) bool { return *list[i].ID < *list[j].ID }) // asc
+
+	for _, r := range list {
+		fmt.Fprintln(file, JSON(r))
 	}
 
-	return string(b)
+	return nil
+}
+
+func scanLastID(path string) (int64, error) {
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		return -1, nil
+	}
+
+	file, err := os.Open(path)
+	if err != nil {
+		return -1, fmt.Errorf("open %v: %v", path, err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	var lastID int64
+	for scanner.Scan() {
+		var pr github.PullRequest
+		if err := json.Unmarshal([]byte(scanner.Text()), &pr); err != nil {
+			return -1, fmt.Errorf("unmarshal: %v", err)
+		}
+
+		lastID = *pr.ID
+	}
+
+	return lastID, nil
 }

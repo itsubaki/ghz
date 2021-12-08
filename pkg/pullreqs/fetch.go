@@ -15,6 +15,7 @@ type ListInput struct {
 	Page    int
 	PerPage int
 	State   string
+	LastID  int64
 }
 
 func Fetch(ctx context.Context, in *ListInput) ([]*github.PullRequest, error) {
@@ -41,8 +42,17 @@ func Fetch(ctx context.Context, in *ListInput) ([]*github.PullRequest, error) {
 			return nil, fmt.Errorf("list PullRequests: %v", err)
 		}
 
-		out = append(out, pr...)
-		if resp.NextPage == 0 {
+		var last bool
+		for i := range pr {
+			if *pr[i].ID <= in.LastID {
+				last = true
+				break
+			}
+
+			out = append(out, pr[i])
+		}
+
+		if last || resp.NextPage == 0 {
 			break
 		}
 
