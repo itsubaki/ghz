@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"strings"
 
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghstats/cmd/pullreqs"
@@ -16,14 +17,33 @@ import (
 
 const Filename = "pullreqs_commits.json"
 
-func Fetch(c *cli.Context) error {
-	prpath := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"), pullreqs.Filename)
-	prs, err := pullreqs.Deserialize(prpath)
-	if err != nil {
-		return fmt.Errorf("deserialize: %v", err)
-	}
+type CommitWithPRID struct {
+	PullRequestID     int64
+	PullRequestNumber int
+	github.RepositoryCommit
+}
 
-	lastNum, err := scanLastNumber(prpath)
+func (c CommitWithPRID) CSV() string {
+	title := strings.Split(strings.ReplaceAll(*c.Commit.Message, ",", " "), "\n")[0]
+
+	return fmt.Sprintf("%v, %v, %v, %v, %v, %v, ",
+		c.PullRequestID,
+		c.PullRequestNumber,
+		*c.SHA,
+		*c.Commit.Author.Name,
+		c.Commit.Author.Date.Format("2006-01-02 15:04:05"),
+		title,
+	)
+}
+
+func Fetch(c *cli.Context) error {
+	dir := fmt.Sprintf("%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"))
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.MkdirAll(dir, os.ModePerm)
+	}
+	path := fmt.Sprintf("%s/%s", dir, Filename)
+
+	lastNum, err := scanLastNumber(path)
 	if err != nil {
 		return fmt.Errorf("last id: %v", err)
 	}
@@ -39,11 +59,11 @@ func Fetch(c *cli.Context) error {
 	fmt.Printf("target: %v/%v\n", in.Owner, in.Repo)
 	fmt.Printf("last_number: %v\n", lastNum)
 
-	dir := fmt.Sprintf("%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"))
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.MkdirAll(dir, os.ModePerm)
+	prpath := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"), pullreqs.Filename)
+	prs, err := pullreqs.Deserialize(prpath)
+	if err != nil {
+		return fmt.Errorf("deserialize: %v", err)
 	}
-	path := fmt.Sprintf("%s/%s", dir, Filename)
 
 	ctx := context.Background()
 	for i := range prs {
@@ -51,16 +71,25 @@ func Fetch(c *cli.Context) error {
 			continue
 		}
 
-		cmts, err := commits.Fetch(ctx, &in, *prs[i].Number)
+		list, err := commits.Fetch(ctx, &in, *prs[i].Number)
 		if err != nil {
 			return fmt.Errorf("fetch: %v", err)
 		}
 
-		if err := serialize(path, cmts); err != nil {
+		clist := make([]CommitWithPRID, 0)
+		for j := range list {
+			clist = append(clist, CommitWithPRID{
+				PullRequestID:     *prs[i].ID,
+				PullRequestNumber: *prs[i].Number,
+				RepositoryCommit:  *list[j],
+			})
+		}
+
+		if err := serialize(path, clist); err != nil {
 			return fmt.Errorf("serialize: %v", err)
 		}
 
-		if len(cmts) > 0 {
+		if len(list) > 0 {
 			fmt.Printf("%v\n", *prs[i].Number)
 		}
 	}
@@ -68,7 +97,7 @@ func Fetch(c *cli.Context) error {
 	return nil
 }
 
-func serialize(path string, list []*github.RepositoryCommit) error {
+func serialize(path string, list []CommitWithPRID) error {
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return fmt.Errorf("open file: %v", err)
@@ -98,12 +127,12 @@ func scanLastNumber(path string) (int, error) {
 	scanner := bufio.NewScanner(file)
 	var number int
 	for scanner.Scan() {
-		var pr github.PullRequest
-		if err := json.Unmarshal([]byte(scanner.Text()), &pr); err != nil {
+		var c CommitWithPRID
+		if err := json.Unmarshal([]byte(scanner.Text()), &c); err != nil {
 			return -1, fmt.Errorf("unmarshal: %v", err)
 		}
 
-		number = *pr.Number
+		number = c.PullRequestNumber
 	}
 
 	return number, nil
