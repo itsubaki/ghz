@@ -18,8 +18,8 @@ import (
 const Filename = "pullreqs_commits.json"
 
 type CommitWithPRID struct {
-	PullRequestID     int64
-	PullRequestNumber int
+	PullRequestID     int64 `json:"pullrequest_id,omitempty"`
+	PullRequestNumber int   `json:"pullreqeust_number,omitempty"`
 	github.RepositoryCommit
 }
 
@@ -43,7 +43,7 @@ func Fetch(c *cli.Context) error {
 	}
 	path := fmt.Sprintf("%s/%s", dir, Filename)
 
-	lastNum, err := scanLastNumber(path)
+	lastID, lastNum, err := scanLastNumber(path)
 	if err != nil {
 		return fmt.Errorf("last id: %v", err)
 	}
@@ -57,7 +57,7 @@ func Fetch(c *cli.Context) error {
 	}
 
 	fmt.Printf("target: %v/%v\n", in.Owner, in.Repo)
-	fmt.Printf("last_number: %v\n", lastNum)
+	fmt.Printf("last_id: %v(%v)\n", lastID, lastNum)
 
 	prpath := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"), pullreqs.Filename)
 	prs, err := pullreqs.Deserialize(prpath)
@@ -90,7 +90,7 @@ func Fetch(c *cli.Context) error {
 		}
 
 		if len(list) > 0 {
-			fmt.Printf("%v\n", *prs[i].Number)
+			fmt.Printf("%v(%v)\n", *prs[i].ID, *prs[i].Number)
 		}
 	}
 
@@ -113,29 +113,31 @@ func serialize(path string, list []CommitWithPRID) error {
 	return nil
 }
 
-func scanLastNumber(path string) (int, error) {
+func scanLastNumber(path string) (int64, int, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return -1, nil
+		return -1, -1, nil
 	}
 
 	file, err := os.Open(path)
 	if err != nil {
-		return -1, fmt.Errorf("open %v: %v", path, err)
+		return -1, -1, fmt.Errorf("open %v: %v", path, err)
 	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
 	var number int
+	var id int64
 	for scanner.Scan() {
 		var c CommitWithPRID
 		if err := json.Unmarshal([]byte(scanner.Text()), &c); err != nil {
-			return -1, fmt.Errorf("unmarshal: %v", err)
+			return -1, -1, fmt.Errorf("unmarshal: %v", err)
 		}
 
+		id = c.PullRequestID
 		number = c.PullRequestNumber
 	}
 
-	return number, nil
+	return id, number, nil
 }
 
 func JSON(v interface{}) string {

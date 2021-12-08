@@ -23,7 +23,7 @@ func Fetch(c *cli.Context) error {
 	}
 
 	path := fmt.Sprintf("%s/%s", dir, Filename)
-	lastRunID, err := ScanLastRunID(path)
+	id, err := ScanLastRunID(path)
 	if err != nil {
 		return fmt.Errorf("last id: %v", err)
 	}
@@ -34,13 +34,13 @@ func Fetch(c *cli.Context) error {
 		PAT:       c.String("pat"),
 		Page:      c.Int("page"),
 		PerPage:   c.Int("perpage"),
-		LastRunID: lastRunID,
+		LastRunID: id,
 	}
 	wid := c.Int64("workflow_id")
 
 	fmt.Printf("target: %v/%v\n", in.Owner, in.Repo)
 	fmt.Printf("workflow_id: %v\n", wid)
-	fmt.Printf("last_run_id: %v\n", lastRunID)
+	fmt.Printf("last_run_id: %v\n", id)
 
 	runspath := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"), runs.Filename)
 	runs, err := runs.Deserialize(runspath)
@@ -111,15 +111,15 @@ func ScanLastRunID(path string) (int64, error) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	var lastID int64
+	var id int64
 	for scanner.Scan() {
 		var job github.WorkflowJob
 		if err := json.Unmarshal([]byte(scanner.Text()), &job); err != nil {
 			return -1, fmt.Errorf("unmarshal: %v", err)
 		}
 
-		lastID = *job.RunID
+		id = *job.RunID
 	}
 
-	return lastID, nil
+	return id, nil
 }

@@ -66,7 +66,7 @@ func print(format string, list []github.WorkflowRun) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("workflow_id, workflow_name, run_id, run_number, status, conclusion, created_at, updated_at, duration(minutes)")
+		fmt.Println("workflow_id, workflow_name, run_id, run_number, status, conclusion, created_at, updated_at, head_commit.sha, head_commit.message")
 
 		for _, r := range list {
 			fmt.Println(CSV(r))
@@ -80,7 +80,7 @@ func print(format string, list []github.WorkflowRun) error {
 
 func CSV(r github.WorkflowRun) string {
 	return fmt.Sprintf(
-		"%v, %v, %v, %v, %v, %v, %v, %v, %v",
+		"%v, %v, %v, %v, %v, %v, %v, %v, %v, %v, ",
 		*r.WorkflowID,
 		*r.Name,
 		*r.ID,
@@ -89,6 +89,7 @@ func CSV(r github.WorkflowRun) string {
 		*r.Conclusion,
 		r.CreatedAt.Format("2006-01-02 15:04:05"),
 		r.UpdatedAt.Format("2006-01-02 15:04:05"),
-		r.UpdatedAt.Sub(r.CreatedAt.Time).Minutes(),
+		*r.HeadCommit.ID,
+		*r.HeadCommit.Message,
 	)
 }

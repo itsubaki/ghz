@@ -22,7 +22,7 @@ func Fetch(c *cli.Context) error {
 	}
 
 	path := fmt.Sprintf("%s/%s", dir, Filename)
-	lastID, err := scanLastID(path)
+	id, number, err := scanLastID(path)
 	if err != nil {
 		return fmt.Errorf("last id: %v", err)
 	}
@@ -34,11 +34,11 @@ func Fetch(c *cli.Context) error {
 		Page:    c.Int("page"),
 		PerPage: c.Int("perpage"),
 		State:   c.String("state"),
-		LastID:  lastID,
+		LastID:  id,
 	}
 
 	fmt.Printf("target: %v/%v\n", in.Owner, in.Repo)
-	fmt.Printf("last_id: %v\n", lastID)
+	fmt.Printf("last_id: %v(%v)\n", id, number)
 
 	ctx := context.Background()
 	list, err := pullreqs.Fetch(ctx, &in)
@@ -50,8 +50,8 @@ func Fetch(c *cli.Context) error {
 		return fmt.Errorf("serialize: %v", err)
 	}
 
-	if len(list) > 0 {
-		fmt.Printf("%v %v\n", *list[len(list)-1].ID, *list[0].ID)
+	for _, r := range list {
+		fmt.Printf("%v(%v)\n", *r.ID, *r.Number)
 	}
 
 	return nil
@@ -73,27 +73,29 @@ func serialize(path string, list []*github.PullRequest) error {
 	return nil
 }
 
-func scanLastID(path string) (int64, error) {
+func scanLastID(path string) (int64, int, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
-		return -1, nil
+		return -1, -1, nil
 	}
 
 	file, err := os.Open(path)
 	if err != nil {
-		return -1, fmt.Errorf("open %v: %v", path, err)
+		return -1, -1, fmt.Errorf("open %v: %v", path, err)
 	}
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	var lastID int64
+	var id int64
+	var number int
 	for scanner.Scan() {
 		var pr github.PullRequest
 		if err := json.Unmarshal([]byte(scanner.Text()), &pr); err != nil {
-			return -1, fmt.Errorf("unmarshal: %v", err)
+			return -1, -1, fmt.Errorf("unmarshal: %v", err)
 		}
 
-		lastID = *pr.ID
+		id = *pr.ID
+		number = *pr.Number
 	}
 
-	return lastID, nil
+	return id, number, nil
 }
