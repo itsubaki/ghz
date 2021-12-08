@@ -22,7 +22,7 @@ func Fetch(c *cli.Context) error {
 	}
 
 	path := fmt.Sprintf("%s/%s", dir, Filename)
-	id, number, err := scanLastID(path)
+	id, number, err := scanMaxID(path)
 	if err != nil {
 		return fmt.Errorf("last id: %v", err)
 	}
@@ -50,6 +50,7 @@ func Fetch(c *cli.Context) error {
 		return fmt.Errorf("serialize: %v", err)
 	}
 
+	sort.Slice(list, func(i, j int) bool { return *list[i].ID < *list[j].ID })
 	for _, r := range list {
 		fmt.Printf("%v(%v)\n", *r.ID, *r.Number)
 	}
@@ -64,8 +65,6 @@ func serialize(path string, list []*github.PullRequest) error {
 	}
 	defer file.Close()
 
-	sort.Slice(list, func(i, j int) bool { return *list[i].ID < *list[j].ID }) // asc
-
 	for _, r := range list {
 		fmt.Fprintln(file, JSON(r))
 	}
@@ -73,7 +72,7 @@ func serialize(path string, list []*github.PullRequest) error {
 	return nil
 }
 
-func scanLastID(path string) (int64, int, error) {
+func scanMaxID(path string) (int64, int, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return -1, -1, nil
 	}
@@ -93,8 +92,10 @@ func scanLastID(path string) (int64, int, error) {
 			return -1, -1, fmt.Errorf("unmarshal: %v", err)
 		}
 
-		id = *pr.ID
-		number = *pr.Number
+		if *pr.ID > id {
+			id = *pr.ID
+			number = *pr.Number
+		}
 	}
 
 	return id, number, nil

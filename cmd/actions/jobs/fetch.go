@@ -23,7 +23,7 @@ func Fetch(c *cli.Context) error {
 	}
 
 	path := fmt.Sprintf("%s/%s", dir, Filename)
-	id, err := ScanLastRunID(path)
+	id, err := scanMaxRunID(path)
 	if err != nil {
 		return fmt.Errorf("last id: %v", err)
 	}
@@ -47,6 +47,7 @@ func Fetch(c *cli.Context) error {
 	if err != nil {
 		return fmt.Errorf("deserialize: %v", err)
 	}
+	sort.Slice(runs, func(i, j int) bool { return *runs[i].ID < *runs[j].ID })
 
 	ctx := context.Background()
 	for i := range runs {
@@ -90,8 +91,6 @@ func serialize(path string, list []*github.WorkflowJob) error {
 	}
 	defer file.Close()
 
-	sort.Slice(list, func(i, j int) bool { return *list[i].ID < *list[j].ID }) // asc
-
 	for _, j := range list {
 		fmt.Fprintln(file, JSON(j))
 	}
@@ -99,7 +98,7 @@ func serialize(path string, list []*github.WorkflowJob) error {
 	return nil
 }
 
-func ScanLastRunID(path string) (int64, error) {
+func scanMaxRunID(path string) (int64, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return -1, nil
 	}
@@ -118,7 +117,9 @@ func ScanLastRunID(path string) (int64, error) {
 			return -1, fmt.Errorf("unmarshal: %v", err)
 		}
 
-		id = *job.RunID
+		if *job.RunID > id {
+			id = *job.RunID
+		}
 	}
 
 	return id, nil
