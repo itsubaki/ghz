@@ -39,7 +39,7 @@ func Fetch(ctx context.Context, in *ListInput) ([]*github.PullRequest, error) {
 	for {
 		pr, resp, err := client.PullRequests.List(ctx, in.Owner, in.Repo, &opts)
 		if err != nil {
-			return nil, fmt.Errorf("list PullRequests: %v", err)
+			return nil, fmt.Errorf("list pull requests: %v", err)
 		}
 
 		var last bool

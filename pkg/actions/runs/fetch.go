@@ -37,7 +37,7 @@ func Fetch(ctx context.Context, in *FetchInput) ([]*github.WorkflowRun, error) {
 	for {
 		runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, in.Owner, in.Repo, &opts)
 		if err != nil {
-			return nil, fmt.Errorf("list WorkflowRuns: %v", err)
+			return nil, fmt.Errorf("list workflow runs: %v", err)
 		}
 
 		var last bool

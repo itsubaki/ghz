@@ -34,7 +34,7 @@ func Fetch(ctx context.Context, in *FetchInput) ([]*github.Event, error) {
 	for {
 		events, resp, err := client.Activity.ListRepositoryEvents(ctx, in.Owner, in.Repo, &opts)
 		if err != nil {
-			return nil, fmt.Errorf("list WorkflowRuns: %v", err)
+			return nil, fmt.Errorf("list workflow runs: %v", err)
 		}
 
 		list = append(list, events...)

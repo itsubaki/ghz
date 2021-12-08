@@ -34,7 +34,7 @@ func Fetch(ctx context.Context, in *FetchInput, number int) ([]*github.Repositor
 	for {
 		c, resp, err := client.PullRequests.ListCommits(ctx, in.Owner, in.Repo, number, &opts)
 		if err != nil {
-			return nil, fmt.Errorf("list PullRequests: %v", err)
+			return nil, fmt.Errorf("list commits: %v", err)
 		}
 
 		out = append(out, c...)

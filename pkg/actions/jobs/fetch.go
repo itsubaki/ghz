@@ -37,7 +37,7 @@ func Fetch(ctx context.Context, in *FetchInput, runID int64) ([]*github.Workflow
 	for {
 		jobs, resp, err := client.Actions.ListWorkflowJobs(ctx, in.Owner, in.Repo, runID, &opts)
 		if err != nil {
-			return nil, fmt.Errorf("list WorkflowJobs: %v", err)
+			return nil, fmt.Errorf("list workflow jobs: %v", err)
 		}
 
 		list = append(list, jobs.Jobs...)

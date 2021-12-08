@@ -37,7 +37,7 @@ func Fetch(ctx context.Context, in *ListInput) ([]*github.RepositoryCommit, erro
 	for {
 		commits, resp, err := client.Repositories.ListCommits(ctx, in.Owner, in.Repo, &opts)
 		if err != nil {
-			return nil, fmt.Errorf("list PullRequests: %v", err)
+			return nil, fmt.Errorf("list commits: %v", err)
 		}
 
 		var last bool

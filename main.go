@@ -243,6 +243,17 @@ func New(version string) *cli.App {
 					},
 				},
 			},
+			{
+				Name:    "update",
+				Aliases: []string{"u"},
+				Action:  pullreqs.Update,
+				Flags: []cli.Flag{
+					&dir,
+					&own,
+					&repo,
+					&pat,
+				},
+			},
 		},
 	}
 

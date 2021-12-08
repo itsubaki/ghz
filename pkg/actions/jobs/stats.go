@@ -59,7 +59,7 @@ func GetStats(jobs []github.WorkflowJob, weeks int, excludingWeekends bool) ([]S
 			ExcludingWeekends: excludingWeekends,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("get RunStatsWith(%v~%v): %v", d.End, d.Start, err)
+			return nil, fmt.Errorf("get runstats with (%v~%v): %v", d.End, d.Start, err)
 		}
 
 		out = append(out, stats)
