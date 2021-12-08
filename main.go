@@ -6,10 +6,10 @@ import (
 
 	"github.com/itsubaki/ghstats/cmd/actions/jobs"
 	"github.com/itsubaki/ghstats/cmd/actions/runs"
-	cmdcommits "github.com/itsubaki/ghstats/cmd/commits"
+	"github.com/itsubaki/ghstats/cmd/commits"
+	prcommits "github.com/itsubaki/ghstats/cmd/commits"
 	"github.com/itsubaki/ghstats/cmd/events"
 	"github.com/itsubaki/ghstats/cmd/pullreqs"
-	"github.com/itsubaki/ghstats/cmd/pullreqs/commits"
 	"github.com/urfave/cli/v2"
 )
 
@@ -220,7 +220,7 @@ func New(version string) *cli.App {
 					{
 						Name:    "fetch",
 						Aliases: []string{"f"},
-						Action:  commits.Fetch,
+						Action:  prcommits.Fetch,
 						Flags: []cli.Flag{
 							&dir,
 							&own,
@@ -233,7 +233,7 @@ func New(version string) *cli.App {
 					{
 						Name:    "list",
 						Aliases: []string{"l"},
-						Action:  commits.List,
+						Action:  prcommits.List,
 						Flags: []cli.Flag{
 							&dir,
 							&own,
@@ -257,14 +257,14 @@ func New(version string) *cli.App {
 		},
 	}
 
-	cmdcommits := cli.Command{
+	commits := cli.Command{
 		Name:    "commits",
 		Aliases: []string{"c"},
 		Subcommands: []*cli.Command{
 			{
 				Name:    "fetch",
 				Aliases: []string{"f"},
-				Action:  cmdcommits.Fetch,
+				Action:  commits.Fetch,
 				Flags: []cli.Flag{
 					&dir,
 					&own,
@@ -277,7 +277,7 @@ func New(version string) *cli.App {
 			{
 				Name:    "list",
 				Aliases: []string{"l"},
-				Action:  cmdcommits.List,
+				Action:  commits.List,
 				Flags: []cli.Flag{
 					&dir,
 					&own,
@@ -312,7 +312,7 @@ func New(version string) *cli.App {
 	app.Commands = []*cli.Command{
 		&actions,
 		&pullreqs,
-		&cmdcommits,
+		&commits,
 		&events,
 	}
 
