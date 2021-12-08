@@ -18,8 +18,6 @@ func List(c *cli.Context) error {
 		return fmt.Errorf("deserialize: %v", err)
 	}
 
-	sort.Slice(list, func(i, j int) bool { return *list[i].ID > *list[j].ID }) // desc
-
 	format := strings.ToLower(c.String("format"))
 	if err := print(format, list); err != nil {
 		return fmt.Errorf("print: %v", err)
@@ -57,6 +55,8 @@ func Deserialize(path string) ([]github.WorkflowRun, error) {
 }
 
 func print(format string, list []github.WorkflowRun) error {
+	sort.Slice(list, func(i, j int) bool { return *list[i].ID > *list[j].ID })
+
 	if format == "json" {
 		for _, r := range list {
 			fmt.Println(JSON(r))
@@ -66,8 +66,7 @@ func print(format string, list []github.WorkflowRun) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("workflow_id, workflow_name, run_id, run_number, status, conclusion, created_at, updated_at, head_commit.sha, head_commit.message")
-
+		fmt.Println("workflow_id, workflow_name, run_id, run_number, status, conclusion, created_at, updated_at, head_commit.sha, head_commit.date, head_commit.message")
 		for _, r := range list {
 			fmt.Println(CSV(r))
 		}
@@ -79,10 +78,11 @@ func print(format string, list []github.WorkflowRun) error {
 }
 
 func CSV(r github.WorkflowRun) string {
-	title := strings.Split(strings.ReplaceAll(*r.HeadCommit.Message, ",", " "), "\n")[0]
+	title := strings.Split(*r.HeadCommit.Message, "\n")[0]
+	title = strings.ReplaceAll(title, ",", " ")
 
 	return fmt.Sprintf(
-		"%v, %v, %v, %v, %v, %v, %v, %v, %v, %v, ",
+		"%v, %v, %v, %v, %v, %v, %v, %v, %v, %v, %v, ",
 		*r.WorkflowID,
 		*r.Name,
 		*r.ID,
@@ -92,6 +92,7 @@ func CSV(r github.WorkflowRun) string {
 		r.CreatedAt.Format("2006-01-02 15:04:05"),
 		r.UpdatedAt.Format("2006-01-02 15:04:05"),
 		*r.HeadCommit.ID,
+		r.HeadCommit.Timestamp.Format("2006-01-02 15:04:05"),
 		title,
 	)
 }

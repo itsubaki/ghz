@@ -18,8 +18,6 @@ func List(c *cli.Context) error {
 		return fmt.Errorf("deserialize: %v", err)
 	}
 
-	sort.Slice(list, func(i, j int) bool { return *list[i].ID > *list[j].ID }) // desc
-
 	format := strings.ToLower(c.String("format"))
 	if err := print(format, list); err != nil {
 		return fmt.Errorf("print: %v", err)
@@ -57,6 +55,8 @@ func Deserialize(path string) ([]github.PullRequest, error) {
 }
 
 func print(format string, list []github.PullRequest) error {
+	sort.Slice(list, func(i, j int) bool { return *list[i].ID > *list[j].ID })
+
 	if format == "json" {
 		for _, r := range list {
 			fmt.Println(JSON(r))
@@ -66,8 +66,7 @@ func print(format string, list []github.PullRequest) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("id, number, title, state, created_at, updated_at, merged_at, closed_at, ")
-
+		fmt.Println("id, number, title, merge_commit_sha, state, created_at, updated_at, merged_at, closed_at,")
 		for _, r := range list {
 			fmt.Println(CSV(r))
 		}
@@ -80,10 +79,11 @@ func print(format string, list []github.PullRequest) error {
 
 func CSV(r github.PullRequest) string {
 	out := fmt.Sprintf(
-		"%v, %v, %v, %v, %v, ",
+		"%v, %v, %v, %v, %v, %v, ",
 		*r.ID,
 		*r.Number,
 		strings.ReplaceAll(*r.Title, ",", ""),
+		*r.MergeCommitSHA,
 		*r.State,
 		r.CreatedAt.Format("2006-01-02 15:04:05"),
 	)

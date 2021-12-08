@@ -17,8 +17,6 @@ func List(c *cli.Context) error {
 		return fmt.Errorf("deserialize: %v", err)
 	}
 
-	sort.Slice(list, func(i, j int) bool { return list[i].Commit.Author.Date.Unix() < list[i].Commit.Author.Date.Unix() }) // desc
-
 	format := strings.ToLower(c.String("format"))
 	if err := print(format, list); err != nil {
 		return fmt.Errorf("print: %v", err)
@@ -56,6 +54,8 @@ func Deserialize(path string) ([]CommitWithPRID, error) {
 }
 
 func print(format string, list []CommitWithPRID) error {
+	sort.Slice(list, func(i, j int) bool { return list[i].PullRequestID > list[j].PullRequestID })
+
 	if format == "json" {
 		for _, r := range list {
 			fmt.Println(JSON(r))
@@ -66,7 +66,6 @@ func print(format string, list []CommitWithPRID) error {
 
 	if format == "csv" {
 		fmt.Println("pr_id, pr_number, sha, login, date, message, ")
-
 		for _, r := range list {
 			fmt.Println(r.CSV())
 		}

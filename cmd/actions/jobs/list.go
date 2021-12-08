@@ -18,8 +18,6 @@ func List(c *cli.Context) error {
 		return fmt.Errorf("deserialize: %v", err)
 	}
 
-	sort.Slice(list, func(i, j int) bool { return *list[i].ID > *list[j].ID }) // desc
-
 	format := strings.ToLower(c.String("format"))
 	if err := print(format, list); err != nil {
 		return fmt.Errorf("print: %v", err)
@@ -57,6 +55,8 @@ func Deserialize(path string) ([]github.WorkflowJob, error) {
 }
 
 func print(format string, list []github.WorkflowJob) error {
+	sort.Slice(list, func(i, j int) bool { return *list[i].ID > *list[j].ID }) // desc
+
 	if format == "json" {
 		for _, r := range list {
 			fmt.Println(JSON(r))

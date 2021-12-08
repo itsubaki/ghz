@@ -24,7 +24,8 @@ type CommitWithPRID struct {
 }
 
 func (c CommitWithPRID) CSV() string {
-	title := strings.Split(strings.ReplaceAll(*c.Commit.Message, ",", " "), "\n")[0]
+	title := strings.Split(*c.Commit.Message, "\n")[0]
+	title = strings.ReplaceAll(title, ",", " ")
 
 	return fmt.Sprintf("%v, %v, %v, %v, %v, %v, ",
 		c.PullRequestID,
