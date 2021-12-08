@@ -79,6 +79,8 @@ func print(format string, list []github.WorkflowRun) error {
 }
 
 func CSV(r github.WorkflowRun) string {
+	title := strings.Split(strings.ReplaceAll(*r.HeadCommit.Message, ",", " "), "\n")[0]
+
 	return fmt.Sprintf(
 		"%v, %v, %v, %v, %v, %v, %v, %v, %v, %v, ",
 		*r.WorkflowID,
@@ -90,6 +92,6 @@ func CSV(r github.WorkflowRun) string {
 		r.CreatedAt.Format("2006-01-02 15:04:05"),
 		r.UpdatedAt.Format("2006-01-02 15:04:05"),
 		*r.HeadCommit.ID,
-		*r.HeadCommit.Message,
+		title,
 	)
 }
