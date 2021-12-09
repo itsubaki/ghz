@@ -25,7 +25,7 @@ func TestCreateIfNotExists(t *testing.T) {
 
 	for _, c := range cases {
 		ctx := context.Background()
-		client, err := dataset.NewClient(ctx)
+		client, err := dataset.New(ctx)
 		if err != nil {
 			t.Fatalf("new bigquery client: %v", err)
 		}

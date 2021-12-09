@@ -9,10 +9,11 @@ import (
 )
 
 type Client struct {
-	client *bigquery.Client
+	client    *bigquery.Client
+	ProjectID string
 }
 
-func NewClient(ctx context.Context) (*Client, error) {
+func New(ctx context.Context) (*Client, error) {
 	creds, err := google.FindDefaultCredentials(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("find default credentials: %v", err)
@@ -24,7 +25,8 @@ func NewClient(ctx context.Context) (*Client, error) {
 	}
 
 	return &Client{
-		client: client,
+		client:    client,
+		ProjectID: creds.ProjectID,
 	}, nil
 }
 
@@ -48,4 +50,8 @@ func (c *Client) Insert(ctx context.Context, datasetName, tableName string, item
 	}
 
 	return nil
+}
+
+func (c *Client) Raw() *bigquery.Client {
+	return c.client
 }

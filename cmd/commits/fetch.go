@@ -23,7 +23,7 @@ func Fetch(c *cli.Context) error {
 	}
 	path := fmt.Sprintf("%s/%s", dir, Filename)
 
-	sha, err := scanLastSHA(path)
+	sha, err := GetLastSHA(path)
 	if err != nil {
 		return fmt.Errorf("last id: %v", err)
 	}
@@ -42,7 +42,7 @@ func Fetch(c *cli.Context) error {
 		return fmt.Errorf("fetch: %v", err)
 	}
 
-	if err := serialize(path, list); err != nil {
+	if err := Serialize(path, list); err != nil {
 		return fmt.Errorf("serialize: %v", err)
 	}
 
@@ -54,7 +54,7 @@ func Fetch(c *cli.Context) error {
 	return nil
 }
 
-func serialize(path string, list []*github.RepositoryCommit) error {
+func Serialize(path string, list []*github.RepositoryCommit) error {
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return fmt.Errorf("open file: %v", err)
@@ -68,7 +68,7 @@ func serialize(path string, list []*github.RepositoryCommit) error {
 	return nil
 }
 
-func scanLastSHA(path string) (string, error) {
+func GetLastSHA(path string) (string, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return "", nil
 	}

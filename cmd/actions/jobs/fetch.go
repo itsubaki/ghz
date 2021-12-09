@@ -23,7 +23,7 @@ func Fetch(c *cli.Context) error {
 	}
 
 	path := fmt.Sprintf("%s/%s", dir, Filename)
-	id, err := scanMaxRunID(path)
+	id, err := GetLastRunID(path)
 	if err != nil {
 		return fmt.Errorf("last id: %v", err)
 	}
@@ -63,7 +63,7 @@ func Fetch(c *cli.Context) error {
 			return fmt.Errorf("fetch: %v", err)
 		}
 
-		if err := serialize(path, jobs); err != nil {
+		if err := Serialize(path, jobs); err != nil {
 			return fmt.Errorf("serialize: %v", err)
 		}
 
@@ -84,7 +84,7 @@ func JSON(v interface{}) string {
 	return string(b)
 }
 
-func serialize(path string, list []*github.WorkflowJob) error {
+func Serialize(path string, list []*github.WorkflowJob) error {
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return fmt.Errorf("open file: %v", err)
@@ -98,7 +98,7 @@ func serialize(path string, list []*github.WorkflowJob) error {
 	return nil
 }
 
-func scanMaxRunID(path string) (int64, error) {
+func GetLastRunID(path string) (int64, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return -1, nil
 	}

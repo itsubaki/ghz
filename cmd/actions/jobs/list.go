@@ -54,6 +54,19 @@ func Deserialize(path string) ([]github.WorkflowJob, error) {
 	return jobs, nil
 }
 
+func CSV(j github.WorkflowJob) string {
+	return fmt.Sprintf(
+		"%v, %v, %v, %v, %v, %v, %v, ",
+		*j.RunID,
+		*j.ID,
+		*j.Name,
+		*j.Status,
+		*j.Conclusion,
+		j.StartedAt.Format("2006-01-02 15:04:05"),
+		j.CompletedAt.Format("2006-01-02 15:04:05"),
+	)
+}
+
 func print(format string, list []github.WorkflowJob) error {
 	sort.Slice(list, func(i, j int) bool { return *list[i].ID > *list[j].ID }) // desc
 
@@ -76,17 +89,4 @@ func print(format string, list []github.WorkflowJob) error {
 	}
 
 	return fmt.Errorf("invalid format=%v", format)
-}
-
-func CSV(j github.WorkflowJob) string {
-	return fmt.Sprintf(
-		"%v, %v, %v, %v, %v, %v, %v, ",
-		*j.RunID,
-		*j.ID,
-		*j.Name,
-		*j.Status,
-		*j.Conclusion,
-		j.StartedAt.Format("2006-01-02 15:04:05"),
-		j.CompletedAt.Format("2006-01-02 15:04:05"),
-	)
 }

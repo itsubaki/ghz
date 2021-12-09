@@ -7,15 +7,15 @@ import (
 )
 
 type WorkflowRun struct {
-	WorkflowID    int       `bigquery:"workflow_id"`
-	WorkflowName  string    `bigquery:"workflow_name"`
-	RunID         int       `bigquery:"run_id"`
-	RunNumber     int       `bigquery:"run_number"`
-	Status        string    `bigquery:"status"`
-	Conclusion    string    `bigquery:"conclusion"`
-	StartedAt     time.Time `bigquery:"started_at"`
-	UpdatedAt     time.Time `bigquery:"updated_at"`
-	HeadCommitSHA string    `bigquery:"head_commit_sha"`
+	WorkflowID    int        `bigquery:"workflow_id"`
+	WorkflowName  string     `bigquery:"workflow_name"`
+	RunID         int        `bigquery:"run_id"`
+	RunNumber     int        `bigquery:"run_number"`
+	Status        string     `bigquery:"status"`
+	Conclusion    string     `bigquery:"conclusion"`
+	StartedAt     *time.Time `bigquery:"started_at"`
+	UpdatedAt     *time.Time `bigquery:"updated_at"`
+	HeadCommitSHA string     `bigquery:"head_commit_sha"`
 }
 
 var WorkflowRunsTableMeta = bigquery.TableMetadata{

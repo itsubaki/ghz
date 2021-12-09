@@ -2,7 +2,7 @@ runtime: go116
 main: ./appengine
 
 env_variables:
-  GIN_MODE: "release"
+  GIN_MODE: release
 
 includes:
   - secrets.yaml

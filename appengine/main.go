@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/gin-gonic/gin"
+	"github.com/itsubaki/ghstats/appengine/handler"
 )
 
 func main() {
@@ -21,25 +21,9 @@ func main() {
 		port = "8080"
 	}
 
-	r := gin.New()
-	r.GET("/", func(c *gin.Context) {
-		c.String(http.StatusOK, "Hello World!")
-	})
-
-	r.GET("/fetch", func(c *gin.Context) {
-		if c.GetHeader("X-Appengine-Cron") != "true" {
-			log.Printf("X-Appengine-Cron header is not set to true")
-			c.Status(http.StatusBadRequest)
-			return
-		}
-
-		log.Println("fetched")
-		c.Status(http.StatusOK)
-	})
-
 	s := &http.Server{
 		Addr:    fmt.Sprintf(":%s", port),
-		Handler: r,
+		Handler: handler.New(),
 	}
 
 	go func() {

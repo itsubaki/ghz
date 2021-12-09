@@ -22,7 +22,7 @@ func Fetch(c *cli.Context) error {
 	}
 
 	path := fmt.Sprintf("%s/%s", dir, Filename)
-	id, number, err := scanMaxID(path)
+	id, number, err := GetLastID(path)
 	if err != nil {
 		return fmt.Errorf("last id: %v", err)
 	}
@@ -46,7 +46,7 @@ func Fetch(c *cli.Context) error {
 		return fmt.Errorf("fetch: %v", err)
 	}
 
-	if err := serialize(path, list); err != nil {
+	if err := Serialize(path, list); err != nil {
 		return fmt.Errorf("serialize: %v", err)
 	}
 
@@ -58,7 +58,7 @@ func Fetch(c *cli.Context) error {
 	return nil
 }
 
-func serialize(path string, list []*github.PullRequest) error {
+func Serialize(path string, list []*github.PullRequest) error {
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
 		return fmt.Errorf("open file: %v", err)
@@ -72,7 +72,7 @@ func serialize(path string, list []*github.PullRequest) error {
 	return nil
 }
 
-func scanMaxID(path string) (int64, int, error) {
+func GetLastID(path string) (int64, int, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return -1, -1, nil
 	}

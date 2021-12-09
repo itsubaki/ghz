@@ -60,7 +60,7 @@ func New(version string) *cli.App {
 
 	perpage := cli.IntFlag{
 		Name:  "perpage",
-		Value: 1000,
+		Value: 100,
 	}
 
 	runs := cli.Command{

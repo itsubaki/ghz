@@ -54,29 +54,6 @@ func Deserialize(path string) ([]github.PullRequest, error) {
 	return out, nil
 }
 
-func print(format string, list []github.PullRequest) error {
-	sort.Slice(list, func(i, j int) bool { return *list[i].ID > *list[j].ID })
-
-	if format == "json" {
-		for _, r := range list {
-			fmt.Println(JSON(r))
-		}
-
-		return nil
-	}
-
-	if format == "csv" {
-		fmt.Println("id, number, title, login, state, created_at, updated_at, merged_at, closed_at, merge_commit_sha, ")
-		for _, r := range list {
-			fmt.Println(CSV(r))
-		}
-
-		return nil
-	}
-
-	return fmt.Errorf("invalid format=%v", format)
-}
-
 func CSV(r github.PullRequest) string {
 	out := fmt.Sprintf(
 		"%v, %v, %v, %v, %v, %v, ",
@@ -122,4 +99,27 @@ func JSON(v interface{}) string {
 	}
 
 	return string(b)
+}
+
+func print(format string, list []github.PullRequest) error {
+	sort.Slice(list, func(i, j int) bool { return *list[i].ID > *list[j].ID })
+
+	if format == "json" {
+		for _, r := range list {
+			fmt.Println(JSON(r))
+		}
+
+		return nil
+	}
+
+	if format == "csv" {
+		fmt.Println("id, number, title, login, state, created_at, updated_at, merged_at, closed_at, merge_commit_sha, ")
+		for _, r := range list {
+			fmt.Println(CSV(r))
+		}
+
+		return nil
+	}
+
+	return fmt.Errorf("invalid format=%v", format)
 }

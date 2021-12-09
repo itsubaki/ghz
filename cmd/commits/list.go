@@ -54,6 +54,28 @@ func Deserialize(path string) ([]github.RepositoryCommit, error) {
 	return out, nil
 }
 
+func CSV(c github.RepositoryCommit) string {
+	title := strings.Split(*c.Commit.Message, "\n")[0]
+	title = strings.ReplaceAll(title, ",", " ")
+
+	return fmt.Sprintf(
+		"%v, %v, %v, %v, ",
+		*c.SHA,
+		*c.Commit.Author.Name,
+		c.Commit.Author.Date.Format("2006-01-02 15:04:05"),
+		title,
+	)
+}
+
+func JSON(v interface{}) string {
+	b, err := json.Marshal(v)
+	if err != nil {
+		panic(err)
+	}
+
+	return string(b)
+}
+
 func print(format string, list []github.RepositoryCommit) error {
 	sort.Slice(list, func(i, j int) bool { return list[i].Commit.Author.Date.After(*list[j].Commit.Author.Date) })
 
@@ -76,26 +98,4 @@ func print(format string, list []github.RepositoryCommit) error {
 	}
 
 	return fmt.Errorf("invalid format=%v", format)
-}
-
-func CSV(c github.RepositoryCommit) string {
-	title := strings.Split(*c.Commit.Message, "\n")[0]
-	title = strings.ReplaceAll(title, ",", " ")
-
-	return fmt.Sprintf(
-		"%v, %v, %v, %v, ",
-		*c.SHA,
-		*c.Commit.Author.Name,
-		c.Commit.Author.Date.Format("2006-01-02 15:04:05"),
-		title,
-	)
-}
-
-func JSON(v interface{}) string {
-	b, err := json.Marshal(v)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(b)
 }

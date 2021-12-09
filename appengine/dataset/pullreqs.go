@@ -7,16 +7,16 @@ import (
 )
 
 type PullReqs struct {
-	ID               int       `bigquery:"id"`
-	Number           int       `bigquery:"number"`
-	Login            string    `bigquery:"login"`
-	Title            string    `bigquery:"title"`
-	State            string    `bigquery:"state"`
-	CreatedAt        time.Time `bigquery:"created_at"`
-	UpdatedAt        time.Time `bigquery:"updated_at"`
-	MergedAt         time.Time `bigquery:"merged_at"`
-	ClosedAt         time.Time `bigquery:"closed_at"`
-	merge_commit_sha string    `bigquery:"merge_commit_sha"`
+	ID             int64     `bigquery:"id"`
+	Number         int       `bigquery:"number"`
+	Login          string    `bigquery:"login"`
+	Title          string    `bigquery:"title"`
+	State          string    `bigquery:"state"`
+	CreatedAt      time.Time `bigquery:"created_at"`
+	UpdatedAt      time.Time `bigquery:"updated_at"`
+	MergedAt       time.Time `bigquery:"merged_at"`
+	ClosedAt       time.Time `bigquery:"closed_at"`
+	MergeCommitSHA string    `bigquery:"merge_commit_sha"`
 }
 
 var PullReqsTableMeta = bigquery.TableMetadata{
@@ -31,6 +31,6 @@ var PullReqsTableMeta = bigquery.TableMetadata{
 		{Name: "updated_at", Type: bigquery.TimestampFieldType},
 		{Name: "merged_at", Type: bigquery.TimestampFieldType},
 		{Name: "closed_at", Type: bigquery.TimestampFieldType},
-		{Name: "merged_commit_sha", Type: bigquery.StringFieldType, Required: true},
+		{Name: "merge_commit_sha", Type: bigquery.StringFieldType, Required: true},
 	},
 }

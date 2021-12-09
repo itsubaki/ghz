@@ -1,5 +1,10 @@
 cron:
-  - description: "fetch"
-    url: /fetch
+  - description: "fetch/pullreqs"
+    url: /fetch/pullreqs?owner=itsubaki&repository=q
+    schedule: every day 07:30
+    timezone: Asia/Tokyo
+
+  - description: "fetch/commits"
+    url: /fetch/commits?owner=itsubaki&repository=q
     schedule: every day 07:30
     timezone: Asia/Tokyo
