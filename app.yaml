@@ -1,0 +1,14 @@
+runtime: go116
+main: ./appengine
+
+env_variables:
+  GIN_MODE: "release"
+
+includes:
+  - secrets.yaml
+
+handlers:
+  - url: /.*
+    script: auto
+    secure: always
+    login: admin

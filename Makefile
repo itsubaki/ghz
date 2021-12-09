@@ -12,3 +12,9 @@ install:
 .PHONY: test
 test:
 	go test -cover $(shell go list ./... | grep -v /vendor/ | grep -v /build/) -v
+
+run:
+	go run appengine/main.go
+
+deploy:
+	gcloud app deploy app.yaml cron.yaml

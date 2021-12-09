@@ -1,0 +1,5 @@
+cron:
+  - description: "fetch"
+    url: /fetch
+    schedule: every day 07:30
+    timezone: Asia/Tokyo
