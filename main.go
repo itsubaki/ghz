@@ -7,9 +7,9 @@ import (
 	"github.com/itsubaki/ghstats/cmd/actions/jobs"
 	"github.com/itsubaki/ghstats/cmd/actions/runs"
 	"github.com/itsubaki/ghstats/cmd/commits"
-	prcommits "github.com/itsubaki/ghstats/cmd/commits"
 	"github.com/itsubaki/ghstats/cmd/events"
 	"github.com/itsubaki/ghstats/cmd/pullreqs"
+	prcommits "github.com/itsubaki/ghstats/cmd/pullreqs/commits"
 	"github.com/urfave/cli/v2"
 )
 
@@ -252,6 +252,7 @@ func New(version string) *cli.App {
 					&own,
 					&repo,
 					&pat,
+					&format,
 				},
 			},
 		},
