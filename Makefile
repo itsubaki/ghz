@@ -18,3 +18,6 @@ run:
 
 deploy:
 	gcloud app deploy app.yaml cron.yaml
+
+browse:
+	gcloud app browse
