@@ -7,16 +7,16 @@ import (
 )
 
 type WorkflowJob struct {
-	WorkflowID   int        `bigquery:"workflow_id"`
-	WorkflowName string     `bigquery:"workflow_name"`
-	RunID        int        `bigquery:"run_id"`
-	RunNumber    int        `bigquery:"run_number"`
-	JobID        int        `bigquery:"job_id"`
-	JobName      string     `bigquery:"job_name"`
-	Status       string     `bigquery:"status"`
-	Conclusion   string     `bigquery:"conclusion"`
-	StartedAt    *time.Time `bigquery:"started_at"`
-	CompletedAt  *time.Time `bigquery:"completed_at"`
+	WorkflowID   int       `bigquery:"workflow_id"`
+	WorkflowName string    `bigquery:"workflow_name"`
+	RunID        int       `bigquery:"run_id"`
+	RunNumber    int       `bigquery:"run_number"`
+	JobID        int       `bigquery:"job_id"`
+	JobName      string    `bigquery:"job_name"`
+	Status       string    `bigquery:"status"`
+	Conclusion   string    `bigquery:"conclusion"`
+	StartedAt    time.Time `bigquery:"started_at"`
+	CompletedAt  time.Time `bigquery:"completed_at"`
 }
 
 var WorkflowJobsTableMeta = bigquery.TableMetadata{

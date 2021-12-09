@@ -1,4 +1,4 @@
-package pullreqs
+package runs
 
 import (
 	"context"
@@ -11,32 +11,32 @@ import (
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghstats/appengine/dataset"
-	"github.com/itsubaki/ghstats/pkg/pullreqs"
+	"github.com/itsubaki/ghstats/pkg/actions/runs"
 	"google.golang.org/api/iterator"
 )
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
 
-	id, err := GetLastID(ctx)
+	id, number, err := GetLastID(ctx)
 	if err != nil {
 		log.Printf("get lastID: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	in := pullreqs.ListInput{
+	in := runs.FetchInput{
 		Owner:   c.Query("owner"),
 		Repo:    c.Query("repository"),
 		PAT:     os.Getenv("PAT"),
 		Page:    0,
 		PerPage: 100,
-		State:   "all",
 		LastID:  id,
 	}
-	log.Printf("target=%v/%v, last_id=%v", in.Owner, in.Repo, in.LastID)
 
-	list, err := pullreqs.Fetch(ctx, &in)
+	log.Printf("target=%v/%v, last_id=%v(%v)", in.Owner, in.Repo, in.LastID, number)
+
+	list, err := runs.Fetch(ctx, &in)
 	if err != nil {
 		log.Printf("fetch: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -45,22 +45,21 @@ func Fetch(c *gin.Context) {
 
 	sort.Slice(list, func(i, j int) bool { return *list[i].ID < *list[j].ID })
 	for _, r := range list {
-		log.Printf("%v(%v)", *r.ID, *r.Number)
+		log.Printf("%v(%v)", r.GetID(), r.GetRunNumber())
 	}
 
 	items := make([]interface{}, 0)
 	for _, r := range list {
-		items = append(items, dataset.PullReqs{
-			ID:             r.GetID(),
-			Number:         r.GetNumber(),
-			Login:          r.User.GetLogin(),
-			Title:          r.GetTitle(),
-			State:          r.GetState(),
-			CreatedAt:      r.GetCreatedAt(),
-			UpdatedAt:      r.GetUpdatedAt(),
-			MergedAt:       r.GetMergedAt(),
-			ClosedAt:       r.GetClosedAt(),
-			MergeCommitSHA: r.GetMergeCommitSHA(),
+		items = append(items, dataset.WorkflowRun{
+			WorkflowID:    r.GetWorkflowID(),
+			WorkflowName:  r.GetName(),
+			RunID:         r.GetID(),
+			RunNumber:     r.GetRunNumber(),
+			Status:        r.GetStatus(),
+			Conclusion:    r.GetConclusion(),
+			CreatedAt:     r.CreatedAt.Time,
+			UpdatedAt:     r.UpdatedAt.Time,
+			HeadCommitSHA: *r.HeadCommit.ID,
 		})
 	}
 
@@ -71,7 +70,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	if err := client.Insert(ctx, "raw", dataset.PullReqsTableMeta.Name, items); err != nil {
+	if err := client.Insert(ctx, "raw", dataset.WorkflowRunsTableMeta.Name, items); err != nil {
 		log.Printf("insert items: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
@@ -81,16 +80,16 @@ func Fetch(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func GetLastID(ctx context.Context) (int64, error) {
+func GetLastID(ctx context.Context) (int64, int64, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("new bigquery client: %v", err)
+		return -1, -1, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	query := fmt.Sprintf("select max(id) from `%v.%v.%v` limit 1", client.ProjectID, "raw", dataset.PullReqsTableMeta.Name)
+	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v.%v.%v` limit 1", client.ProjectID, "raw", dataset.WorkflowRunsTableMeta.Name)
 	it, err := client.Raw().Query(query).Read(ctx)
 	if err != nil {
-		return -1, fmt.Errorf("query(%v): %v", query, err)
+		return -1, -1, fmt.Errorf("query(%v): %v", query, err)
 	}
 
 	var values []bigquery.Value
@@ -101,7 +100,7 @@ func GetLastID(ctx context.Context) (int64, error) {
 		}
 
 		if err != nil {
-			return -1, fmt.Errorf("iterator: %v", err)
+			return -1, -1, fmt.Errorf("iterator: %v", err)
 		}
 	}
 
@@ -110,5 +109,10 @@ func GetLastID(ctx context.Context) (int64, error) {
 		id = values[0].(int64)
 	}
 
-	return id, nil
+	var number int64
+	if len(values) > 1 && values[1] != nil {
+		number = values[1].(int64)
+	}
+
+	return id, number, nil
 }

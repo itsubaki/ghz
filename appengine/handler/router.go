@@ -5,6 +5,8 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/itsubaki/ghstats/appengine/handler/actions/jobs"
+	"github.com/itsubaki/ghstats/appengine/handler/actions/runs"
 	"github.com/itsubaki/ghstats/appengine/handler/commits"
 	"github.com/itsubaki/ghstats/appengine/handler/pullreqs"
 	prcommits "github.com/itsubaki/ghstats/appengine/handler/pullreqs/commits"
@@ -52,4 +54,6 @@ func Fetch(g *gin.Engine) {
 	f.GET("/commits", commits.Fetch)
 	f.GET("/pullreqs", pullreqs.Fetch)
 	f.GET("/pullreqs/commits", prcommits.Fetch)
+	f.GET("/actions/runs", runs.Fetch)
+	f.GET("/actions/jobs", jobs.Fetch)
 }

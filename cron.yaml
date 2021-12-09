@@ -8,3 +8,8 @@ cron:
     url: /fetch/commits?owner=itsubaki&repository=q
     schedule: every day 07:30
     timezone: Asia/Tokyo
+
+  - description: "fetch/actions/runs"
+    url: /fetch/actions/runs?owner=itsubaki&repository=q
+    schedule: every day 07:30
+    timezone: Asia/Tokyo

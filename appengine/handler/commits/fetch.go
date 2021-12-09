@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"sort"
 	"strings"
 
 	"cloud.google.com/go/bigquery"
@@ -17,6 +18,7 @@ import (
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
+
 	sha, err := GetLastSHA(ctx)
 	if err != nil {
 		log.Printf("get lastSHA: %v", err)
@@ -40,6 +42,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
+	sort.Slice(list, func(i, j int) bool { return list[i].Commit.Author.Date.Before(*list[j].Commit.Author.Date) })
 	for _, r := range list {
 		log.Printf("%v(%v)", r.GetSHA(), r.Commit.Author.GetDate())
 	}
