@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"sort"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
@@ -43,7 +42,6 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	sort.Slice(list, func(i, j int) bool { return *list[i].ID < *list[j].ID })
 	for _, r := range list {
 		log.Printf("%v(%v)", *r.ID, *r.Number)
 	}
