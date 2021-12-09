@@ -15,58 +15,55 @@ go install github.com/itsubaki/ghstats@latest
 ## Example
 
 ```shell
-$ ghstats actions runs fetch --owner itsubaki --repo q
-$ ghstats actions runs list  --owner itsubaki --repo q --format csv | column -t -s, | less -S
-workflow_id   workflow_name   run_id       run_number   status      conclusion   created_at            updated_at            duration(minutes)
-5841880       tests           1429332756   109          completed   success      2021-11-06 14:51:50   2021-11-06 14:53:20   1.5
-5841880       tests           1299800366   108          completed   success      2021-10-03 05:10:58   2021-10-03 05:11:45   0.7833333333333333
-5841880       tests           1200937783   107          completed   success      2021-09-04 12:41:02   2021-09-04 12:41:56   0.9
-5841880       tests           1174489906   106          completed   success      2021-08-27 14:00:40   2021-08-27 14:01:39   0.9833333333333333
-5841880       tests           1169027869   105          completed   success      2021-08-26 03:51:07   2021-08-26 03:51:59   0.8666666666666667
-5841880       tests           1166653588   104          completed   success      2021-08-25 13:20:43   2021-08-25 13:21:58   1.25
-5841880       tests           1166541361   103          completed   success      2021-08-25 12:47:48   2021-08-25 12:50:36   2.8
-5841880       tests           1166522425   102          completed   success      2021-08-25 12:42:05   2021-08-25 12:43:02   0.95
-5841880       tests           1166480252   101          completed   success      2021-08-25 12:28:34   2021-08-25 12:29:38   1.0666666666666667
-...
-
-$ ghstats actions runs analyze --owner itsubaki --repo q --format csv | column -t -s, | less -S
-workflow_id   name    start        end          runs_per_day          failure_rate           duration_avg(minutes)   duration_var(minutes)
-5841880       tests   2021-02-14   2021-02-21   0.2857142857142857    0                      0.5916666666666667      6.944444444444396e-05
-5841880       tests   2021-02-21   2021-02-28   0.5714285714285714    0                      0.7291666666666666      0.07421875
-5841880       tests   2021-02-28   2021-03-07   2.142857142857143     0.06666666666666667    2.4655555555555555      3.1072715226337455
-5841880       tests   2021-03-07   2021-03-14   3.7142857142857144    0.038461538461538464   2.532051282051282       4.895141291154604
-5841880       tests   2021-03-14   2021-03-21   0.42857142857142855   0                      0.9777777777777779      0.0008024691358024684
-5841880       tests   2021-03-21   2021-03-28   0                     0                      0                       0
+$ ghstats commits fetch --owner itsubaki -repo q
+$ ghstats commits list  --owner itsubaki -repo q --format csv | column -t -s, | less -S
+sha                                        login      date                  message
+42b43a568b29448e0bc60fecf8f94aa3df1c2798   itsubaki   2021-12-07 14:58:53   Merge branch 'main' of https://github.com/itsubaki/q into main      
+d00f69dcfa519148b769c2e2c9d7495e2a16b731   itsubaki   2021-12-07 14:58:40   Update test                                                         
+09638c9e19af748d434fa9afbd3e48a4a5b74df1   itsubaki   2021-12-07 03:58:46   Refactor cmodexp2 gate   
 ...
 ```
 
 ```shell
-$ ghstats actions jobs fetch --owner itsubaki --repo q
-$ ghstats actions jobs list  --owner itsubaki --repo q --format csv | column -t -s, | less -S
-job_id       job_name               status           conclusion   started_at            completed_at          duration(minutes)
-4126276932   test (ubuntu-latest)   completed        success      2021-11-06 14:52:00   2021-11-06 14:52:53   0.8833333333333333
-3780280583   test (ubuntu-latest)   completed        success      2021-10-03 05:11:05   2021-10-03 05:11:43   0.6333333333333333
-3513358909   test (ubuntu-latest)   completed        success      2021-09-04 12:41:10   2021-09-04 12:41:53   0.7166666666666667
-3443854949   test (ubuntu-latest)   completed        success      2021-08-27 14:00:47   2021-08-27 14:01:36   0.8166666666666667
-3428886296   test (ubuntu-latest)   completed        success      2021-08-26 03:51:14   2021-08-26 03:51:56   0.7
-3422345982   test (ubuntu-latest)   completed        success      2021-08-25 13:20:52   2021-08-25 13:21:54   1.0333333333333334
-3422049046   test (ubuntu-latest)   completed        success      2021-08-25 12:49:51   2021-08-25 12:50:33   0.7
-3421981918   test (ubuntu-latest)   completed        success      2021-08-25 12:42:13   2021-08-25 12:42:59   0.7666666666666667
-3421861740   test (ubuntu-latest)   completed        success      2021-08-25 12:28:41   2021-08-25 12:29:35   0.9
-3421712060   test (ubuntu-latest)   completed        success      2021-08-25 12:12:20   2021-08-25 12:13:03   0.7166666666666667
-3311170395   test (ubuntu-latest)   completed        success      2021-08-12 11:45:28   2021-08-12 11:46:17   0.8166666666666667
-...
+$ ghstats pullreqs fetch --owner itsubaki -repo q 
+$ ghstats pullreqs list  --owner itsubaki -repo q --format csv | column -t -s, | less -S
+id          number   title                                       login        state    created_at            updated_at            merged_at             closed_at             merge_commit_sha                           
+697873132   13       Add lexer for OpenQASM                      itsubaki     closed   2021-07-27 13:40:39   2021-07-30 12:05:17   2021-07-30 12:04:37   2021-07-30 12:04:37   6c6df53c0ee86e8e78e4313135ec11c0e6fa8764   
+444592694   11       Configure Sider                             sider[bot]   closed   2020-07-06 07:30:06   2021-11-22 00:43:05   null                  2020-07-07 00:43:12   87cb3d0103c04be2288e96a5acc08454c0b8788b   
+270932381   3        Added documentation and expanded coverage   axamon       closed   2019-04-16 14:21:28   2021-02-25 12:08:43   null                  2021-02-25 12:08:43   09ee1f68eba4eaad660cb48dd2237d0cb8c90495   
+204640368   2        Add simulator                               itsubaki     closed   2018-07-29 12:41:02   2021-07-24 11:27:42   2018-07-29 12:42:47   2018-07-29 12:42:47   dfdd80c575874dd4485007a5cda984e0b08a6ae8   
+```
 
-$ ghstats actions jobs analyze  --owner itsubaki --repo q --format csv | column -t -s, | less -S
-name                   start            end          runs_per_day          failure_rate          duration_avg(minutes)   duration_var(minutes)
-test (ubuntu-latest)   2021-07-04       2021-07-11   0.14285714285714285   0                     0.9                     0
-test (ubuntu-latest)   2021-07-11       2021-07-18   0                     0                     0                       0
-test (ubuntu-latest)   2021-07-18       2021-07-25   0.14285714285714285   0                     0.8666666666666667      0
-test (ubuntu-latest)   2021-07-25       2021-08-01   5.428571428571429     0.05263157894736842   0.7596491228070176      0.00839460724757415
-test (ubuntu-latest)   2021-08-01       2021-08-08   0.2857142857142857    0                     0.825                   0.003402777777777773
-test (ubuntu-latest)   2021-08-08       2021-08-15   0.5714285714285714    0                     0.7416666666666667      0.0024305555555555547
-test (ubuntu-latest)   2021-08-15       2021-08-22   0                     0                     0                       0
-test (ubuntu-latest)   2021-08-22       2021-08-29   1                     0                     0.8047619047619047      0.013231292517006813
-test (ubuntu-latest)   2021-08-29       2021-09-05   0.14285714285714285   0                     0.7166666666666667      0
+```shell
+$ ghstats pullreqs commits fetch --owner itsubaki -repo q 
+$ ghstats pullreqs commits list  --owner itsubaki -repo q --format csv | column -t -s, | less -S
+pr_id       pr_number   sha                                        login               date                  message                             
+697873132   13          7b2619e89065d96e683d70a72512e2883c1a2cf6   itsubaki            2021-07-30 12:02:49   Merge branch 'main' into openqasm   
+697873132   13          806cdd051a833de04ce1d3b721eff12004c64f41   itsubaki            2021-07-27 13:38:22   Add lexer for openqasm                                        
 ...
 ```
+
+```shell
+$ ghstats actions runs fetch --owner itsubaki -repo q 
+$ ghstats actions runs list  --owner itsubaki -repo q --format csv | column -t -s, | less -S
+workflow_id   workflow_name   run_id       run_number   status      conclusion   created_at            updated_at            head_commit.sha                            
+5841880       tests           1549986886   111          completed   success      2021-12-07 14:59:05   2021-12-07 15:00:05   42b43a568b29448e0bc60fecf8f94aa3df1c2798   
+5841880       tests           1547804641   110          completed   success      2021-12-07 03:59:03   2021-12-07 04:00:04   09638c9e19af748d434fa9afbd3e48a4a5b74df1   
+...
+5841880       tests           1082134326   91           completed   success      2021-07-30 12:04:39   2021-07-30 12:05:37   6c6df53c0ee86e8e78e4313135ec11c0e6fa8764
+5841880       tests           1082128658   90           completed   success      2021-07-30 12:02:58   2021-07-30 12:03:54   7b2619e89065d96e683d70a72512e2883c1a2cf6   
+...
+```
+
+```shell
+$ ghstats actions jobs fetch --owner itsubaki -repo q 
+$ ghstats actions jobs list  --owner itsubaki -repo q --format csv | column -t -s, | less -S
+run_id       job_id       job_name               status           conclusion   started_at            completed_at          
+1549986886   4445591170   test (ubuntu-latest)   completed        success      2021-12-07 14:59:15   2021-12-07 15:00:01   
+1547804641   4439429997   test (ubuntu-latest)   completed        success      2021-12-07 03:59:10   2021-12-07 04:00:00   
+...
+1082134326   3201660144   test (ubuntu-latest)   completed        success      2021-07-30 12:04:45   2021-07-30 12:05:33  
+1082128658   3201644714   test (ubuntu-latest)   completed        success      2021-07-30 12:03:06   2021-07-30 12:03:51 
+...
+```
+

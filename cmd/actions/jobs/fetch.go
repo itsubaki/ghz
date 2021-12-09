@@ -68,7 +68,7 @@ func Fetch(c *cli.Context) error {
 		}
 
 		if len(jobs) > 0 {
-			fmt.Printf("%v\n", *jobs[0].RunID)
+			fmt.Printf("%v(%v)\n", *jobs[0].RunID, *runs[i].RunNumber)
 		}
 	}
 
