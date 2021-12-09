@@ -65,7 +65,7 @@ func print(format string, list []CommitWithPRID) error {
 	}
 
 	if format == "csv" {
-		fmt.Println("pr_id, pr_number, sha, login, date, message, ")
+		fmt.Println("id, number, sha, login, date, message, ")
 		for _, r := range list {
 			fmt.Println(r.CSV())
 		}

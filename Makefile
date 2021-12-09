@@ -11,7 +11,7 @@ install:
 
 .PHONY: test
 test:
-	go test -cover $(shell go list ./... | grep -v /vendor/ | grep -v /build/) -v
+	go test -cover $(shell go list ./... | grep -v /vendor/ | grep -v /build/ | grep -v /appengine/) -v
 
 run:
 	go run appengine/main.go
