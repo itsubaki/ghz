@@ -25,15 +25,15 @@ func Fetch(c *gin.Context) {
 	}
 
 	in := runs.FetchInput{
-		Owner:   c.Query("owner"),
-		Repo:    c.Query("repository"),
-		PAT:     os.Getenv("PAT"),
-		Page:    0,
-		PerPage: 100,
-		LastID:  id,
+		Owner:      c.Query("owner"),
+		Repository: c.Query("repository"),
+		PAT:        os.Getenv("PAT"),
+		Page:       0,
+		PerPage:    100,
+		LastID:     id,
 	}
 
-	log.Printf("target=%v/%v, last_id=%v(%v)", in.Owner, in.Repo, in.LastID, number)
+	log.Printf("target=%v/%v, last_id=%v(%v)", in.Owner, in.Repository, in.LastID, number)
 
 	list, err := runs.Fetch(ctx, &in)
 	if err != nil {
@@ -49,6 +49,8 @@ func Fetch(c *gin.Context) {
 	items := make([]interface{}, 0)
 	for _, r := range list {
 		items = append(items, dataset.WorkflowRun{
+			Owner:         c.Query("owner"),
+			Repository:    c.Query("repository"),
 			WorkflowID:    r.GetWorkflowID(),
 			WorkflowName:  r.GetName(),
 			RunID:         r.GetID(),

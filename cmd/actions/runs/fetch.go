@@ -28,15 +28,15 @@ func Fetch(c *cli.Context) error {
 	}
 
 	in := runs.FetchInput{
-		Owner:   c.String("owner"),
-		Repo:    c.String("repo"),
-		PAT:     c.String("pat"),
-		Page:    c.Int("page"),
-		PerPage: c.Int("perpage"),
-		LastID:  id,
+		Owner:      c.String("owner"),
+		Repository: c.String("repo"),
+		PAT:        c.String("pat"),
+		Page:       c.Int("page"),
+		PerPage:    c.Int("perpage"),
+		LastID:     id,
 	}
 
-	fmt.Printf("target: %v/%v\n", in.Owner, in.Repo)
+	fmt.Printf("target: %v/%v\n", in.Owner, in.Repository)
 	fmt.Printf("last_id: %v(%v)\n", id, number)
 
 	ctx := context.Background()

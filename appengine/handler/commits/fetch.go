@@ -26,12 +26,12 @@ func Fetch(c *gin.Context) {
 	}
 
 	in := commits.ListInput{
-		Owner:   c.Query("owner"),
-		Repo:    c.Query("repository"),
-		PAT:     os.Getenv("PAT"),
-		Page:    0,
-		PerPage: 100,
-		LastSHA: sha,
+		Owner:      c.Query("owner"),
+		Repository: c.Query("repository"),
+		PAT:        os.Getenv("PAT"),
+		Page:       0,
+		PerPage:    100,
+		LastSHA:    sha,
 	}
 
 	list, err := commits.Fetch(ctx, &in)
@@ -48,10 +48,12 @@ func Fetch(c *gin.Context) {
 	items := make([]interface{}, 0)
 	for _, r := range list {
 		items = append(items, dataset.Commits{
-			SHA:     r.GetSHA(),
-			Login:   r.Commit.Author.GetName(),
-			Date:    r.Commit.Author.GetDate(),
-			Message: strings.ReplaceAll(r.Commit.GetMessage(), "\n", " "),
+			Owner:      c.Query("owner"),
+			Repository: c.Query("repository"),
+			SHA:        r.GetSHA(),
+			Login:      r.Commit.Author.GetName(),
+			Date:       r.Commit.Author.GetDate(),
+			Message:    strings.ReplaceAll(r.Commit.GetMessage(), "\n", " "),
 		})
 	}
 

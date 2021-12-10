@@ -29,15 +29,15 @@ func Fetch(c *cli.Context) error {
 	}
 
 	in := jobs.FetchInput{
-		Owner:   c.String("owner"),
-		Repo:    c.String("repo"),
-		PAT:     c.String("pat"),
-		Page:    c.Int("page"),
-		PerPage: c.Int("perpage"),
+		Owner:      c.String("owner"),
+		Repository: c.String("repo"),
+		PAT:        c.String("pat"),
+		Page:       c.Int("page"),
+		PerPage:    c.Int("perpage"),
 	}
 	wid := c.Int64("workflow_id")
 
-	fmt.Printf("target: %v/%v\n", in.Owner, in.Repo)
+	fmt.Printf("target: %v/%v\n", in.Owner, in.Repository)
 	fmt.Printf("workflow_id: %v\n", wid)
 	fmt.Printf("last_run_id: %v\n", lastRunID)
 

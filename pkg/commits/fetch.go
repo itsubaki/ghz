@@ -9,12 +9,12 @@ import (
 )
 
 type ListInput struct {
-	Owner   string
-	Repo    string
-	PAT     string
-	Page    int
-	PerPage int
-	LastSHA string
+	Owner      string
+	Repository string
+	PAT        string
+	Page       int
+	PerPage    int
+	LastSHA    string
 }
 
 func Fetch(ctx context.Context, in *ListInput) ([]*github.RepositoryCommit, error) {
@@ -35,7 +35,7 @@ func Fetch(ctx context.Context, in *ListInput) ([]*github.RepositoryCommit, erro
 
 	out := make([]*github.RepositoryCommit, 0)
 	for {
-		commits, resp, err := client.Repositories.ListCommits(ctx, in.Owner, in.Repo, &opts)
+		commits, resp, err := client.Repositories.ListCommits(ctx, in.Owner, in.Repository, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list commits: %v", err)
 		}

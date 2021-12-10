@@ -29,12 +29,12 @@ func Fetch(c *cli.Context) error {
 	}
 
 	in := commits.ListInput{
-		Owner:   c.String("owner"),
-		Repo:    c.String("repo"),
-		PAT:     c.String("pat"),
-		Page:    c.Int("page"),
-		PerPage: c.Int("perpage"),
-		LastSHA: sha,
+		Owner:      c.String("owner"),
+		Repository: c.String("repo"),
+		PAT:        c.String("pat"),
+		Page:       c.Int("page"),
+		PerPage:    c.Int("perpage"),
+		LastSHA:    sha,
 	}
 
 	list, err := commits.Fetch(context.Background(), &in)

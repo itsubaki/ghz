@@ -10,11 +10,11 @@ import (
 
 func Fetch(c *cli.Context) error {
 	in := events.FetchInput{
-		Owner:   c.String("owner"),
-		Repo:    c.String("repo"),
-		PAT:     c.String("pat"),
-		Page:    c.Int("page"),
-		PerPage: c.Int("perpage"),
+		Owner:      c.String("owner"),
+		Repository: c.String("repo"),
+		PAT:        c.String("pat"),
+		Page:       c.Int("page"),
+		PerPage:    c.Int("perpage"),
 	}
 
 	events, err := events.Fetch(context.Background(), &in)

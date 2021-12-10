@@ -9,13 +9,13 @@ import (
 )
 
 type ListInput struct {
-	Owner   string
-	Repo    string
-	PAT     string
-	Page    int
-	PerPage int
-	State   string
-	LastID  int64
+	Owner      string
+	Repository string
+	PAT        string
+	Page       int
+	PerPage    int
+	State      string
+	LastID     int64
 }
 
 func Fetch(ctx context.Context, in *ListInput) ([]*github.PullRequest, error) {
@@ -37,7 +37,7 @@ func Fetch(ctx context.Context, in *ListInput) ([]*github.PullRequest, error) {
 
 	out := make([]*github.PullRequest, 0)
 	for {
-		pr, resp, err := client.PullRequests.List(ctx, in.Owner, in.Repo, &opts)
+		pr, resp, err := client.PullRequests.List(ctx, in.Owner, in.Repository, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list pull requests: %v", err)
 		}

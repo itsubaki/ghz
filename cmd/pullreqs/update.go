@@ -29,10 +29,10 @@ func Update(c *cli.Context) error {
 	ctx := context.Background()
 	for i := range open {
 		in := pullreqs.GetInput{
-			Owner:  c.String("owner"),
-			Repo:   c.String("repo"),
-			PAT:    c.String("pat"),
-			Number: *open[i].Number,
+			Owner:      c.String("owner"),
+			Repository: c.String("repo"),
+			PAT:        c.String("pat"),
+			Number:     *open[i].Number,
 		}
 
 		pr, err := pullreqs.Get(ctx, &in)

@@ -25,15 +25,15 @@ func Fetch(c *gin.Context) {
 	}
 
 	in := pullreqs.ListInput{
-		Owner:   c.Query("owner"),
-		Repo:    c.Query("repository"),
-		PAT:     os.Getenv("PAT"),
-		Page:    0,
-		PerPage: 100,
-		State:   "all",
-		LastID:  id,
+		Owner:      c.Query("owner"),
+		Repository: c.Query("repository"),
+		PAT:        os.Getenv("PAT"),
+		Page:       0,
+		PerPage:    100,
+		State:      "all",
+		LastID:     id,
 	}
-	log.Printf("target=%v/%v, last_id=%v", in.Owner, in.Repo, in.LastID)
+	log.Printf("target=%v/%v, last_id=%v", in.Owner, in.Repository, in.LastID)
 
 	list, err := pullreqs.Fetch(ctx, &in)
 	if err != nil {
@@ -49,6 +49,8 @@ func Fetch(c *gin.Context) {
 	items := make([]interface{}, 0)
 	for _, r := range list {
 		items = append(items, dataset.PullReqs{
+			Owner:          c.Query("owner"),
+			Repository:     c.Query("repository"),
 			ID:             r.GetID(),
 			Number:         r.GetNumber(),
 			Login:          r.User.GetLogin(),

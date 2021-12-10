@@ -9,10 +9,10 @@ import (
 )
 
 type GetInput struct {
-	Owner  string
-	Repo   string
-	PAT    string
-	Number int
+	Owner      string
+	Repository string
+	PAT        string
+	Number     int
 }
 
 func Get(ctx context.Context, in *GetInput) (*github.PullRequest, error) {
@@ -24,7 +24,7 @@ func Get(ctx context.Context, in *GetInput) (*github.PullRequest, error) {
 		)))
 	}
 
-	pr, _, err := client.PullRequests.Get(ctx, in.Owner, in.Repo, in.Number)
+	pr, _, err := client.PullRequests.Get(ctx, in.Owner, in.Repository, in.Number)
 	if err != nil {
 		return nil, fmt.Errorf("get pull rquests: %v", err)
 	}

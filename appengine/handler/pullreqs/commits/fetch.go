@@ -40,14 +40,14 @@ func Fetch(c *gin.Context) {
 	}
 
 	in := commits.FetchInput{
-		Owner:   c.Query("owner"),
-		Repo:    c.Query("repository"),
-		PAT:     os.Getenv("PAT"),
-		Page:    0,
-		PerPage: 100,
+		Owner:      c.Query("owner"),
+		Repository: c.Query("repository"),
+		PAT:        os.Getenv("PAT"),
+		Page:       0,
+		PerPage:    100,
 	}
 
-	log.Printf("target=%v/%v, last_id=%v(%v)", in.Owner, in.Repo, id, number)
+	log.Printf("target=%v/%v, last_id=%v(%v)", in.Owner, in.Repository, id, number)
 
 	for _, p := range prs {
 		list, err := commits.Fetch(ctx, &in, int(p.Number))
@@ -64,12 +64,14 @@ func Fetch(c *gin.Context) {
 		items := make([]interface{}, 0)
 		for _, r := range list {
 			items = append(items, dataset.PullReqCommits{
-				ID:      p.ID,
-				Number:  p.Number,
-				SHA:     r.GetSHA(),
-				Login:   r.Commit.Author.GetName(),
-				Date:    r.Commit.Author.GetDate(),
-				Message: strings.ReplaceAll(r.Commit.GetMessage(), "\n", " "),
+				Owner:      c.Query("owner"),
+				Repository: c.Query("repository"),
+				ID:         p.ID,
+				Number:     p.Number,
+				SHA:        r.GetSHA(),
+				Login:      r.Commit.Author.GetName(),
+				Date:       r.Commit.Author.GetDate(),
+				Message:    strings.ReplaceAll(r.Commit.GetMessage(), "\n", " "),
 			})
 		}
 

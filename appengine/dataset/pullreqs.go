@@ -7,6 +7,8 @@ import (
 )
 
 type PullReqs struct {
+	Owner          string    `bigquery:"onwer"`
+	Repository     string    `bigquery:"repository"`
 	ID             int64     `bigquery:"id"`
 	Number         int       `bigquery:"number"`
 	Login          string    `bigquery:"login"`
@@ -22,6 +24,8 @@ type PullReqs struct {
 var PullReqsTableMeta = bigquery.TableMetadata{
 	Name: "pullreqs",
 	Schema: bigquery.Schema{
+		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
+		{Name: "repository", Type: bigquery.StringFieldType, Required: true},
 		{Name: "id", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "number", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "login", Type: bigquery.StringFieldType, Required: true},

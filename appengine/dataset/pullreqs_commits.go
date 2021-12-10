@@ -7,17 +7,21 @@ import (
 )
 
 type PullReqCommits struct {
-	ID      int64     `bigquery:"id"`
-	Number  int64     `bigquery:"number"`
-	SHA     string    `bigquery:"sha"`
-	Login   string    `bigquery:"login"`
-	Date    time.Time `bigquery:"date"`
-	Message string    `bigquery:"message"`
+	Owner      string    `bigquery:"onwer"`
+	Repository string    `bigquery:"repository"`
+	ID         int64     `bigquery:"id"`
+	Number     int64     `bigquery:"number"`
+	SHA        string    `bigquery:"sha"`
+	Login      string    `bigquery:"login"`
+	Date       time.Time `bigquery:"date"`
+	Message    string    `bigquery:"message"`
 }
 
 var PullReqCommitsTableMeta = bigquery.TableMetadata{
 	Name: "pullreqs_commits",
 	Schema: bigquery.Schema{
+		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
+		{Name: "repository", Type: bigquery.StringFieldType, Required: true},
 		{Name: "id", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "number", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "sha", Type: bigquery.StringFieldType, Required: true},

@@ -9,11 +9,11 @@ import (
 )
 
 type FetchInput struct {
-	Owner   string
-	Repo    string
-	PAT     string
-	Page    int
-	PerPage int
+	Owner      string
+	Repository string
+	PAT        string
+	Page       int
+	PerPage    int
 }
 
 func Fetch(ctx context.Context, in *FetchInput) ([]*github.Event, error) {
@@ -32,7 +32,7 @@ func Fetch(ctx context.Context, in *FetchInput) ([]*github.Event, error) {
 
 	list := make([]*github.Event, 0)
 	for {
-		events, resp, err := client.Activity.ListRepositoryEvents(ctx, in.Owner, in.Repo, &opts)
+		events, resp, err := client.Activity.ListRepositoryEvents(ctx, in.Owner, in.Repository, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list workflow runs: %v", err)
 		}
