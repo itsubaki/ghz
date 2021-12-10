@@ -28,3 +28,18 @@ cron:
     url: /fetch/actions/jobs?owner=itsubaki&repository=ghstats
     schedule: every day 03:00
     timezone: Asia/Tokyo
+
+  - description: "stats/pullreqs"
+    url: /stats/pullreqs?owner=itsubaki&repository=ghstats
+    schedule: every day 00:00
+    timezone: Asia/Tokyo
+
+  - description: "stats/actions/runs"
+    url: /stats/actions/runs?owner=itsubaki&repository=ghstats
+    schedule: every day 02:00
+    timezone: Asia/Tokyo
+
+  - description: "stats/actions/jobs"
+    url: /stats/actions/jobs?owner=itsubaki&repository=ghstats
+    schedule: every day 03:00
+    timezone: Asia/Tokyo
