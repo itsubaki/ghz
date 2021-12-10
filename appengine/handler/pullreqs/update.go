@@ -43,6 +43,7 @@ func Update(c *gin.Context) {
 		if err := UpdatePullReq(ctx, datasetName, pr); err != nil {
 			log.Printf("update pullreq: %v", err)
 			c.Status(http.StatusInternalServerError)
+			return
 		}
 	}
 
@@ -85,8 +86,6 @@ func UpdatePullReq(ctx context.Context, datasetName string, r *github.PullReques
 	if query == "" {
 		return nil
 	}
-
-	log.Println(query)
 
 	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
 		return
