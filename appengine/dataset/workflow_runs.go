@@ -12,7 +12,7 @@ type WorkflowRun struct {
 	WorkflowID    int64     `bigquery:"workflow_id"`
 	WorkflowName  string    `bigquery:"workflow_name"`
 	RunID         int64     `bigquery:"run_id"`
-	RunNumber     int       `bigquery:"run_number"`
+	RunNumber     int64     `bigquery:"run_number"`
 	Status        string    `bigquery:"status"`
 	Conclusion    string    `bigquery:"conclusion"`
 	CreatedAt     time.Time `bigquery:"created_at"`

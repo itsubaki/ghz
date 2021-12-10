@@ -17,7 +17,7 @@ type FetchInput struct {
 	LastID     int64
 }
 
-func Fetch(ctx context.Context, in *FetchInput) ([]*github.WorkflowRun, error) {
+func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.WorkflowRun) error) ([]*github.WorkflowRun, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -33,13 +33,14 @@ func Fetch(ctx context.Context, in *FetchInput) ([]*github.WorkflowRun, error) {
 		},
 	}
 
-	list := make([]*github.WorkflowRun, 0)
+	out := make([]*github.WorkflowRun, 0)
 	for {
 		runs, resp, err := client.Actions.ListRepositoryWorkflowRuns(ctx, in.Owner, in.Repository, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list workflow runs: %v", err)
 		}
 
+		buf := make([]*github.WorkflowRun, 0)
 		var last bool
 		for i := range runs.WorkflowRuns {
 			if *runs.WorkflowRuns[i].ID <= in.LastID {
@@ -47,9 +48,16 @@ func Fetch(ctx context.Context, in *FetchInput) ([]*github.WorkflowRun, error) {
 				break
 			}
 
-			list = append(list, runs.WorkflowRuns[i])
+			buf = append(buf, runs.WorkflowRuns[i])
 		}
 
+		for i, f := range fn {
+			if err := f(buf); err != nil {
+				return nil, fmt.Errorf("func[%v]: %v", i, err)
+			}
+		}
+
+		out = append(out, buf...)
 		if last || resp.NextPage == 0 {
 			break
 		}
@@ -57,5 +65,5 @@ func Fetch(ctx context.Context, in *FetchInput) ([]*github.WorkflowRun, error) {
 		opts.Page = resp.NextPage
 	}
 
-	return list, nil
+	return out, nil
 }

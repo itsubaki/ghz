@@ -12,29 +12,28 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghstats/appengine/dataset"
 	"github.com/itsubaki/ghstats/pkg/pullreqs/commits"
-	"google.golang.org/api/iterator"
 )
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
+	datasetName := dataset.Name(c.Query("owner"), c.Query("repository"))
 
-	id, number, err := GetLastID(ctx)
+	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.PullReqCommitsTableMeta); err != nil {
+		log.Printf("create if not exists: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	id, number, err := GetLastID(ctx, datasetName)
 	if err != nil {
 		log.Printf("get lastID: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	prs, err := GetPullReqs(ctx, id)
+	prs, err := GetPullReqs(ctx, datasetName, id)
 	if err != nil {
 		log.Printf("get pull requests: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	client, err := dataset.New(ctx)
-	if err != nil {
-		log.Printf("new bigquery client: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
@@ -57,10 +56,6 @@ func Fetch(c *gin.Context) {
 			return
 		}
 
-		for _, r := range list {
-			log.Printf("%v(%v)", r.GetSHA(), r.Commit.Author.GetDate())
-		}
-
 		items := make([]interface{}, 0)
 		for _, r := range list {
 			items = append(items, dataset.PullReqCommits{
@@ -75,7 +70,7 @@ func Fetch(c *gin.Context) {
 			})
 		}
 
-		if err := client.Insert(ctx, "raw", dataset.PullReqCommitsTableMeta.Name, items); err != nil {
+		if err := dataset.Insert(ctx, datasetName, dataset.PullReqCommitsTableMeta.Name, items); err != nil {
 			log.Printf("insert items: %v", err)
 			c.Status(http.StatusInternalServerError)
 			return
@@ -91,71 +86,51 @@ type PullReq struct {
 	Number int64
 }
 
-func GetPullReqs(ctx context.Context, lastID int64) ([]PullReq, error) {
+func GetPullReqs(ctx context.Context, datasetName string, lastID int64) ([]PullReq, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	query := fmt.Sprintf("select id, number from `%v.%v.%v` where id > %v", client.ProjectID, "raw", dataset.PullReqsTableMeta.Name, lastID)
-	it, err := client.Raw().Query(query).Read(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("query(%v): %v", query, err)
-	}
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsTableMeta.Name)
+	query := fmt.Sprintf("select id, number from `%v` where id > %v", table, lastID)
 
 	prs := make([]PullReq, 0)
-	for {
-		var values []bigquery.Value
-		err := it.Next(&values)
-		if err == iterator.Done {
-			break
-		}
-
-		if err != nil {
-			return nil, fmt.Errorf("iterator: %v", err)
-		}
-
+	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
 		prs = append(prs, PullReq{
 			ID:     values[0].(int64),
 			Number: values[1].(int64),
 		})
+	}); err != nil {
+		return nil, fmt.Errorf("query(%v): %v", query, err)
 	}
 
 	return prs, nil
 }
 
-func GetLastID(ctx context.Context) (int64, int64, error) {
+func GetLastID(ctx context.Context, datasetName string) (int64, int64, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return -1, -1, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	query := fmt.Sprintf("select max(id), max(number) from `%v.%v.%v` limit 1", client.ProjectID, "raw", dataset.PullReqCommitsTableMeta.Name)
-	it, err := client.Raw().Query(query).Read(ctx)
-	if err != nil {
-		return -1, -1, fmt.Errorf("query(%v): %v", query, err)
-	}
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqCommitsTableMeta.Name)
+	query := fmt.Sprintf("select max(id), max(number) from `%v` limit 1", table)
 
-	var values []bigquery.Value
-	for {
-		err := it.Next(&values)
-		if err == iterator.Done {
-			break
+	var id, number int64
+	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+		if len(values) != 2 {
+			return
 		}
 
-		if err != nil {
-			return -1, -1, fmt.Errorf("iterator: %v", err)
+		if values[0] == nil || values[1] == nil {
+			return
 		}
-	}
 
-	var id int64
-	if len(values) > 0 && values[0] != nil {
 		id = values[0].(int64)
-	}
-
-	var number int64
-	if len(values) > 1 && values[1] != nil {
 		number = values[1].(int64)
+	}); err != nil {
+		return -1, -1, fmt.Errorf("query(%v): %v", query, err)
 	}
 
 	return id, number, nil

@@ -18,7 +18,7 @@ type ListInput struct {
 	LastID     int64
 }
 
-func Fetch(ctx context.Context, in *ListInput) ([]*github.PullRequest, error) {
+func Fetch(ctx context.Context, in *ListInput, fn ...func(list []*github.PullRequest) error) ([]*github.PullRequest, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -42,6 +42,7 @@ func Fetch(ctx context.Context, in *ListInput) ([]*github.PullRequest, error) {
 			return nil, fmt.Errorf("list pull requests: %v", err)
 		}
 
+		buf := make([]*github.PullRequest, 0)
 		var last bool
 		for i := range pr {
 			if *pr[i].ID <= in.LastID {
@@ -49,9 +50,16 @@ func Fetch(ctx context.Context, in *ListInput) ([]*github.PullRequest, error) {
 				break
 			}
 
-			out = append(out, pr[i])
+			buf = append(buf, pr[i])
 		}
 
+		for i, f := range fn {
+			if err := f(buf); err != nil {
+				return nil, fmt.Errorf("func[%v]: %v", i, err)
+			}
+		}
+
+		out = append(out, buf...)
 		if last || resp.NextPage == 0 {
 			break
 		}

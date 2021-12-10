@@ -9,15 +9,22 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
+	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghstats/appengine/dataset"
 	"github.com/itsubaki/ghstats/pkg/actions/runs"
-	"google.golang.org/api/iterator"
 )
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
+	datasetName := dataset.Name(c.Query("owner"), c.Query("repository"))
 
-	id, number, err := GetLastID(ctx)
+	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.WorkflowRunsTableMeta); err != nil {
+		log.Printf("create if not exists: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	id, number, err := GetLastID(ctx, datasetName)
 	if err != nil {
 		log.Printf("get lastID: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -35,43 +42,31 @@ func Fetch(c *gin.Context) {
 
 	log.Printf("target=%v/%v, last_id=%v(%v)", in.Owner, in.Repository, in.LastID, number)
 
-	list, err := runs.Fetch(ctx, &in)
-	if err != nil {
+	if _, err := runs.Fetch(ctx, &in, func(list []*github.WorkflowRun) error {
+		items := make([]interface{}, 0)
+		for _, r := range list {
+			items = append(items, dataset.WorkflowRun{
+				Owner:         c.Query("owner"),
+				Repository:    c.Query("repository"),
+				WorkflowID:    r.GetWorkflowID(),
+				WorkflowName:  r.GetName(),
+				RunID:         r.GetID(),
+				RunNumber:     int64(r.GetRunNumber()),
+				Status:        r.GetStatus(),
+				Conclusion:    r.GetConclusion(),
+				CreatedAt:     r.CreatedAt.Time,
+				UpdatedAt:     r.UpdatedAt.Time,
+				HeadCommitSHA: *r.HeadCommit.ID,
+			})
+		}
+
+		if err := dataset.Insert(ctx, datasetName, dataset.WorkflowRunsTableMeta.Name, items); err != nil {
+			return fmt.Errorf("insert items: %v", err)
+		}
+
+		return nil
+	}); err != nil {
 		log.Printf("fetch: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	for _, r := range list {
-		log.Printf("%v(%v)", r.GetID(), r.GetRunNumber())
-	}
-
-	items := make([]interface{}, 0)
-	for _, r := range list {
-		items = append(items, dataset.WorkflowRun{
-			Owner:         c.Query("owner"),
-			Repository:    c.Query("repository"),
-			WorkflowID:    r.GetWorkflowID(),
-			WorkflowName:  r.GetName(),
-			RunID:         r.GetID(),
-			RunNumber:     r.GetRunNumber(),
-			Status:        r.GetStatus(),
-			Conclusion:    r.GetConclusion(),
-			CreatedAt:     r.CreatedAt.Time,
-			UpdatedAt:     r.UpdatedAt.Time,
-			HeadCommitSHA: *r.HeadCommit.ID,
-		})
-	}
-
-	client, err := dataset.New(ctx)
-	if err != nil {
-		log.Printf("new bigquery client: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	if err := client.Insert(ctx, "raw", dataset.WorkflowRunsTableMeta.Name, items); err != nil {
-		log.Printf("insert items: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
@@ -80,38 +75,29 @@ func Fetch(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func GetLastID(ctx context.Context) (int64, int64, error) {
+func GetLastID(ctx context.Context, datasetName string) (int64, int64, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return -1, -1, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v.%v.%v` limit 1", client.ProjectID, "raw", dataset.WorkflowRunsTableMeta.Name)
-	it, err := client.Raw().Query(query).Read(ctx)
-	if err != nil {
-		return -1, -1, fmt.Errorf("query(%v): %v", query, err)
-	}
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunsTableMeta.Name)
+	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v` limit 1", table)
 
-	var values []bigquery.Value
-	for {
-		err := it.Next(&values)
-		if err == iterator.Done {
-			break
+	var id, number int64
+	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+		if len(values) != 2 {
+			return
 		}
 
-		if err != nil {
-			return -1, -1, fmt.Errorf("iterator: %v", err)
+		if values[0] == nil || values[1] == nil {
+			return
 		}
-	}
 
-	var id int64
-	if len(values) > 0 && values[0] != nil {
 		id = values[0].(int64)
-	}
-
-	var number int64
-	if len(values) > 1 && values[1] != nil {
 		number = values[1].(int64)
+	}); err != nil {
+		return -1, -1, fmt.Errorf("query(%v): %v", query, err)
 	}
 
 	return id, number, nil

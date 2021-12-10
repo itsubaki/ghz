@@ -11,29 +11,28 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghstats/appengine/dataset"
 	"github.com/itsubaki/ghstats/pkg/actions/jobs"
-	"google.golang.org/api/iterator"
 )
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
+	datasetName := dataset.Name(c.Query("owner"), c.Query("repository"))
 
-	lastRunID, number, err := GetLastRunID(ctx)
+	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.WorkflowJobsTableMeta); err != nil {
+		log.Printf("create if not exists: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	lastRunID, number, err := GetLastRunID(ctx, datasetName)
 	if err != nil {
 		log.Printf("get lastRunID: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	runs, err := GetRuns(ctx, lastRunID)
+	runs, err := GetRuns(ctx, datasetName, lastRunID)
 	if err != nil {
 		log.Printf("get runs: %v", err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
-	client, err := dataset.New(ctx)
-	if err != nil {
-		log.Printf("new bigquery client: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
@@ -60,13 +59,11 @@ func Fetch(c *gin.Context) {
 			return
 		}
 
-		log.Printf("%v(%v)", r.RunID, r.RunNumber)
-
 		items := make([]interface{}, 0)
 		for _, j := range jobs {
 			items = append(items, dataset.WorkflowJob{
-				Owner:        c.Query("owner"),
-				Repository:   c.Query("repository"),
+				Owner:        in.Owner,
+				Repository:   in.Repository,
 				WorkflowID:   r.WorkflowID,
 				WorkflowName: r.WorkflowName,
 				RunID:        r.RunID,
@@ -80,7 +77,7 @@ func Fetch(c *gin.Context) {
 			})
 		}
 
-		if err := client.Insert(ctx, "raw", dataset.WorkflowJobsTableMeta.Name, items); err != nil {
+		if err := dataset.Insert(ctx, datasetName, dataset.WorkflowJobsTableMeta.Name, items); err != nil {
 			log.Printf("insert items: %v", err)
 			c.Status(http.StatusInternalServerError)
 			return
@@ -91,73 +88,53 @@ func Fetch(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func GetRuns(ctx context.Context, lastID int64) ([]dataset.WorkflowRun, error) {
+func GetRuns(ctx context.Context, datasetName string, lastID int64) ([]dataset.WorkflowRun, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	query := fmt.Sprintf("select workflow_id, workflow_name, run_id, run_number from `%v.%v.%v` where run_id > %v", client.ProjectID, "raw", dataset.WorkflowRunsTableMeta.Name, lastID)
-	it, err := client.Raw().Query(query).Read(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("query(%v): %v", query, err)
-	}
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunsTableMeta.Name)
+	query := fmt.Sprintf("select workflow_id, workflow_name, run_id, run_number from `%v` where run_id > %v", table, lastID)
 
 	runs := make([]dataset.WorkflowRun, 0)
-	for {
-		var values []bigquery.Value
-		err := it.Next(&values)
-		if err == iterator.Done {
-			break
-		}
-
-		if err != nil {
-			return nil, fmt.Errorf("iterator: %v", err)
-		}
-
+	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
 		runs = append(runs, dataset.WorkflowRun{
 			WorkflowID:   values[0].(int64),
 			WorkflowName: values[1].(string),
 			RunID:        values[2].(int64),
-			RunNumber:    int(values[3].(int64)),
+			RunNumber:    values[3].(int64),
 		})
+	}); err != nil {
+		return nil, fmt.Errorf("query(%v): %v", query, err)
 	}
 
 	return runs, nil
 }
 
-func GetLastRunID(ctx context.Context) (int64, int64, error) {
+func GetLastRunID(ctx context.Context, datasetName string) (int64, int64, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return -1, -1, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v.%v.%v` limit 1", client.ProjectID, "raw", dataset.WorkflowJobsTableMeta.Name)
-	it, err := client.Raw().Query(query).Read(ctx)
-	if err != nil {
-		return -1, -1, fmt.Errorf("query(%v): %v", query, err)
-	}
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowJobsTableMeta.Name)
+	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v` limit 1", table)
 
-	var values []bigquery.Value
-	for {
-		err := it.Next(&values)
-		if err == iterator.Done {
-			break
+	var id, number int64
+	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+		if len(values) != 2 {
+			return
 		}
 
-		if err != nil {
-			return -1, -1, fmt.Errorf("iterator: %v", err)
+		if values[0] == nil || values[1] == nil {
+			return
 		}
-	}
 
-	var id int64
-	if len(values) > 0 && values[0] != nil {
 		id = values[0].(int64)
-	}
-
-	var number int64
-	if len(values) > 1 && values[1] != nil {
 		number = values[1].(int64)
+	}); err != nil {
+		return -1, -1, fmt.Errorf("query(%v): %v", query, err)
 	}
 
 	return id, number, nil

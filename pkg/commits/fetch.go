@@ -17,7 +17,7 @@ type ListInput struct {
 	LastSHA    string
 }
 
-func Fetch(ctx context.Context, in *ListInput) ([]*github.RepositoryCommit, error) {
+func Fetch(ctx context.Context, in *ListInput, fn ...func(list []*github.RepositoryCommit) error) ([]*github.RepositoryCommit, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -40,6 +40,7 @@ func Fetch(ctx context.Context, in *ListInput) ([]*github.RepositoryCommit, erro
 			return nil, fmt.Errorf("list commits: %v", err)
 		}
 
+		buf := make([]*github.RepositoryCommit, 0)
 		var last bool
 		for i := range commits {
 			if in.LastSHA != "" && *commits[i].SHA == in.LastSHA {
@@ -47,9 +48,16 @@ func Fetch(ctx context.Context, in *ListInput) ([]*github.RepositoryCommit, erro
 				break
 			}
 
-			out = append(out, commits[i])
+			buf = append(buf, commits[i])
 		}
 
+		for i, f := range fn {
+			if err := f(buf); err != nil {
+				return nil, fmt.Errorf("func[%v]: %v", i, err)
+			}
+		}
+
+		out = append(out, buf...)
 		if last || resp.NextPage == 0 {
 			break
 		}

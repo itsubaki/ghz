@@ -3,6 +3,7 @@ main: ./appengine
 
 env_variables:
   GIN_MODE: release
+  DATASET_LOCATION: asia-northeast1
 
 includes:
   - secrets.yaml

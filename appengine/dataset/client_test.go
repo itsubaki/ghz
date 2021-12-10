@@ -20,11 +20,11 @@ func TestCreateIfNotExists(t *testing.T) {
 		name string
 		meta bigquery.TableMetadata
 	}{
-		{"raw", dataset.CommitsTableMeta},
-		{"raw", dataset.PullReqsTableMeta},
-		{"raw", dataset.PullReqCommitsTableMeta},
-		{"raw", dataset.WorkflowRunsTableMeta},
-		{"raw", dataset.WorkflowJobsTableMeta},
+		{"test", dataset.CommitsTableMeta},
+		{"test", dataset.PullReqsTableMeta},
+		{"test", dataset.PullReqCommitsTableMeta},
+		{"test", dataset.WorkflowRunsTableMeta},
+		{"test", dataset.WorkflowJobsTableMeta},
 	}
 
 	for _, c := range cases {

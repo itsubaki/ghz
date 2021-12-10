@@ -12,7 +12,7 @@ type WorkflowJob struct {
 	WorkflowID   int64     `bigquery:"workflow_id"`
 	WorkflowName string    `bigquery:"workflow_name"`
 	RunID        int64     `bigquery:"run_id"`
-	RunNumber    int       `bigquery:"run_number"`
+	RunNumber    int64     `bigquery:"run_number"`
 	JobID        int64     `bigquery:"job_id"`
 	JobName      string    `bigquery:"job_name"`
 	Status       string    `bigquery:"status"`

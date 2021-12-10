@@ -10,7 +10,7 @@ type PullReqs struct {
 	Owner          string    `bigquery:"owner"`
 	Repository     string    `bigquery:"repository"`
 	ID             int64     `bigquery:"id"`
-	Number         int       `bigquery:"number"`
+	Number         int64     `bigquery:"number"`
 	Login          string    `bigquery:"login"`
 	Title          string    `bigquery:"title"`
 	State          string    `bigquery:"state"`
