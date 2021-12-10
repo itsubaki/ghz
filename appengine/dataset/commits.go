@@ -7,7 +7,7 @@ import (
 )
 
 type Commits struct {
-	Owner      string    `bigquery:"onwer"`
+	Owner      string    `bigquery:"owner"`
 	Repository string    `bigquery:"repository"`
 	SHA        string    `bigquery:"sha"`
 	Login      string    `bigquery:"login"`

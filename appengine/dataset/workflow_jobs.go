@@ -7,7 +7,7 @@ import (
 )
 
 type WorkflowJob struct {
-	Owner        string    `bigquery:"onwer"`
+	Owner        string    `bigquery:"owner"`
 	Repository   string    `bigquery:"repository"`
 	WorkflowID   int64     `bigquery:"workflow_id"`
 	WorkflowName string    `bigquery:"workflow_name"`

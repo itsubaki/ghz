@@ -7,7 +7,7 @@ import (
 )
 
 type PullReqCommits struct {
-	Owner      string    `bigquery:"onwer"`
+	Owner      string    `bigquery:"owner"`
 	Repository string    `bigquery:"repository"`
 	ID         int64     `bigquery:"id"`
 	Number     int64     `bigquery:"number"`
