@@ -9,12 +9,11 @@ import (
 )
 
 type FetchInput struct {
-	Owner     string
-	Repo      string
-	PAT       string
-	Page      int
-	PerPage   int
-	LastRunID int64
+	Owner   string
+	Repo    string
+	PAT     string
+	Page    int
+	PerPage int
 }
 
 func Fetch(ctx context.Context, in *FetchInput, runID int64) ([]*github.WorkflowJob, error) {

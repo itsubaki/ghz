@@ -53,6 +53,7 @@ func Fetch(g *gin.Engine) {
 
 	f.GET("/commits", commits.Fetch)
 	f.GET("/pullreqs", pullreqs.Fetch)
+	f.GET("/pullreqs/update", pullreqs.Update)
 	f.GET("/pullreqs/commits", prcommits.Fetch)
 	f.GET("/actions/runs", runs.Fetch)
 	f.GET("/actions/jobs", jobs.Fetch)

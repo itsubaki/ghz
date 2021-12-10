@@ -10,6 +10,10 @@ import (
 )
 
 func TestCreateIfNotExists(t *testing.T) {
+	if _, err := os.Stat("../../credentials.json"); os.IsNotExist(err) {
+		return
+	}
+
 	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "../../credentials.json")
 
 	cases := []struct {

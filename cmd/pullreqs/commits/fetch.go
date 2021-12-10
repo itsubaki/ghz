@@ -18,8 +18,8 @@ import (
 const Filename = "pullreqs_commits.json"
 
 type CommitWithPRID struct {
-	PullRequestID     int64 `json:"pullrequest_id,omitempty"`
-	PullRequestNumber int   `json:"pullreqeust_number,omitempty"`
+	PullReqID     int64 `json:"pullreq_id,omitempty"`
+	PullReqNumber int   `json:"pullreq_number,omitempty"`
 	github.RepositoryCommit
 }
 
@@ -28,8 +28,8 @@ func (c CommitWithPRID) CSV() string {
 	title = strings.ReplaceAll(title, ",", " ")
 
 	return fmt.Sprintf("%v, %v, %v, %v, %v, %v, ",
-		c.PullRequestID,
-		c.PullRequestNumber,
+		c.PullReqID,
+		c.PullReqNumber,
 		*c.SHA,
 		*c.Commit.Author.Name,
 		c.Commit.Author.Date.Format("2006-01-02 15:04:05"),
@@ -81,9 +81,9 @@ func Fetch(c *cli.Context) error {
 		clist := make([]CommitWithPRID, 0)
 		for j := range list {
 			clist = append(clist, CommitWithPRID{
-				PullRequestID:     *prs[i].ID,
-				PullRequestNumber: *prs[i].Number,
-				RepositoryCommit:  *list[j],
+				PullReqID:        *prs[i].ID,
+				PullReqNumber:    *prs[i].Number,
+				RepositoryCommit: *list[j],
 			})
 		}
 
@@ -133,9 +133,9 @@ func GetLastNumber(path string) (int64, int, error) {
 			return -1, -1, fmt.Errorf("unmarshal: %v", err)
 		}
 
-		if c.PullRequestID > id {
-			id = c.PullRequestID
-			number = c.PullRequestNumber
+		if c.PullReqID > id {
+			id = c.PullReqID
+			number = c.PullReqNumber
 		}
 	}
 

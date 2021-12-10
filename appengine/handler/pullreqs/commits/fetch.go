@@ -25,7 +25,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	prs, err := GetPullRequests(ctx, id)
+	prs, err := GetPullReqs(ctx, id)
 	if err != nil {
 		log.Printf("get pull requests: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -84,12 +84,12 @@ func Fetch(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-type PullRequest struct {
+type PullReq struct {
 	ID     int64
 	Number int64
 }
 
-func GetPullRequests(ctx context.Context, lastID int64) ([]PullRequest, error) {
+func GetPullReqs(ctx context.Context, lastID int64) ([]PullReq, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("new bigquery client: %v", err)
@@ -101,7 +101,7 @@ func GetPullRequests(ctx context.Context, lastID int64) ([]PullRequest, error) {
 		return nil, fmt.Errorf("query(%v): %v", query, err)
 	}
 
-	prs := make([]PullRequest, 0)
+	prs := make([]PullReq, 0)
 	for {
 		var values []bigquery.Value
 		err := it.Next(&values)
@@ -113,7 +113,7 @@ func GetPullRequests(ctx context.Context, lastID int64) ([]PullRequest, error) {
 			return nil, fmt.Errorf("iterator: %v", err)
 		}
 
-		prs = append(prs, PullRequest{
+		prs = append(prs, PullReq{
 			ID:     values[0].(int64),
 			Number: values[1].(int64),
 		})

@@ -54,7 +54,7 @@ func Deserialize(path string) ([]CommitWithPRID, error) {
 }
 
 func print(format string, list []CommitWithPRID) error {
-	sort.Slice(list, func(i, j int) bool { return list[i].PullRequestID > list[j].PullRequestID })
+	sort.Slice(list, func(i, j int) bool { return list[i].PullReqID > list[j].PullReqID })
 
 	if format == "json" {
 		for _, r := range list {

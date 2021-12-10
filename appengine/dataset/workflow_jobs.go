@@ -7,11 +7,11 @@ import (
 )
 
 type WorkflowJob struct {
-	WorkflowID   int       `bigquery:"workflow_id"`
+	WorkflowID   int64     `bigquery:"workflow_id"`
 	WorkflowName string    `bigquery:"workflow_name"`
-	RunID        int       `bigquery:"run_id"`
+	RunID        int64     `bigquery:"run_id"`
 	RunNumber    int       `bigquery:"run_number"`
-	JobID        int       `bigquery:"job_id"`
+	JobID        int64     `bigquery:"job_id"`
 	JobName      string    `bigquery:"job_name"`
 	Status       string    `bigquery:"status"`
 	Conclusion   string    `bigquery:"conclusion"`

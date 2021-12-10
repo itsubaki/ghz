@@ -23,24 +23,23 @@ func Fetch(c *cli.Context) error {
 	}
 
 	path := fmt.Sprintf("%s/%s", dir, Filename)
-	id, err := GetLastRunID(path)
+	lastRunID, err := GetLastRunID(path)
 	if err != nil {
 		return fmt.Errorf("last id: %v", err)
 	}
 
 	in := jobs.FetchInput{
-		Owner:     c.String("owner"),
-		Repo:      c.String("repo"),
-		PAT:       c.String("pat"),
-		Page:      c.Int("page"),
-		PerPage:   c.Int("perpage"),
-		LastRunID: id,
+		Owner:   c.String("owner"),
+		Repo:    c.String("repo"),
+		PAT:     c.String("pat"),
+		Page:    c.Int("page"),
+		PerPage: c.Int("perpage"),
 	}
 	wid := c.Int64("workflow_id")
 
 	fmt.Printf("target: %v/%v\n", in.Owner, in.Repo)
 	fmt.Printf("workflow_id: %v\n", wid)
-	fmt.Printf("last_run_id: %v\n", id)
+	fmt.Printf("last_run_id: %v\n", lastRunID)
 
 	runspath := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"), runs.Filename)
 	runs, err := runs.Deserialize(runspath)
@@ -54,7 +53,7 @@ func Fetch(c *cli.Context) error {
 		if wid > 0 && *runs[i].WorkflowID != wid {
 			continue
 		}
-		if *runs[i].ID <= in.LastRunID {
+		if *runs[i].ID <= lastRunID {
 			continue
 		}
 
