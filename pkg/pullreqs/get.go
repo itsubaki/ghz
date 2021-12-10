@@ -24,10 +24,10 @@ func Get(ctx context.Context, in *GetInput) (*github.PullRequest, error) {
 		)))
 	}
 
-	pr, _, err := client.PullRequests.Get(ctx, in.Owner, in.Repository, in.Number)
+	out, _, err := client.PullRequests.Get(ctx, in.Owner, in.Repository, in.Number)
 	if err != nil {
-		return nil, fmt.Errorf("get pull rquests: %v", err)
+		return nil, fmt.Errorf("get pullreq: %v", err)
 	}
 
-	return pr, nil
+	return out, nil
 }

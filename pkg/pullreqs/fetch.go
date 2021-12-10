@@ -39,7 +39,7 @@ func Fetch(ctx context.Context, in *ListInput, fn ...func(list []*github.PullReq
 	for {
 		pr, resp, err := client.PullRequests.List(ctx, in.Owner, in.Repository, &opts)
 		if err != nil {
-			return nil, fmt.Errorf("list pull requests: %v", err)
+			return nil, fmt.Errorf("list pullreqs: %v", err)
 		}
 
 		buf := make([]*github.PullRequest, 0)

@@ -30,14 +30,14 @@ func Fetch(ctx context.Context, in *FetchInput) ([]*github.Event, error) {
 		PerPage: in.PerPage,
 	}
 
-	list := make([]*github.Event, 0)
+	out := make([]*github.Event, 0)
 	for {
 		events, resp, err := client.Activity.ListRepositoryEvents(ctx, in.Owner, in.Repository, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list workflow runs: %v", err)
 		}
 
-		list = append(list, events...)
+		out = append(out, events...)
 		if resp.NextPage == 0 {
 			break
 		}
@@ -45,5 +45,5 @@ func Fetch(ctx context.Context, in *FetchInput) ([]*github.Event, error) {
 		opts.Page = resp.NextPage
 	}
 
-	return list, nil
+	return out, nil
 }

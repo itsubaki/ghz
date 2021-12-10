@@ -32,14 +32,14 @@ func Fetch(ctx context.Context, in *FetchInput, runID int64) ([]*github.Workflow
 		},
 	}
 
-	list := make([]*github.WorkflowJob, 0)
+	out := make([]*github.WorkflowJob, 0)
 	for {
 		jobs, resp, err := client.Actions.ListWorkflowJobs(ctx, in.Owner, in.Repository, runID, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list workflow jobs: %v", err)
 		}
 
-		list = append(list, jobs.Jobs...)
+		out = append(out, jobs.Jobs...)
 		if resp.NextPage == 0 {
 			break
 		}
@@ -47,5 +47,5 @@ func Fetch(ctx context.Context, in *FetchInput, runID int64) ([]*github.Workflow
 		opts.Page = resp.NextPage
 	}
 
-	return list, nil
+	return out, nil
 }

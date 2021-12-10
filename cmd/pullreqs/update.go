@@ -37,7 +37,7 @@ func Update(c *cli.Context) error {
 
 		pr, err := pullreqs.Get(ctx, &in)
 		if err != nil {
-			return fmt.Errorf("pull request: %v", err)
+			return fmt.Errorf("get pullreq: %v", err)
 		}
 
 		fmt.Println(CSV(*pr))
