@@ -56,7 +56,7 @@ func Fetch(c *gin.Context) {
 				Conclusion:    r.GetConclusion(),
 				CreatedAt:     r.CreatedAt.Time,
 				UpdatedAt:     r.UpdatedAt.Time,
-				HeadCommitSHA: *r.HeadCommit.ID,
+				HeadCommitSHA: r.HeadCommit.GetID(),
 			})
 		}
 
