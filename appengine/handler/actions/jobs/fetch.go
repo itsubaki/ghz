@@ -23,14 +23,14 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	lastRunID, number, err := GetLastRunID(ctx, datasetName)
+	token, num, err := NextToken(ctx, datasetName)
 	if err != nil {
 		log.Printf("get lastRunID: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	runs, err := GetRuns(ctx, datasetName, lastRunID)
+	runs, err := GetRuns(ctx, datasetName, token)
 	if err != nil {
 		log.Printf("get runs: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -45,13 +45,9 @@ func Fetch(c *gin.Context) {
 		PerPage:    100,
 	}
 
-	log.Printf("target=%v/%v, last_id=%v(%v)", in.Owner, in.Repository, lastRunID, number)
+	log.Printf("target=%v/%v, next=%v(%v)", in.Owner, in.Repository, token, num)
 
 	for _, r := range runs {
-		if r.RunID <= lastRunID {
-			continue
-		}
-
 		jobs, err := jobs.Fetch(ctx, &in, r.RunID)
 		if err != nil {
 			log.Printf("fetch: %v", err)
@@ -112,7 +108,7 @@ func GetRuns(ctx context.Context, datasetName string, lastID int64) ([]dataset.W
 	return runs, nil
 }
 
-func GetLastRunID(ctx context.Context, datasetName string) (int64, int64, error) {
+func NextToken(ctx context.Context, datasetName string) (int64, int64, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return -1, -1, fmt.Errorf("new bigquery client: %v", err)
@@ -121,8 +117,8 @@ func GetLastRunID(ctx context.Context, datasetName string) (int64, int64, error)
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowJobsTableMeta.Name)
 	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v` limit 1", table)
 
-	var id, number int64
-	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+	var id, num int64
+	if err := client.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 2 {
 			return
 		}
@@ -132,10 +128,10 @@ func GetLastRunID(ctx context.Context, datasetName string) (int64, int64, error)
 		}
 
 		id = values[0].(int64)
-		number = values[1].(int64)
+		num = values[1].(int64)
 	}); err != nil {
 		return -1, -1, fmt.Errorf("query(%v): %v", query, err)
 	}
 
-	return id, number, nil
+	return id, num, nil
 }

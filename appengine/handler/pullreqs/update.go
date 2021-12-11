@@ -25,6 +25,8 @@ func Update(c *gin.Context) {
 		return
 	}
 
+	log.Printf("target=%v/%v, len(open)=%v", c.Query("owner"), c.Query("repository"), len(open))
+
 	for _, r := range open {
 		in := pullreqs.GetInput{
 			Owner:      c.Query("owner"),
@@ -87,7 +89,7 @@ func UpdatePullReq(ctx context.Context, datasetName string, r *github.PullReques
 		return nil
 	}
 
-	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+	if err := client.Query(ctx, query, func(values []bigquery.Value) {
 		return
 	}); err != nil {
 		return fmt.Errorf("query(%v): %v", query, err)
@@ -106,7 +108,7 @@ func GetPullReqsWith(ctx context.Context, datasetName, state string) ([]dataset.
 	query := fmt.Sprintf("select id, number from `%v` where state = \"%v\"", table, state)
 
 	out := make([]dataset.PullReqs, 0)
-	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+	if err := client.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 2 {
 			return
 		}

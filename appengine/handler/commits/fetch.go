@@ -25,7 +25,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	sha, err := GetLastSHA(ctx, datasetName)
+	token, err := NextToken(ctx, datasetName)
 	if err != nil {
 		log.Printf("get lastSHA: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -38,8 +38,10 @@ func Fetch(c *gin.Context) {
 		PAT:        os.Getenv("PAT"),
 		Page:       0,
 		PerPage:    100,
-		LastSHA:    sha,
+		LastSHA:    token,
 	}
+
+	log.Printf("target=%v/%v, next=%v", in.Owner, in.Repository, token)
 
 	if _, err := commits.Fetch(ctx, &in, func(list []*github.RepositoryCommit) error {
 		items := make([]interface{}, 0)
@@ -69,7 +71,7 @@ func Fetch(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func GetLastSHA(ctx context.Context, datasetName string) (string, error) {
+func NextToken(ctx context.Context, datasetName string) (string, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return "", fmt.Errorf("new bigquery client: %v", err)
@@ -79,7 +81,7 @@ func GetLastSHA(ctx context.Context, datasetName string) (string, error) {
 	query := fmt.Sprintf("select sha from `%v` where date = (select max(date) from `%v` limit 1)", table, table)
 
 	var sha string
-	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+	if err := client.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 1 {
 			return
 		}

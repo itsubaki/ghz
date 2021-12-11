@@ -68,6 +68,29 @@ func (c *Client) Insert(ctx context.Context, datasetName, tableName string, item
 	return nil
 }
 
+func (c *Client) Query(ctx context.Context, query string, fn func(values []bigquery.Value)) error {
+	it, err := c.client.Query(query).Read(ctx)
+	if err != nil {
+		return fmt.Errorf("query(%v): %v", query, err)
+	}
+
+	var values []bigquery.Value
+	for {
+		err := it.Next(&values)
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			return fmt.Errorf("iterator: %v", err)
+		}
+
+		fn(values)
+	}
+
+	return nil
+}
+
 func (c *Client) Raw() *bigquery.Client {
 	return c.client
 }
@@ -96,26 +119,7 @@ func Query(ctx context.Context, query string, fn func(values []bigquery.Value)) 
 		return fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	it, err := client.Raw().Query(query).Read(ctx)
-	if err != nil {
-		return fmt.Errorf("query(%v): %v", query, err)
-	}
-
-	var values []bigquery.Value
-	for {
-		err := it.Next(&values)
-		if err == iterator.Done {
-			break
-		}
-
-		if err != nil {
-			return fmt.Errorf("iterator: %v", err)
-		}
-
-		fn(values)
-	}
-
-	return nil
+	return client.Query(ctx, query, fn)
 }
 
 func Name(owner, repository string) string {

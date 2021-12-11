@@ -24,7 +24,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	id, err := GetLastID(ctx, datasetName)
+	token, err := NextToken(ctx, datasetName)
 	if err != nil {
 		log.Printf("get lastID: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -38,10 +38,10 @@ func Fetch(c *gin.Context) {
 		Page:       0,
 		PerPage:    100,
 		State:      "all",
-		LastID:     id,
+		LastID:     token,
 	}
 
-	log.Printf("target=%v/%v, last_id=%v", in.Owner, in.Repository, in.LastID)
+	log.Printf("target=%v/%v, next=%v", in.Owner, in.Repository, token)
 
 	if _, err := pullreqs.Fetch(ctx, &in, func(list []*github.PullRequest) error {
 		items := make([]interface{}, 0)
@@ -77,7 +77,7 @@ func Fetch(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func GetLastID(ctx context.Context, datasetName string) (int64, error) {
+func NextToken(ctx context.Context, datasetName string) (int64, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return -1, fmt.Errorf("new bigquery client: %v", err)
@@ -87,7 +87,7 @@ func GetLastID(ctx context.Context, datasetName string) (int64, error) {
 	query := fmt.Sprintf("select max(id) from `%v` limit 1", table)
 
 	var id int64
-	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+	if err := client.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 1 {
 			return
 		}

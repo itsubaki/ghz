@@ -24,7 +24,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	id, number, err := GetLastID(ctx, datasetName)
+	token, num, err := NextToken(ctx, datasetName)
 	if err != nil {
 		log.Printf("get lastID: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -37,10 +37,10 @@ func Fetch(c *gin.Context) {
 		PAT:        os.Getenv("PAT"),
 		Page:       0,
 		PerPage:    100,
-		LastID:     id,
+		LastID:     token,
 	}
 
-	log.Printf("target=%v/%v, last_id=%v(%v)", in.Owner, in.Repository, in.LastID, number)
+	log.Printf("target=%v/%v, next=%v(%v)", in.Owner, in.Repository, token, num)
 
 	if _, err := runs.Fetch(ctx, &in, func(list []*github.WorkflowRun) error {
 		items := make([]interface{}, 0)
@@ -75,7 +75,7 @@ func Fetch(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func GetLastID(ctx context.Context, datasetName string) (int64, int64, error) {
+func NextToken(ctx context.Context, datasetName string) (int64, int64, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return -1, -1, fmt.Errorf("new bigquery client: %v", err)
@@ -84,8 +84,8 @@ func GetLastID(ctx context.Context, datasetName string) (int64, int64, error) {
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunsTableMeta.Name)
 	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v` limit 1", table)
 
-	var id, number int64
-	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+	var id, num int64
+	if err := client.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 2 {
 			return
 		}
@@ -95,10 +95,10 @@ func GetLastID(ctx context.Context, datasetName string) (int64, int64, error) {
 		}
 
 		id = values[0].(int64)
-		number = values[1].(int64)
+		num = values[1].(int64)
 	}); err != nil {
 		return -1, -1, fmt.Errorf("query(%v): %v", query, err)
 	}
 
-	return id, number, nil
+	return id, num, nil
 }

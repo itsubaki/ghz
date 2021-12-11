@@ -24,14 +24,14 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	id, number, err := GetLastID(ctx, datasetName)
+	token, num, err := NextToken(ctx, datasetName)
 	if err != nil {
 		log.Printf("get lastID: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	prs, err := GetPullReqs(ctx, datasetName, id)
+	prs, err := GetPullReqs(ctx, datasetName, token)
 	if err != nil {
 		log.Printf("get pull requests: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -46,7 +46,7 @@ func Fetch(c *gin.Context) {
 		PerPage:    100,
 	}
 
-	log.Printf("target=%v/%v, last_id=%v(%v)", in.Owner, in.Repository, id, number)
+	log.Printf("target=%v/%v, next=%v(%v)", in.Owner, in.Repository, token, num)
 
 	for _, p := range prs {
 		list, err := commits.Fetch(ctx, &in, int(p.Number))
@@ -96,7 +96,7 @@ func GetPullReqs(ctx context.Context, datasetName string, lastID int64) ([]PullR
 	query := fmt.Sprintf("select id, number from `%v` where id > %v", table, lastID)
 
 	prs := make([]PullReq, 0)
-	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+	if err := client.Query(ctx, query, func(values []bigquery.Value) {
 		prs = append(prs, PullReq{
 			ID:     values[0].(int64),
 			Number: values[1].(int64),
@@ -108,7 +108,7 @@ func GetPullReqs(ctx context.Context, datasetName string, lastID int64) ([]PullR
 	return prs, nil
 }
 
-func GetLastID(ctx context.Context, datasetName string) (int64, int64, error) {
+func NextToken(ctx context.Context, datasetName string) (int64, int64, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return -1, -1, fmt.Errorf("new bigquery client: %v", err)
@@ -117,8 +117,8 @@ func GetLastID(ctx context.Context, datasetName string) (int64, int64, error) {
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqCommitsTableMeta.Name)
 	query := fmt.Sprintf("select max(id), max(number) from `%v` limit 1", table)
 
-	var id, number int64
-	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+	var id, num int64
+	if err := client.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 2 {
 			return
 		}
@@ -128,10 +128,10 @@ func GetLastID(ctx context.Context, datasetName string) (int64, int64, error) {
 		}
 
 		id = values[0].(int64)
-		number = values[1].(int64)
+		num = values[1].(int64)
 	}); err != nil {
 		return -1, -1, fmt.Errorf("query(%v): %v", query, err)
 	}
 
-	return id, number, nil
+	return id, num, nil
 }
