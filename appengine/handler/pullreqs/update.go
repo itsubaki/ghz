@@ -16,7 +16,15 @@ import (
 
 func Update(c *gin.Context) {
 	ctx := context.Background()
-	datasetName := dataset.Name(c.Query("owner"), c.Query("repository"))
+	owner := c.Query("owner")
+	repository := c.Query("repository")
+	datasetName := dataset.Name(owner, repository)
+
+	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.PullReqsTableMeta); err != nil {
+		log.Printf("create if not exists: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
 
 	open, err := GetPullReqsWith(ctx, datasetName, "open")
 	if err != nil {
@@ -25,17 +33,15 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	log.Printf("target=%v/%v, len(open)=%v", c.Query("owner"), c.Query("repository"), len(open))
+	log.Printf("target=%v/%v, len(open)=%v", owner, repository, len(open))
 
 	for _, r := range open {
-		in := pullreqs.GetInput{
-			Owner:      c.Query("owner"),
-			Repository: c.Query("repository"),
+		pr, err := pullreqs.Get(ctx, &pullreqs.GetInput{
+			Owner:      owner,
+			Repository: repository,
 			PAT:        os.Getenv("PAT"),
 			Number:     int(r.Number),
-		}
-
-		pr, err := pullreqs.Get(ctx, &in)
+		})
 		if err != nil {
 			log.Printf("get pullreq: %v", err)
 			c.Status(http.StatusInternalServerError)

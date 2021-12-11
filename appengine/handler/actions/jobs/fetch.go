@@ -15,7 +15,9 @@ import (
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
-	datasetName := dataset.Name(c.Query("owner"), c.Query("repository"))
+	owner := c.Query("owner")
+	repository := c.Query("repository")
+	datasetName := dataset.Name(owner, repository)
 
 	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.WorkflowJobsTableMeta); err != nil {
 		log.Printf("create if not exists: %v", err)
@@ -30,6 +32,8 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
+	log.Printf("target=%v/%v, next=%v(%v)", owner, repository, token, num)
+
 	runs, err := GetRuns(ctx, datasetName, token)
 	if err != nil {
 		log.Printf("get runs: %v", err)
@@ -37,18 +41,17 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	in := jobs.FetchInput{
-		Owner:      c.Query("owner"),
-		Repository: c.Query("repository"),
-		PAT:        os.Getenv("PAT"),
-		Page:       0,
-		PerPage:    100,
-	}
-
-	log.Printf("target=%v/%v, next=%v(%v)", in.Owner, in.Repository, token, num)
-
 	for _, r := range runs {
-		jobs, err := jobs.Fetch(ctx, &in, r.RunID)
+		jobs, err := jobs.Fetch(ctx,
+			&jobs.FetchInput{
+				Owner:      owner,
+				Repository: repository,
+				PAT:        os.Getenv("PAT"),
+				Page:       0,
+				PerPage:    100,
+			},
+			r.RunID,
+		)
 		if err != nil {
 			log.Printf("fetch: %v", err)
 			c.Status(http.StatusInternalServerError)
@@ -58,8 +61,8 @@ func Fetch(c *gin.Context) {
 		items := make([]interface{}, 0)
 		for _, j := range jobs {
 			items = append(items, dataset.WorkflowJob{
-				Owner:        in.Owner,
-				Repository:   in.Repository,
+				Owner:        owner,
+				Repository:   repository,
 				WorkflowID:   r.WorkflowID,
 				WorkflowName: r.WorkflowName,
 				RunID:        r.RunID,
@@ -84,17 +87,17 @@ func Fetch(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func GetRuns(ctx context.Context, datasetName string, lastID int64) ([]dataset.WorkflowRun, error) {
+func GetRuns(ctx context.Context, datasetName string, nextToken int64) ([]dataset.WorkflowRun, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("new bigquery client: %v", err)
 	}
 
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunsTableMeta.Name)
-	query := fmt.Sprintf("select workflow_id, workflow_name, run_id, run_number from `%v` where run_id > %v", table, lastID)
+	query := fmt.Sprintf("select workflow_id, workflow_name, run_id, run_number from `%v` where run_id > %v", table, nextToken)
 
 	runs := make([]dataset.WorkflowRun, 0)
-	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+	if err := client.Query(ctx, query, func(values []bigquery.Value) {
 		runs = append(runs, dataset.WorkflowRun{
 			WorkflowID:   values[0].(int64),
 			WorkflowName: values[1].(string),

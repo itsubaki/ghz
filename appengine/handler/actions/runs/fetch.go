@@ -16,7 +16,9 @@ import (
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
-	datasetName := dataset.Name(c.Query("owner"), c.Query("repository"))
+	owner := c.Query("owner")
+	repository := c.Query("repository")
+	datasetName := dataset.Name(owner, repository)
 
 	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.WorkflowRunsTableMeta); err != nil {
 		log.Printf("create if not exists: %v", err)
@@ -31,41 +33,41 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	in := runs.FetchInput{
-		Owner:      c.Query("owner"),
-		Repository: c.Query("repository"),
-		PAT:        os.Getenv("PAT"),
-		Page:       0,
-		PerPage:    100,
-		LastID:     token,
-	}
+	log.Printf("target=%v/%v, next=%v(%v)", owner, repository, token, num)
 
-	log.Printf("target=%v/%v, next=%v(%v)", in.Owner, in.Repository, token, num)
+	if _, err := runs.Fetch(ctx,
+		&runs.FetchInput{
+			Owner:      owner,
+			Repository: repository,
+			PAT:        os.Getenv("PAT"),
+			Page:       0,
+			PerPage:    100,
+			LastID:     token,
+		},
+		func(list []*github.WorkflowRun) error {
+			items := make([]interface{}, 0)
+			for _, r := range list {
+				items = append(items, dataset.WorkflowRun{
+					Owner:         owner,
+					Repository:    repository,
+					WorkflowID:    r.GetWorkflowID(),
+					WorkflowName:  r.GetName(),
+					RunID:         r.GetID(),
+					RunNumber:     int64(r.GetRunNumber()),
+					Status:        r.GetStatus(),
+					Conclusion:    r.GetConclusion(),
+					CreatedAt:     r.CreatedAt.Time,
+					UpdatedAt:     r.UpdatedAt.Time,
+					HeadCommitSHA: r.HeadCommit.GetID(),
+				})
+			}
 
-	if _, err := runs.Fetch(ctx, &in, func(list []*github.WorkflowRun) error {
-		items := make([]interface{}, 0)
-		for _, r := range list {
-			items = append(items, dataset.WorkflowRun{
-				Owner:         c.Query("owner"),
-				Repository:    c.Query("repository"),
-				WorkflowID:    r.GetWorkflowID(),
-				WorkflowName:  r.GetName(),
-				RunID:         r.GetID(),
-				RunNumber:     int64(r.GetRunNumber()),
-				Status:        r.GetStatus(),
-				Conclusion:    r.GetConclusion(),
-				CreatedAt:     r.CreatedAt.Time,
-				UpdatedAt:     r.UpdatedAt.Time,
-				HeadCommitSHA: r.HeadCommit.GetID(),
-			})
-		}
+			if err := dataset.Insert(ctx, datasetName, dataset.WorkflowRunsTableMeta.Name, items); err != nil {
+				return fmt.Errorf("insert items: %v", err)
+			}
 
-		if err := dataset.Insert(ctx, datasetName, dataset.WorkflowRunsTableMeta.Name, items); err != nil {
-			return fmt.Errorf("insert items: %v", err)
-		}
-
-		return nil
-	}); err != nil {
+			return nil
+		}); err != nil {
 		log.Printf("fetch: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return

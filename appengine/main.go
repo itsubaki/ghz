@@ -26,6 +26,4 @@ func main() {
 	if err := s.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		log.Fatalf("listen: %s\n", err)
 	}
-
-	log.Println("shutdown finished")
 }

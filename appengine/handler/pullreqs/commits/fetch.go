@@ -16,7 +16,9 @@ import (
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
-	datasetName := dataset.Name(c.Query("owner"), c.Query("repository"))
+	owner := c.Query("owner")
+	repository := c.Query("repository")
+	datasetName := dataset.Name(owner, repository)
 
 	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.PullReqCommitsTableMeta); err != nil {
 		log.Printf("create if not exists: %v", err)
@@ -31,6 +33,8 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
+	log.Printf("target=%v/%v, next=%v(%v)", owner, repository, token, num)
+
 	prs, err := GetPullReqs(ctx, datasetName, token)
 	if err != nil {
 		log.Printf("get pull requests: %v", err)
@@ -38,18 +42,17 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	in := commits.FetchInput{
-		Owner:      c.Query("owner"),
-		Repository: c.Query("repository"),
-		PAT:        os.Getenv("PAT"),
-		Page:       0,
-		PerPage:    100,
-	}
-
-	log.Printf("target=%v/%v, next=%v(%v)", in.Owner, in.Repository, token, num)
-
 	for _, p := range prs {
-		list, err := commits.Fetch(ctx, &in, int(p.Number))
+		list, err := commits.Fetch(ctx,
+			&commits.FetchInput{
+				Owner:      owner,
+				Repository: repository,
+				PAT:        os.Getenv("PAT"),
+				Page:       0,
+				PerPage:    100,
+			},
+			int(p.Number),
+		)
 		if err != nil {
 			log.Printf("fetch: %v", err)
 			c.Status(http.StatusInternalServerError)
@@ -59,8 +62,8 @@ func Fetch(c *gin.Context) {
 		items := make([]interface{}, 0)
 		for _, r := range list {
 			items = append(items, dataset.PullReqCommits{
-				Owner:      c.Query("owner"),
-				Repository: c.Query("repository"),
+				Owner:      owner,
+				Repository: repository,
 				ID:         p.ID,
 				Number:     p.Number,
 				SHA:        r.GetSHA(),
@@ -86,14 +89,14 @@ type PullReq struct {
 	Number int64
 }
 
-func GetPullReqs(ctx context.Context, datasetName string, lastID int64) ([]PullReq, error) {
+func GetPullReqs(ctx context.Context, datasetName string, nextToken int64) ([]PullReq, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("new bigquery client: %v", err)
 	}
 
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsTableMeta.Name)
-	query := fmt.Sprintf("select id, number from `%v` where id > %v", table, lastID)
+	query := fmt.Sprintf("select id, number from `%v` where id > %v", table, nextToken)
 
 	prs := make([]PullReq, 0)
 	if err := client.Query(ctx, query, func(values []bigquery.Value) {
