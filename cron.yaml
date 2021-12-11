@@ -1,45 +1,45 @@
 cron:
-  - description: "ghstats"
-    url: /_fetch/commits?owner=itsubaki&repository=ghstats
+  - description: "gin"
+    url: /_fetch/commits?owner=gin-gonic&repository=gin
     schedule: every day 00:00
     timezone: Asia/Tokyo
 
-  - description: "ghstats"
-    url: /_fetch/pullreqs?owner=itsubaki&repository=ghstats
+  - description: "gin"
+    url: /_fetch/pullreqs?owner=gin-gonic&repository=gin
     schedule: every day 00:00
     timezone: Asia/Tokyo
 
-  - description: "ghstats"
-    url: /_fetch/pullreqs/update?owner=itsubaki&repository=ghstats
+  - description: "gin"
+    url: /_fetch/pullreqs/update?owner=gin-gonic&repository=gin
     schedule: every day 01:00
     timezone: Asia/Tokyo
 
-  - description: "ghstats"
-    url: /_fetch/pullreqs/commits?owner=itsubaki&repository=ghstats
+  - description: "gin"
+    url: /_fetch/pullreqs/commits?owner=gin-gonic&repository=gin
     schedule: every day 01:00
     timezone: Asia/Tokyo
 
-  - description: "ghstats"
-    url: /_fetch/actions/runs?owner=itsubaki&repository=ghstats
+  - description: "gin"
+    url: /_fetch/actions/runs?owner=gin-gonic&repository=gin
     schedule: every day 02:00
     timezone: Asia/Tokyo
 
-  - description: "ghstats"
-    url: /_fetch/actions/jobs?owner=itsubaki&repository=ghstats
+  - description: "gin"
+    url: /_fetch/actions/jobs?owner=gin-gonic&repository=gin
+    schedule: every day 02:00
+    timezone: Asia/Tokyo
+
+  - description: "gin"
+    url: /_stats/pullreqs?owner=gin-gonic&repository=gin
     schedule: every day 03:00
     timezone: Asia/Tokyo
 
-  - description: "ghstats"
-    url: /_stats/pullreqs?owner=itsubaki&repository=ghstats
-    schedule: every day 00:00
+  - description: "gin"
+    url: /_stats/actions/runs?owner=gin-gonic&repository=gin
+    schedule: every day 03:00
     timezone: Asia/Tokyo
 
-  - description: "ghstats"
-    url: /_stats/actions/runs?owner=itsubaki&repository=ghstats
-    schedule: every day 02:00
-    timezone: Asia/Tokyo
-
-  - description: "ghstats"
-    url: /_stats/actions/jobs?owner=itsubaki&repository=ghstats
+  - description: "gin"
+    url: /_stats/actions/jobs?owner=gin-gonic&repository=gin
     schedule: every day 03:00
     timezone: Asia/Tokyo

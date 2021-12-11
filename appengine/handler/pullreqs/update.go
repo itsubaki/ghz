@@ -33,7 +33,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	log.Printf("target=%v/%v, len(open)=%v", owner, repository, len(open))
+	log.Printf("path=%v, target=%v/%v, len(open)=%v", c.Request.URL.Path, owner, repository, len(open))
 
 	for _, r := range open {
 		pr, err := pullreqs.Get(ctx, &pullreqs.GetInput{

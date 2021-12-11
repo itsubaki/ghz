@@ -34,7 +34,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	log.Printf("target=%v/%v, next=%v", owner, repository, token)
+	log.Printf("path=%v, target=%v/%v, next=%v", c.Request.URL.Path, owner, repository, token)
 
 	if _, err := commits.Fetch(ctx,
 		&commits.ListInput{

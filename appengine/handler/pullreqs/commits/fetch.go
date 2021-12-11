@@ -33,7 +33,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	log.Printf("target=%v/%v, next=%v(%v)", owner, repository, token, num)
+	log.Printf("path=%v, target=%v/%v, next=%v(%v)", c.Request.URL.Path, owner, repository, token, num)
 
 	prs, err := GetPullReqs(ctx, datasetName, token)
 	if err != nil {

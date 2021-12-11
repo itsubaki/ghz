@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"regexp"
 
 	"cloud.google.com/go/bigquery"
 	"golang.org/x/oauth2/google"
@@ -122,6 +123,10 @@ func Query(ctx context.Context, query string, fn func(values []bigquery.Value)) 
 	return client.Query(ctx, query, fn)
 }
 
+var invalid = regexp.MustCompile(`[!?"'#$%&@\+\-\*/=~^;:,.|()\[\]{}<>]`)
+
 func Name(owner, repository string) string {
-	return fmt.Sprintf("%v_%v", owner, repository)
+	own := invalid.ReplaceAllString(owner, "_")
+	rep := invalid.ReplaceAllString(repository, "_")
+	return fmt.Sprintf("%v_%v", own, rep)
 }
