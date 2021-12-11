@@ -51,7 +51,7 @@ func XAppEngineCron(c *gin.Context) {
 }
 
 func Fetch(g *gin.Engine) {
-	f := g.Group("/fetch")
+	f := g.Group("/_fetch")
 	f.Use(XAppEngineCron)
 
 	f.GET("/commits", commits.Fetch)
@@ -63,7 +63,7 @@ func Fetch(g *gin.Engine) {
 }
 
 func Stats(g *gin.Engine) {
-	s := g.Group("/stats")
+	s := g.Group("/_stats")
 	s.Use(XAppEngineCron)
 
 	s.GET("/pullreqs", pullreqs.Stats)

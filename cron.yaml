@@ -1,45 +1,45 @@
 cron:
-  - description: "fetch/commits"
-    url: /fetch/commits?owner=itsubaki&repository=ghstats
+  - description: "ghstats"
+    url: /_fetch/commits?owner=itsubaki&repository=ghstats
     schedule: every day 00:00
     timezone: Asia/Tokyo
 
-  - description: "fetch/pullreqs"
-    url: /fetch/pullreqs?owner=itsubaki&repository=ghstats
+  - description: "ghstats"
+    url: /_fetch/pullreqs?owner=itsubaki&repository=ghstats
     schedule: every day 00:00
     timezone: Asia/Tokyo
 
-  - description: "fetch/pullreqs/update"
-    url: /fetch/pullreqs/update?owner=itsubaki&repository=ghstats
+  - description: "ghstats"
+    url: /_fetch/pullreqs/update?owner=itsubaki&repository=ghstats
     schedule: every day 01:00
     timezone: Asia/Tokyo
 
-  - description: "fetch/pullreqs/commits"
-    url: /fetch/pullreqs/commits?owner=itsubaki&repository=ghstats
+  - description: "ghstats"
+    url: /_fetch/pullreqs/commits?owner=itsubaki&repository=ghstats
     schedule: every day 01:00
     timezone: Asia/Tokyo
 
-  - description: "fetch/actions/runs"
-    url: /fetch/actions/runs?owner=itsubaki&repository=ghstats
+  - description: "ghstats"
+    url: /_fetch/actions/runs?owner=itsubaki&repository=ghstats
     schedule: every day 02:00
     timezone: Asia/Tokyo
 
-  - description: "fetch/actions/jobs"
-    url: /fetch/actions/jobs?owner=itsubaki&repository=ghstats
+  - description: "ghstats"
+    url: /_fetch/actions/jobs?owner=itsubaki&repository=ghstats
     schedule: every day 03:00
     timezone: Asia/Tokyo
 
-  - description: "stats/pullreqs"
-    url: /stats/pullreqs?owner=itsubaki&repository=ghstats
+  - description: "ghstats"
+    url: /_stats/pullreqs?owner=itsubaki&repository=ghstats
     schedule: every day 00:00
     timezone: Asia/Tokyo
 
-  - description: "stats/actions/runs"
-    url: /stats/actions/runs?owner=itsubaki&repository=ghstats
+  - description: "ghstats"
+    url: /_stats/actions/runs?owner=itsubaki&repository=ghstats
     schedule: every day 02:00
     timezone: Asia/Tokyo
 
-  - description: "stats/actions/jobs"
-    url: /stats/actions/jobs?owner=itsubaki&repository=ghstats
+  - description: "ghstats"
+    url: /_stats/actions/jobs?owner=itsubaki&repository=ghstats
     schedule: every day 03:00
     timezone: Asia/Tokyo
