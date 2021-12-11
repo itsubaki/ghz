@@ -13,8 +13,8 @@ type PullReqStats struct {
 	End           time.Time `bigquery:"end"`
 	CreatedPerDay float64   `bigquery:"created_per_day"`
 	MergedPerDay  float64   `bigquery:"merged_per_day"`
-	DurationAvg   float64   `bigquery:"duration_avg"` // merged_timestamp - first_commit_timestamp
-	DurationVar   float64   `bigquery:"duration_var"`
+	DurationAvg   float64   `bigquery:"duration_avg"` // avg(merged_timestamp - commit_timestamp)
+	DurationVar   float64   `bigquery:"duration_var"` // avg(merged_timestamp - commit_timestamp)
 }
 
 var PullReqStatsTableMeta = bigquery.TableMetadata{
