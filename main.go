@@ -92,9 +92,9 @@ func New(version string) *cli.App {
 				},
 			},
 			{
-				Name:    "analyze",
-				Aliases: []string{"a"},
-				Action:  runs.Analyze,
+				Name:    "stats",
+				Aliases: []string{"s"},
+				Action:  runs.Stats,
 				Flags: []cli.Flag{
 					&dir,
 					&own,
@@ -148,9 +148,9 @@ func New(version string) *cli.App {
 				},
 			},
 			{
-				Name:    "analyze",
-				Aliases: []string{"a"},
-				Action:  jobs.Analyze,
+				Name:    "stats",
+				Aliases: []string{"s"},
+				Action:  jobs.Stats,
 				Flags: []cli.Flag{
 					&dir,
 					&own,

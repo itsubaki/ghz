@@ -47,21 +47,11 @@ func (s Stats) JSON() string {
 func GetStats(runs []github.WorkflowRun, weeks int, excludingWeekends bool) ([]Stats, error) {
 	out := make([]Stats, 0)
 	for _, d := range calendar.LastNWeeks(weeks) {
-		start, err := calendar.Parse(d.Start)
-		if err != nil {
-			return nil, fmt.Errorf("parse %v: %v", d.Start, err)
-		}
-
-		end, err := calendar.Parse(d.End)
-		if err != nil {
-			return nil, fmt.Errorf("parse %v: %v", d.End, err)
-		}
-
-		stats, err := GetStatsWith(runs, end, start, &GetStatsWithOptions{
+		stats, err := GetStatsWith(runs, d.Start, d.End, &GetStatsWithOptions{
 			ExcludingWeekends: excludingWeekends,
 		})
 		if err != nil {
-			return nil, fmt.Errorf("get runstats with (%v~%v): %v", d.End, d.Start, err)
+			return nil, fmt.Errorf("get runstats with (%v~%v): %v", d.Start, d.End, err)
 		}
 
 		out = append(out, stats)
@@ -74,7 +64,7 @@ type GetStatsWithOptions struct {
 	ExcludingWeekends bool
 }
 
-func GetStatsWith(runs []github.WorkflowRun, end, start time.Time, opts *GetStatsWithOptions) (Stats, error) {
+func GetStatsWith(runs []github.WorkflowRun, start, end time.Time, opts *GetStatsWithOptions) (Stats, error) {
 	var count, failure float64
 	var duration time.Duration
 	for _, r := range runs {

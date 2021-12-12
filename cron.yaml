@@ -35,7 +35,7 @@ cron:
     timezone: Asia/Tokyo
 
   - description: "gin-conic/gin"
-    url: /_stats/gin-gonic/gin/actions/runs
+    url: /_stats/gin-gonic/gin/actions/runs?weeks=3
     schedule: every day 03:00
     timezone: Asia/Tokyo
 
