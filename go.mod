@@ -3,6 +3,7 @@ module github.com/itsubaki/ghstats
 go 1.17
 
 require (
+	cloud.google.com/go v0.99.0
 	cloud.google.com/go/bigquery v1.25.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/google/go-github/v40 v40.0.0
@@ -12,7 +13,6 @@ require (
 )
 
 require (
-	cloud.google.com/go v0.99.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
 	github.com/cncf/udpa/go v0.0.0-20210930031921-04548b0d99d4 // indirect
