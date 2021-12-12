@@ -54,19 +54,19 @@ func Fetch(g *gin.Engine) {
 	f := g.Group("/_fetch")
 	f.Use(XAppEngineCron)
 
-	f.GET("/commits", commits.Fetch)
-	f.GET("/pullreqs", pullreqs.Fetch)
-	f.GET("/pullreqs/update", pullreqs.Update)
-	f.GET("/pullreqs/commits", prcommits.Fetch)
-	f.GET("/actions/runs", runs.Fetch)
-	f.GET("/actions/jobs", jobs.Fetch)
+	f.GET("/:owner/:repository/commits", commits.Fetch)
+	f.GET("/:owner/:repository/pullreqs", pullreqs.Fetch)
+	f.GET("/:owner/:repository/pullreqs/update", pullreqs.Update)
+	f.GET("/:owner/:repository/pullreqs/commits", prcommits.Fetch)
+	f.GET("/:owner/:repository/actions/runs", runs.Fetch)
+	f.GET("/:owner/:repository/actions/jobs", jobs.Fetch)
 }
 
 func Stats(g *gin.Engine) {
 	s := g.Group("/_stats")
 	s.Use(XAppEngineCron)
 
-	s.GET("/pullreqs", pullreqs.Stats)
-	s.GET("/actions/runs", runs.Stats)
-	s.GET("/actions/jobs", jobs.Stats)
+	s.GET("/:owner/:repository/pullreqs", pullreqs.Stats)
+	s.GET("/:owner/:repository/actions/runs", runs.Stats)
+	s.GET("/:owner/:repository/actions/jobs", jobs.Stats)
 }

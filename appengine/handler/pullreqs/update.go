@@ -16,8 +16,8 @@ import (
 
 func Update(c *gin.Context) {
 	ctx := context.Background()
-	owner := c.Query("owner")
-	repository := c.Query("repository")
+	owner := c.Param("owner")
+	repository := c.Param("repository")
 	datasetName := dataset.Name(owner, repository)
 
 	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.PullReqsTableMeta); err != nil {

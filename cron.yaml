@@ -1,45 +1,45 @@
 cron:
-  - description: "gin"
-    url: /_fetch/commits?owner=gin-gonic&repository=gin
+  - description: "gin-conic/gin"
+    url: /_fetch/gin-gonic/gin/commits
     schedule: every day 00:00
     timezone: Asia/Tokyo
 
-  - description: "gin"
-    url: /_fetch/pullreqs?owner=gin-gonic&repository=gin
+  - description: "gin-conic/gin"
+    url: /_fetch/gin-gonic/gin/pullreqs
     schedule: every day 00:00
     timezone: Asia/Tokyo
 
-  - description: "gin"
-    url: /_fetch/pullreqs/update?owner=gin-gonic&repository=gin
+  - description: "gin-conic/gin"
+    url: /_fetch/gin-gonic/gin/pullreqs/update
     schedule: every day 01:00
     timezone: Asia/Tokyo
 
-  - description: "gin"
-    url: /_fetch/pullreqs/commits?owner=gin-gonic&repository=gin
+  - description: "gin-conic/gin"
+    url: /_fetch/gin-gonic/gin/pullreqs/commits
     schedule: every day 01:00
     timezone: Asia/Tokyo
 
-  - description: "gin"
-    url: /_fetch/actions/runs?owner=gin-gonic&repository=gin
+  - description: "gin-conic/gin"
+    url: /_fetch/gin-gonic/gin/actions/runs
     schedule: every day 02:00
     timezone: Asia/Tokyo
 
-  - description: "gin"
-    url: /_fetch/actions/jobs?owner=gin-gonic&repository=gin
+  - description: "gin-conic/gin"
+    url: /_fetch/gin-gonic/gin/actions/jobs
     schedule: every day 02:00
     timezone: Asia/Tokyo
 
-  - description: "gin"
-    url: /_stats/pullreqs?owner=gin-gonic&repository=gin
+  - description: "gin-conic/gin"
+    url: /_stats/gin-gonic/gin/pullreqs
     schedule: every day 03:00
     timezone: Asia/Tokyo
 
-  - description: "gin"
-    url: /_stats/actions/runs?owner=gin-gonic&repository=gin
+  - description: "gin-conic/gin"
+    url: /_stats/gin-gonic/gin/actions/runs
     schedule: every day 03:00
     timezone: Asia/Tokyo
 
-  - description: "gin"
-    url: /_stats/actions/jobs?owner=gin-gonic&repository=gin
+  - description: "gin-conic/gin"
+    url: /_stats/gin-gonic/gin/actions/jobs
     schedule: every day 03:00
     timezone: Asia/Tokyo
