@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/bigquery"
+	"cloud.google.com/go/civil"
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghstats/appengine/dataset"
 	"github.com/itsubaki/ghstats/pkg/calendar"
@@ -20,6 +21,12 @@ func Stats(c *gin.Context) {
 	owner := c.Param("owner")
 	repository := c.Param("repository")
 	datasetName := dataset.Name(owner, repository)
+
+	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.WorkflowRunStatsTableMeta); err != nil {
+		log.Printf("create if not exists: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
 
 	weeks := c.Query("weeks")
 	if weeks == "" {
@@ -33,7 +40,19 @@ func Stats(c *gin.Context) {
 		return
 	}
 
+	next, err := NextTime(ctx, datasetName)
+	if err != nil {
+		log.Printf("next: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
 	for _, d := range calendar.LastNWeeks(w) {
+		if d.Start.Before(next) {
+			// already done it
+			continue
+		}
+
 		runs, err := GetRunsWith(ctx, datasetName, d.Start, d.End)
 		if err != nil {
 			log.Printf("get runs with(%v, %v): %v", d.Start, d.End, err)
@@ -46,12 +65,17 @@ func Stats(c *gin.Context) {
 		}
 
 		stats := GetStats(owner, repository, d.Start, d.End, runs)
-		for k, v := range stats {
-			log.Printf("%v(%v ~ %v): %#v", k, d.Start, d.End, v)
+		for _, v := range stats {
+			log.Printf("%v(%v ~ %v): %#v", v.WorkflowID, d.Start, d.End, v)
 		}
 
-		if err := Insert(ctx, datasetName, stats); err != nil {
-			log.Printf("insert: %v", err)
+		items := make([]interface{}, 0)
+		for i := range stats {
+			items = append(items, stats[i])
+		}
+
+		if err := dataset.Insert(ctx, datasetName, dataset.WorkflowRunStatsTableMeta.Name, items); err != nil {
+			log.Printf("insert items: %v", err)
 			c.Status(http.StatusInternalServerError)
 			return
 		}
@@ -91,7 +115,7 @@ func GetRunsWith(ctx context.Context, datasetName string, start, end time.Time) 
 	return out, nil
 }
 
-func GetStats(owner, repository string, start, end time.Time, list []dataset.WorkflowRun) map[int64]dataset.WorkflowRunStats {
+func GetStats(owner, repository string, start, end time.Time, list []dataset.WorkflowRun) []dataset.WorkflowRunStats {
 	runs := make(map[int64][]dataset.WorkflowRun)
 	for _, r := range list {
 		v, ok := runs[r.WorkflowID]
@@ -102,8 +126,8 @@ func GetStats(owner, repository string, start, end time.Time, list []dataset.Wor
 		runs[r.WorkflowID] = append(v, r)
 	}
 
-	out := make(map[int64]dataset.WorkflowRunStats)
-	for k, v := range runs {
+	out := make([]dataset.WorkflowRunStats, 0)
+	for _, v := range runs {
 		var failure float64
 		var duration time.Duration
 		for _, r := range v {
@@ -131,23 +155,47 @@ func GetStats(owner, repository string, start, end time.Time, list []dataset.Wor
 		}
 		variant := sum / count
 
-		out[k] = dataset.WorkflowRunStats{
+		out = append(out, dataset.WorkflowRunStats{
 			Owner:        owner,
 			Repository:   repository,
 			WorkflowID:   v[0].WorkflowID,
 			WorkflowName: v[0].WorkflowName,
-			Start:        start,
-			End:          end,
+			Start:        civil.DateOf(start),
+			End:          civil.DateOf(end),
 			RunsPerDay:   runsperday,
 			FailureRate:  rate,
 			DurationAvg:  avg,
 			DurationVar:  variant,
-		}
+		})
 	}
 
 	return out
 }
 
-func Insert(ctx context.Context, datasetName string, stats map[int64]dataset.WorkflowRunStats) error {
-	return nil
+func NextTime(ctx context.Context, datasetName string) (time.Time, error) {
+	client, err := dataset.New(ctx)
+	if err != nil {
+		return time.Now(), fmt.Errorf("new bigquery client: %v", err)
+	}
+
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunStatsTableMeta.Name)
+	query := fmt.Sprintf("select max(start) from `%v` limit 1", table)
+
+	var out time.Time
+	if err := client.Query(ctx, query, func(values []bigquery.Value) {
+		if len(values) != 1 {
+			return
+		}
+
+		if values[0] == nil {
+			return
+		}
+
+		date := values[0].(civil.Date)
+		out = time.Date(date.Year, date.Month, date.Day+1, 0, 0, 0, 0, time.UTC)
+	}); err != nil {
+		return time.Now(), fmt.Errorf("query(%v): %v", query, err)
+	}
+
+	return out, nil
 }
