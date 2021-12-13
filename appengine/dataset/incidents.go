@@ -23,6 +23,6 @@ var IncidentTableMeta = bigquery.TableMetadata{
 		{Name: "id", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "deployment_id", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "created_at", Type: bigquery.TimestampFieldType, Required: true},
-		{Name: "resolvec_at", Type: bigquery.TimestampFieldType, Required: true},
+		{Name: "resolved_at", Type: bigquery.TimestampFieldType, Required: true},
 	},
 }

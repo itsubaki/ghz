@@ -62,9 +62,13 @@ func Stats(c *gin.Context) {
 				return
 			}
 
+			if len(commits) == 0 {
+				continue
+			}
+
 			var sum float64
 			for _, c := range commits {
-				sum += pr.MergedAt.Sub(c.Date).Hours()
+				sum += pr.MergedAt.Sub(c.Date).Minutes()
 			}
 
 			count := float64(len(commits))
@@ -73,7 +77,7 @@ func Stats(c *gin.Context) {
 
 			var sum2 float64
 			for _, c := range commits {
-				sum2 += math.Pow(pr.MergedAt.Sub(c.Date).Hours()-avg, 2.0)
+				sum2 += math.Pow(pr.MergedAt.Sub(c.Date).Minutes()-avg, 2.0)
 			}
 
 			variant := sum2 / count
@@ -97,7 +101,7 @@ func Stats(c *gin.Context) {
 		})
 
 		if err := dataset.Insert(ctx, datasetName, dataset.PullReqStatsTableMeta.Name, items); err != nil {
-			log.Printf("insert items: %v", err)
+			log.Printf("insert items(%v): %v", items, err)
 			c.Status(http.StatusInternalServerError)
 			return
 		}

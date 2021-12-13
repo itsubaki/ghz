@@ -71,8 +71,8 @@ func Fetch(c *gin.Context) {
 				JobName:      j.GetName(),
 				Status:       j.GetStatus(),
 				Conclusion:   j.GetConclusion(),
-				StartedAt:    j.StartedAt.Time,
-				CompletedAt:  j.CompletedAt.Time,
+				StartedAt:    j.GetStartedAt().Time,
+				CompletedAt:  j.GetCompletedAt().Time,
 			})
 		}
 

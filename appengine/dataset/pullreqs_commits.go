@@ -19,6 +19,10 @@ type PullReqCommits struct {
 
 var PullReqCommitsTableMeta = bigquery.TableMetadata{
 	Name: "pullreqs_commits",
+	TimePartitioning: &bigquery.TimePartitioning{
+		Type:  bigquery.MonthPartitioningType,
+		Field: "date",
+	},
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},

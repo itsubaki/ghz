@@ -17,6 +17,10 @@ type Commits struct {
 
 var CommitsTableMeta = bigquery.TableMetadata{
 	Name: "commits",
+	TimePartitioning: &bigquery.TimePartitioning{
+		Type:  bigquery.MonthPartitioningType,
+		Field: "date",
+	},
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},
