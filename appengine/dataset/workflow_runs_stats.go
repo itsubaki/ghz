@@ -5,12 +5,11 @@ import (
 	"cloud.google.com/go/civil"
 )
 
-type WorkflowJobStats struct {
+type WorkflowRunStats struct {
 	Owner        string     `bigquery:"owner"`
 	Repository   string     `bigquery:"repository"`
 	WorkflowID   int64      `bigquery:"workflow_id"`
 	WorkflowName string     `bigquery:"workflow_name"`
-	JobName      string     `bigquery:"job_name"`
 	Start        civil.Date `bigquery:"start"`
 	End          civil.Date `bigquery:"end"`
 	RunsPerDay   float64    `bigquery:"runs_per_day"`
@@ -19,14 +18,13 @@ type WorkflowJobStats struct {
 	DurationVar  float64    `bigquery:"duration_var"`
 }
 
-var WorkflowJobStatsTableMeta = bigquery.TableMetadata{
-	Name: "stats_workflow_job",
+var WorkflowRunStatsTableMeta = bigquery.TableMetadata{
+	Name: "workflow_runs_stats",
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},
 		{Name: "workflow_id", Type: bigquery.StringFieldType, Required: true},
 		{Name: "workflow_name", Type: bigquery.StringFieldType, Required: true},
-		{Name: "job_name", Type: bigquery.StringFieldType, Required: true},
 		{Name: "start", Type: bigquery.DateFieldType, Required: true},
 		{Name: "end", Type: bigquery.DateFieldType},
 		{Name: "runs_per_day", Type: bigquery.FloatFieldType, Required: true},

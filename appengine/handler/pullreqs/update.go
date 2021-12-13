@@ -26,7 +26,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	open, err := GetPullReqsWith(ctx, datasetName, "open")
+	open, err := GetPullReqs(ctx, datasetName, "open")
 	if err != nil {
 		log.Printf("get pullreq with: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -104,7 +104,7 @@ func UpdatePullReq(ctx context.Context, datasetName string, r *github.PullReques
 	return nil
 }
 
-func GetPullReqsWith(ctx context.Context, datasetName, state string) ([]dataset.PullReqs, error) {
+func GetPullReqs(ctx context.Context, datasetName, state string) ([]dataset.PullReqs, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("new bigquery client: %v", err)

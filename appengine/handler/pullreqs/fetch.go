@@ -48,13 +48,18 @@ func Fetch(c *gin.Context) {
 		func(list []*github.PullRequest) error {
 			items := make([]interface{}, 0)
 			for _, r := range list {
+				title := r.GetTitle()
+				if len(title) > 64 {
+					title = title[0:64]
+				}
+
 				items = append(items, dataset.PullReqs{
 					Owner:          owner,
 					Repository:     repository,
 					ID:             r.GetID(),
 					Number:         int64(r.GetNumber()),
 					Login:          r.User.GetLogin(),
-					Title:          r.GetTitle(),
+					Title:          title,
 					State:          r.GetState(),
 					CreatedAt:      r.GetCreatedAt(),
 					UpdatedAt:      r.GetUpdatedAt(),

@@ -21,7 +21,7 @@ var IncidentTableMeta = bigquery.TableMetadata{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},
 		{Name: "id", Type: bigquery.IntegerFieldType, Required: true},
-		{Name: "deployment_id", Type: bigquery.IntegerFieldType, Required: true, Repeated: true},
+		{Name: "deployment_id", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "created_at", Type: bigquery.TimestampFieldType, Required: true},
 		{Name: "resolvec_at", Type: bigquery.TimestampFieldType, Required: true},
 	},

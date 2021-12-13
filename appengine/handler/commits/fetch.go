@@ -48,13 +48,18 @@ func Fetch(c *gin.Context) {
 		func(list []*github.RepositoryCommit) error {
 			items := make([]interface{}, 0)
 			for _, r := range list {
+				message := strings.ReplaceAll(r.Commit.GetMessage(), "\n", " ")
+				if len(message) > 64 {
+					message = message[0:64]
+				}
+
 				items = append(items, dataset.Commits{
 					Owner:      owner,
 					Repository: repository,
 					SHA:        r.GetSHA(),
 					Login:      r.Commit.Author.GetName(),
 					Date:       r.Commit.Author.GetDate(),
-					Message:    strings.ReplaceAll(r.Commit.GetMessage(), "\n", " "),
+					Message:    message,
 				})
 			}
 

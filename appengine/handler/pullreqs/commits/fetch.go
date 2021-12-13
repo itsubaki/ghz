@@ -61,6 +61,11 @@ func Fetch(c *gin.Context) {
 
 		items := make([]interface{}, 0)
 		for _, r := range list {
+			message := strings.ReplaceAll(r.Commit.GetMessage(), "\n", " ")
+			if len(message) > 64 {
+				message = message[0:64]
+			}
+
 			items = append(items, dataset.PullReqCommits{
 				Owner:      owner,
 				Repository: repository,
@@ -69,7 +74,7 @@ func Fetch(c *gin.Context) {
 				SHA:        r.GetSHA(),
 				Login:      r.Commit.Author.GetName(),
 				Date:       r.Commit.Author.GetDate(),
-				Message:    strings.ReplaceAll(r.Commit.GetMessage(), "\n", " "),
+				Message:    message,
 			})
 		}
 

@@ -40,6 +40,6 @@ func LastNWeeksWith(now time.Time, n int) []TimeDate {
 		out = append(out, tmp[i])
 	}
 
-	sort.Slice(out, func(i, j int) bool { return out[i].Start.Before(out[j].Start) })
+	sort.Slice(out, func(i, j int) bool { return out[i].Start.After(out[j].Start) })
 	return out
 }

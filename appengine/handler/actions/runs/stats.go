@@ -34,6 +34,8 @@ func Stats(c *gin.Context) {
 		return
 	}
 
+	log.Printf("path=%v, target=%v/%v, next=%v", c.Request.URL.Path, owner, repository, next)
+
 	for _, d := range calendar.LastNWeeks(52) { // 1 year ~= 52 weeks
 		if d.Start.Before(next) {
 			// already done it
@@ -52,9 +54,6 @@ func Stats(c *gin.Context) {
 		}
 
 		stats := GetStats(owner, repository, d.Start, d.End, runs)
-		for _, v := range stats {
-			log.Printf("%v(%v ~ %v): %#v", v.WorkflowID, d.Start, d.End, v)
-		}
 
 		items := make([]interface{}, 0)
 		for i := range stats {
@@ -138,7 +137,7 @@ func GetStats(owner, repository string, start, end time.Time, list []dataset.Wor
 				continue
 			}
 
-			sum += math.Pow((r.UpdatedAt.Sub(r.CreatedAt).Minutes() - avg), 2.0)
+			sum += math.Pow(r.UpdatedAt.Sub(r.CreatedAt).Minutes()-avg, 2.0)
 		}
 		variant := sum / count
 
