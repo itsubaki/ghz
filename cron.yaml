@@ -11,8 +11,8 @@ cron:
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
-    url: /_fetch/gin-gonic/gin/pullreqs/update
-    schedule: every day 01:00
+    url: /_fetch/gin-gonic/gin/actions/runs
+    schedule: every day 00:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
@@ -21,28 +21,28 @@ cron:
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
-    url: /_fetch/gin-gonic/gin/actions/runs
-    schedule: every day 02:00
+    url: /_fetch/gin-gonic/gin/pullreqs/update
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/actions/jobs
-    schedule: every day 02:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
     url: /_stats/gin-gonic/gin/pullreqs
-    schedule: every day 03:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
     url: /_stats/gin-gonic/gin/actions/runs
-    schedule: every day 03:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
     url: /_stats/gin-gonic/gin/actions/jobs
-    schedule: every day 03:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   # vercel/next.js
@@ -57,6 +57,11 @@ cron:
     timezone: Asia/Tokyo
 
   - description: "vercel/next.js"
+    url: /_fetch/vercel/next.js/actions/runs
+    schedule: every day 00:00
+    timezone: Asia/Tokyo
+
+  - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/pullreqs/update
     schedule: every day 01:00
     timezone: Asia/Tokyo
@@ -67,13 +72,8 @@ cron:
     timezone: Asia/Tokyo
 
   - description: "vercel/next.js"
-    url: /_fetch/vercel/next.js/actions/runs
-    schedule: every day 02:00
-    timezone: Asia/Tokyo
-
-  - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/actions/jobs
-    schedule: every day 02:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "vercel/next.js"
