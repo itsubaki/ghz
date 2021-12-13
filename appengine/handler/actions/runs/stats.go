@@ -6,7 +6,6 @@ import (
 	"log"
 	"math"
 	"net/http"
-	"strconv"
 	"time"
 
 	"cloud.google.com/go/bigquery"
@@ -28,18 +27,6 @@ func Stats(c *gin.Context) {
 		return
 	}
 
-	weeks := c.Query("weeks")
-	if weeks == "" {
-		weeks = "1"
-	}
-
-	w, err := strconv.Atoi(weeks)
-	if err != nil {
-		log.Printf("atoi %v: %v", weeks, err)
-		c.Status(http.StatusInternalServerError)
-		return
-	}
-
 	next, err := NextTime(ctx, datasetName)
 	if err != nil {
 		log.Printf("next: %v", err)
@@ -47,7 +34,7 @@ func Stats(c *gin.Context) {
 		return
 	}
 
-	for _, d := range calendar.LastNWeeks(w) {
+	for _, d := range calendar.LastNWeeks(52) { // 1 year ~= 52 weeks
 		if d.Start.Before(next) {
 			// already done it
 			continue
