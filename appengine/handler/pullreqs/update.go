@@ -53,10 +53,20 @@ func Update(c *gin.Context) {
 			c.Status(http.StatusInternalServerError)
 			return
 		}
+
+		if err := UpdatePullReqCommits(ctx, datasetName, pr); err != nil {
+			log.Printf("update pullreq commits: %v", err)
+			c.Status(http.StatusInternalServerError)
+			return
+		}
 	}
 
 	log.Println("updated")
 	c.Status(http.StatusOK)
+}
+
+func UpdatePullReqCommits(ctx context.Context, datasetName string, r *github.PullRequest) error {
+	return nil
 }
 
 func UpdatePullReq(ctx context.Context, datasetName string, r *github.PullRequest) error {

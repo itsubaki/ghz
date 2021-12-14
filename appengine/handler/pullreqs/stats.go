@@ -42,7 +42,7 @@ func Stats(c *gin.Context) {
 			continue
 		}
 
-		prs, err := GetPullReqsWith(ctx, datasetName, d.Start, d.End)
+		prs, err := GetMergedPullReqs(ctx, datasetName, d.Start, d.End)
 		if err != nil {
 			log.Printf("get pullreqs: %v", err)
 			c.Status(http.StatusInternalServerError)
@@ -136,7 +136,7 @@ func GetPullReqCommits(ctx context.Context, datasetName string, id int64) ([]dat
 	return out, nil
 }
 
-func GetPullReqsWith(ctx context.Context, datasetName string, start, end time.Time) ([]dataset.PullReqs, error) {
+func GetMergedPullReqs(ctx context.Context, datasetName string, start, end time.Time) ([]dataset.PullReqs, error) {
 	client, err := dataset.New(ctx)
 	if err != nil {
 		return nil, fmt.Errorf("new bigquery client: %v", err)

@@ -5,20 +5,20 @@ import (
 	"time"
 )
 
-type TimeDate struct {
+type Date struct {
 	Start time.Time `json:"start,omitempty"`
 	End   time.Time `json:"end,omitempty"`
 }
 
-func Last12Weeks() []TimeDate {
+func Last12Weeks() []Date {
 	return LastNWeeks(12)
 }
 
-func LastNWeeks(n int) []TimeDate {
+func LastNWeeks(n int) []Date {
 	return LastNWeeksWith(time.Now(), n)
 }
 
-func LastNWeeksWith(now time.Time, n int) []TimeDate {
+func LastNWeeksWith(now time.Time, n int) []Date {
 	zzz := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	laststartday := zzz.AddDate(0, 0, -int(zzz.Weekday()))
 
@@ -27,15 +27,15 @@ func LastNWeeksWith(now time.Time, n int) []TimeDate {
 		days = append(days, laststartday.AddDate(0, 0, -i*7))
 	}
 
-	tmp := make([]TimeDate, 0)
+	tmp := make([]Date, 0)
 	for _, d := range days {
-		tmp = append(tmp, TimeDate{
+		tmp = append(tmp, Date{
 			Start: d,
 			End:   d.AddDate(0, 0, 7),
 		})
 	}
 
-	out := make([]TimeDate, 0)
+	out := make([]Date, 0)
 	for i := len(tmp) - 1; i > -1; i-- {
 		out = append(out, tmp[i])
 	}
