@@ -6,13 +6,15 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
+	"regexp"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghstats/appengine/dataset"
 	"github.com/itsubaki/ghstats/pkg/pullreqs/commits"
 )
+
+var regexpnl = regexp.MustCompile(`\r\n|\r|\n`)
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
@@ -61,7 +63,7 @@ func Fetch(c *gin.Context) {
 
 		items := make([]interface{}, 0)
 		for _, r := range list {
-			message := strings.ReplaceAll(r.Commit.GetMessage(), "\n", " ")
+			message := regexpnl.ReplaceAllString(r.Commit.GetMessage(), " ")
 			if len(message) > 64 {
 				message = message[0:64]
 			}

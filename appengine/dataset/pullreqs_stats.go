@@ -8,6 +8,7 @@ import (
 type PullReqStats struct {
 	Owner        string     `bigquery:"owner"`
 	Repository   string     `bigquery:"repository"`
+	Week         int64      `bigquery:"week"`
 	Start        civil.Date `bigquery:"start"`
 	End          civil.Date `bigquery:"end"`
 	MergedPerDay float64    `bigquery:"merged_per_day"`
@@ -17,9 +18,14 @@ type PullReqStats struct {
 
 var PullReqStatsTableMeta = bigquery.TableMetadata{
 	Name: "pullreqs_stats",
+	TimePartitioning: &bigquery.TimePartitioning{
+		Type:  bigquery.MonthPartitioningType,
+		Field: "start",
+	},
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},
+		{Name: "week", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "start", Type: bigquery.DateFieldType, Required: true},
 		{Name: "end", Type: bigquery.DateFieldType},
 		{Name: "merged_per_day", Type: bigquery.FloatFieldType, Required: true},

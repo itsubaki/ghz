@@ -10,6 +10,7 @@ type WorkflowRunStats struct {
 	Repository   string     `bigquery:"repository"`
 	WorkflowID   int64      `bigquery:"workflow_id"`
 	WorkflowName string     `bigquery:"workflow_name"`
+	Week         int64      `bigquery:"week"`
 	Start        civil.Date `bigquery:"start"`
 	End          civil.Date `bigquery:"end"`
 	RunsPerDay   float64    `bigquery:"runs_per_day"`
@@ -20,11 +21,16 @@ type WorkflowRunStats struct {
 
 var WorkflowRunStatsTableMeta = bigquery.TableMetadata{
 	Name: "workflow_runs_stats",
+	TimePartitioning: &bigquery.TimePartitioning{
+		Type:  bigquery.MonthPartitioningType,
+		Field: "start",
+	},
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},
 		{Name: "workflow_id", Type: bigquery.StringFieldType, Required: true},
 		{Name: "workflow_name", Type: bigquery.StringFieldType, Required: true},
+		{Name: "week", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "start", Type: bigquery.DateFieldType, Required: true},
 		{Name: "end", Type: bigquery.DateFieldType},
 		{Name: "runs_per_day", Type: bigquery.FloatFieldType, Required: true},

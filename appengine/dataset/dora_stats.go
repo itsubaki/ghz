@@ -10,6 +10,7 @@ import (
 type DORAStats struct {
 	Owner                string     `bigquery:"owner"`
 	Repository           string     `bigquery:"repository"`
+	Week                 int64      `bigquery:"week"`
 	Start                civil.Date `bigquery:"start"`
 	End                  civil.Date `bigquery:"end"`
 	DeploymentFrequency  float64    `bigquery:"deployment_frequency"`    // deployment per day in production
@@ -20,9 +21,14 @@ type DORAStats struct {
 
 var DORAStatsTableMeta = bigquery.TableMetadata{
 	Name: "stats_dora",
+	TimePartitioning: &bigquery.TimePartitioning{
+		Type:  bigquery.MonthPartitioningType,
+		Field: "start",
+	},
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},
+		{Name: "week", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "start", Type: bigquery.DateFieldType, Required: true},
 		{Name: "end", Type: bigquery.DateFieldType},
 		{Name: "deployment_frequency", Type: bigquery.FloatFieldType, Required: true},

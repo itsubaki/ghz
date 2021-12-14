@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,8 @@ import (
 	"github.com/itsubaki/ghstats/appengine/dataset"
 	"github.com/itsubaki/ghstats/pkg/pullreqs"
 )
+
+var regexpnl = regexp.MustCompile(`\r\n|\r|\n`)
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
@@ -48,7 +51,7 @@ func Fetch(c *gin.Context) {
 		func(list []*github.PullRequest) error {
 			items := make([]interface{}, 0)
 			for _, r := range list {
-				title := r.GetTitle()
+				title := regexpnl.ReplaceAllString(r.GetTitle(), " ")
 				if len(title) > 64 {
 					title = title[0:64]
 				}
