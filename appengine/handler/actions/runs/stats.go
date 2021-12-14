@@ -141,12 +141,13 @@ func GetStats(owner, repository string, start, end time.Time, list []dataset.Wor
 		}
 		variant := sum / count
 
-		_, w := start.ISOWeek()
+		y, w := start.ISOWeek()
 		out = append(out, dataset.WorkflowRunStats{
 			Owner:        owner,
 			Repository:   repository,
 			WorkflowID:   v[0].WorkflowID,
 			WorkflowName: v[0].WorkflowName,
+			Year:         int64(y),
 			Week:         int64(w),
 			Start:        civil.DateOf(start),
 			End:          civil.DateOf(end),

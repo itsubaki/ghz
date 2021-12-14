@@ -10,6 +10,7 @@ import (
 type DORAStats struct {
 	Owner                string     `bigquery:"owner"`
 	Repository           string     `bigquery:"repository"`
+	Year                 int64      `bigquery:"year"`
 	Week                 int64      `bigquery:"week"`
 	Start                civil.Date `bigquery:"start"`
 	End                  civil.Date `bigquery:"end"`
@@ -28,6 +29,7 @@ var DORAStatsTableMeta = bigquery.TableMetadata{
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},
+		{Name: "year", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "week", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "start", Type: bigquery.DateFieldType, Required: true},
 		{Name: "end", Type: bigquery.DateFieldType},

@@ -88,12 +88,13 @@ func Stats(c *gin.Context) {
 		perday := count / (d.End.Sub(d.Start).Hours() / 24)
 		duravg := sumavg / count
 		durvar := sumvar / count
-		_, w := d.Start.ISOWeek()
+		y, w := d.Start.ISOWeek()
 
 		items := make([]interface{}, 0)
 		items = append(items, dataset.PullReqStats{
 			Owner:        owner,
 			Repository:   repository,
+			Year:         int64(y),
 			Week:         int64(w),
 			Start:        civil.DateOf(d.Start),
 			End:          civil.DateOf(d.End),

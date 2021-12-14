@@ -10,6 +10,7 @@ type WorkflowRunStats struct {
 	Repository   string     `bigquery:"repository"`
 	WorkflowID   int64      `bigquery:"workflow_id"`
 	WorkflowName string     `bigquery:"workflow_name"`
+	Year         int64      `bigquery:"year"`
 	Week         int64      `bigquery:"week"`
 	Start        civil.Date `bigquery:"start"`
 	End          civil.Date `bigquery:"end"`
@@ -30,6 +31,7 @@ var WorkflowRunStatsTableMeta = bigquery.TableMetadata{
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},
 		{Name: "workflow_id", Type: bigquery.StringFieldType, Required: true},
 		{Name: "workflow_name", Type: bigquery.StringFieldType, Required: true},
+		{Name: "year", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "week", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "start", Type: bigquery.DateFieldType, Required: true},
 		{Name: "end", Type: bigquery.DateFieldType},
