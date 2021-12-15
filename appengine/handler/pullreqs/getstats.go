@@ -67,7 +67,7 @@ func GetStats(c *gin.Context) {
 	}
 
 	if err := beta.MemSet(ctx, cachekey, b, 24*time.Hour); err != nil {
-		log.Printf("memcaceh set(%v): %v", cachekey, err)
+		log.Printf("memcache set(%v): %v", cachekey, err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}

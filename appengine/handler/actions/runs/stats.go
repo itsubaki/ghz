@@ -79,7 +79,7 @@ func GetRunsWith(ctx context.Context, datasetName string, start, end time.Time) 
 
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunsTableMeta.Name)
 	query := fmt.Sprintf(
-		"select workflow_id, workflow_name, run_id, conclusion, created_at, updated_at from `%v` where created_at >= \"%v\" and created_at < \"%v\"",
+		"select workflow_id, workflow_name, run_id, conclusion, created_at, updated_at, head_sha from `%v` where created_at >= \"%v\" and created_at < \"%v\"",
 		table,
 		start.Format("2006-01-02 15:04:05 UTC"),
 		end.Format("2006-01-02 15:04:05 UTC"),
@@ -94,6 +94,7 @@ func GetRunsWith(ctx context.Context, datasetName string, start, end time.Time) 
 			Conclusion:   values[3].(string),
 			CreatedAt:    values[4].(time.Time),
 			UpdatedAt:    values[5].(time.Time),
+			HeadSHA:      values[6].(string),
 		})
 	}); err != nil {
 		return nil, fmt.Errorf("query(%v): %v", query, err)
@@ -130,7 +131,7 @@ func GetStats(owner, repository string, start, end time.Time, list []dataset.Wor
 		count := float64(len(v))
 		rate := failure / count
 		avg := duration.Minutes() / count
-		runsperday := count / (end.Sub(start).Hours() / 24)
+		perday := count / (end.Sub(start).Hours() / 24)
 
 		var sum float64
 		for _, r := range v {
@@ -152,7 +153,7 @@ func GetStats(owner, repository string, start, end time.Time, list []dataset.Wor
 			Week:         int64(w),
 			Start:        civil.DateOf(start),
 			End:          civil.DateOf(end),
-			RunsPerDay:   runsperday,
+			RunsPerDay:   perday,
 			FailureRate:  rate,
 			DurationAvg:  avg,
 			DurationVar:  variant,
