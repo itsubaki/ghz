@@ -49,17 +49,17 @@ func Fetch(c *gin.Context) {
 			items := make([]interface{}, 0)
 			for _, r := range list {
 				items = append(items, dataset.WorkflowRun{
-					Owner:        owner,
-					Repository:   repository,
-					WorkflowID:   r.GetWorkflowID(),
-					WorkflowName: r.GetName(),
-					RunID:        r.GetID(),
-					RunNumber:    int64(r.GetRunNumber()),
-					Status:       r.GetStatus(),
-					Conclusion:   r.GetConclusion(),
-					CreatedAt:    r.GetCreatedAt().Time,
-					UpdatedAt:    r.GetUpdatedAt().Time,
-					HeadSHA:      r.GetHeadSHA(),
+					Owner:         owner,
+					Repository:    repository,
+					WorkflowID:    r.GetWorkflowID(),
+					WorkflowName:  r.GetName(),
+					RunID:         r.GetID(),
+					RunNumber:     int64(r.GetRunNumber()),
+					Status:        r.GetStatus(),
+					Conclusion:    r.GetConclusion(),
+					CreatedAt:     r.CreatedAt.Time,
+					UpdatedAt:     r.UpdatedAt.Time,
+					HeadCommitSHA: r.HeadCommit.GetID(),
 				})
 			}
 

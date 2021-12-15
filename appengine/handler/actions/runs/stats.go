@@ -79,7 +79,7 @@ func GetRunsWith(ctx context.Context, datasetName string, start, end time.Time) 
 
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunsTableMeta.Name)
 	query := fmt.Sprintf(
-		"select workflow_id, workflow_name, run_id, conclusion, created_at, updated_at, head_sha from `%v` where created_at >= \"%v\" and created_at < \"%v\"",
+		"select workflow_id, workflow_name, run_id, conclusion, created_at, updated_at from `%v` where created_at >= \"%v\" and created_at < \"%v\"",
 		table,
 		start.Format("2006-01-02 15:04:05 UTC"),
 		end.Format("2006-01-02 15:04:05 UTC"),
@@ -94,7 +94,6 @@ func GetRunsWith(ctx context.Context, datasetName string, start, end time.Time) 
 			Conclusion:   values[3].(string),
 			CreatedAt:    values[4].(time.Time),
 			UpdatedAt:    values[5].(time.Time),
-			HeadSHA:      values[6].(string),
 		})
 	}); err != nil {
 		return nil, fmt.Errorf("query(%v): %v", query, err)
@@ -143,28 +142,6 @@ func GetStats(owner, repository string, start, end time.Time, list []dataset.Wor
 		}
 		variant := sum / count
 
-		var leadtime float64
-		{
-			list := make([]time.Duration, 0)
-			for _, r := range v {
-				lt, err := LeadTime(owner, repository, r)
-				if err != nil {
-					panic(fmt.Sprintf("lead time(%v/%v): %v", owner, repository, err))
-				}
-
-				list = append(list, lt...)
-			}
-
-			var sum float64
-			for _, t := range list {
-				sum += t.Minutes()
-			}
-
-			if len(list) > 0 {
-				leadtime = sum / float64(len(list))
-			}
-		}
-
 		y, w := start.ISOWeek()
 		out = append(out, dataset.WorkflowRunStats{
 			Owner:        owner,
@@ -179,71 +156,10 @@ func GetStats(owner, repository string, start, end time.Time, list []dataset.Wor
 			FailureRate:  rate,
 			DurationAvg:  avg,
 			DurationVar:  variant,
-			LeadTime:     leadtime,
 		})
 	}
 
 	return out
-}
-
-func LeadTime(owner, repository string, run dataset.WorkflowRun) ([]time.Duration, error) {
-	if run.Conclusion != "success" {
-		return make([]time.Duration, 0), nil
-	}
-
-	ctx := context.Background()
-	client, err := dataset.New(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("new bigquery client: %v", err)
-	}
-	datasetName := dataset.Name(owner, repository)
-
-	var id int64
-	{
-		table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsTableMeta.Name)
-		query := fmt.Sprintf("select id from `%v` where merge_commit_sha = \"%v\"", table, run.HeadSHA)
-
-		if err := client.Query(ctx, query, func(values []bigquery.Value) {
-			if len(values) != 1 {
-				return
-			}
-
-			if values[0] == nil {
-				return
-			}
-
-			id = values[0].(int64)
-		}); err != nil {
-			return nil, fmt.Errorf("query(%v): %v", query, err)
-		}
-
-		if id == 0 {
-			return make([]time.Duration, 0), nil
-		}
-	}
-
-	out := make([]time.Duration, 0)
-	{
-		table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqCommitsTableMeta.Name)
-		query := fmt.Sprintf("select date from `%v` where id = %v", table, id)
-
-		if err := client.Query(ctx, query, func(values []bigquery.Value) {
-			if len(values) != 1 {
-				return
-			}
-
-			if values[0] == nil {
-				return
-			}
-
-			date := values[0].(time.Time)
-			out = append(out, run.UpdatedAt.Sub(date))
-		}); err != nil {
-			return nil, fmt.Errorf("query(%v): %v", query, err)
-		}
-	}
-
-	return out, nil
 }
 
 func NextTime(ctx context.Context, datasetName string) (time.Time, error) {
