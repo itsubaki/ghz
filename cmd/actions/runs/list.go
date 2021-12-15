@@ -68,7 +68,7 @@ func CSV(r github.WorkflowRun) string {
 		*r.Conclusion,
 		r.CreatedAt.Format("2006-01-02 15:04:05"),
 		r.UpdatedAt.Format("2006-01-02 15:04:05"),
-		*r.HeadCommit.ID,
+		r.GetHeadSHA(),
 		r.HeadCommit.Timestamp.Format("2006-01-02 15:04:05"),
 		title,
 	)
