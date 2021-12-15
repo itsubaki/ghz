@@ -17,6 +17,7 @@ import (
 
 func Stats(c *gin.Context) {
 	ctx := context.Background()
+
 	owner := c.Param("owner")
 	repository := c.Param("repository")
 	datasetName := dataset.Name(owner, repository)

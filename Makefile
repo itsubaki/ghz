@@ -17,7 +17,7 @@ run:
 	go run appengine/main.go
 
 deploy:
-	gcloud app deploy app.yaml cron.yaml
+	gcloud beta app deploy app.yaml cron.yaml
 
 browse:
 	gcloud app browse

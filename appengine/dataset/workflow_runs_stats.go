@@ -6,18 +6,19 @@ import (
 )
 
 type WorkflowRunStats struct {
-	Owner        string     `bigquery:"owner"`
-	Repository   string     `bigquery:"repository"`
-	WorkflowID   int64      `bigquery:"workflow_id"`
-	WorkflowName string     `bigquery:"workflow_name"`
-	Year         int64      `bigquery:"year"`
-	Week         int64      `bigquery:"week"`
-	Start        civil.Date `bigquery:"start"`
-	End          civil.Date `bigquery:"end"`
-	RunsPerDay   float64    `bigquery:"runs_per_day"`
-	FailureRate  float64    `bigquery:"failure_rate"`
-	DurationAvg  float64    `bigquery:"duration_avg"`
-	DurationVar  float64    `bigquery:"duration_var"`
+	Owner              string     `bigquery:"owner"`
+	Repository         string     `bigquery:"repository"`
+	WorkflowID         int64      `bigquery:"workflow_id"`
+	WorkflowName       string     `bigquery:"workflow_name"`
+	Year               int64      `bigquery:"year"`
+	Week               int64      `bigquery:"week"`
+	Start              civil.Date `bigquery:"start"`
+	End                civil.Date `bigquery:"end"`
+	RunsPerDay         float64    `bigquery:"runs_per_day"`
+	FailureRate        float64    `bigquery:"failure_rate"`
+	DurationAvg        float64    `bigquery:"duration_avg"`
+	DurationVar        float64    `bigquery:"duration_var"`
+	LeadTimeForChanges float64    `bigquery:"lead_time"` // completed time of run - commit time
 }
 
 var WorkflowRunStatsTableMeta = bigquery.TableMetadata{
@@ -39,5 +40,6 @@ var WorkflowRunStatsTableMeta = bigquery.TableMetadata{
 		{Name: "failure_rate", Type: bigquery.FloatFieldType, Required: true},
 		{Name: "duration_avg", Type: bigquery.FloatFieldType, Required: true},
 		{Name: "duration_var", Type: bigquery.FloatFieldType, Required: true},
+		{Name: "lead_time", Type: bigquery.FloatFieldType, Required: true},
 	},
 }

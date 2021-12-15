@@ -1,5 +1,6 @@
 runtime: go116
 main: ./appengine
+app_engine_apis: true
 
 env_variables:
   GIN_MODE: release

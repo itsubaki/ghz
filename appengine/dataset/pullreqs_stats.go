@@ -6,15 +6,15 @@ import (
 )
 
 type PullReqStats struct {
-	Owner        string     `bigquery:"owner"`
-	Repository   string     `bigquery:"repository"`
-	Year         int64      `bigquery:"year"`
-	Week         int64      `bigquery:"week"`
-	Start        civil.Date `bigquery:"start"`
-	End          civil.Date `bigquery:"end"`
-	MergedPerDay float64    `bigquery:"merged_per_day"`
-	DurationAvg  float64    `bigquery:"duration_avg"` // avg(merged_timestamp - commit_timestamp)
-	DurationVar  float64    `bigquery:"duration_var"` // avg(merged_timestamp - commit_timestamp)
+	Owner        string     `bigquery:"owner" json:"owner"`
+	Repository   string     `bigquery:"repository" json:"repository"`
+	Year         int64      `bigquery:"year" json:"year"`
+	Week         int64      `bigquery:"week" json:"week"`
+	Start        civil.Date `bigquery:"start" json:"start"`
+	End          civil.Date `bigquery:"end" json:"end"`
+	MergedPerDay float64    `bigquery:"merged_per_day" json:"merged_per_day"`
+	DurationAvg  float64    `bigquery:"duration_avg" json:"duration_avg"` // avg(merged_timestamp - commit_timestamp)
+	DurationVar  float64    `bigquery:"duration_var" json:"duration_var"` // avg(merged_timestamp - commit_timestamp)
 }
 
 var PullReqStatsTableMeta = bigquery.TableMetadata{
