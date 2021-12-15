@@ -67,3 +67,11 @@ run_id       job_id       job_name               status           conclusion   s
 ...
 ```
 
+```shell
+$ ghstats pullreqs list --owner itsubaki -repo q | jq -r '[.id, .number, .user.login, .title, .state] | @csv' | tr -d '"' | column -t -s, | less -S
+697873132  13  itsubaki    Add lexer for OpenQASM                     closed
+444592694  11  sider[bot]  Configure Sider                            closed
+270932381  3   axamon      Added documentation and expanded coverage  closed
+204640368  2   itsubaki    Add simulator                              closed
+```
+
