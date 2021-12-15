@@ -18,7 +18,7 @@ type WorkflowRunStats struct {
 	FailureRate  float64    `bigquery:"failure_rate"`
 	DurationAvg  float64    `bigquery:"duration_avg"`
 	DurationVar  float64    `bigquery:"duration_var"`
-	LeadTime     float64    `bigquery:"lead_time"` // completed time of run - commit time
+	// LeadTime     float64    `bigquery:"lead_time"` // completed time of run - commit time
 }
 
 var WorkflowRunStatsTableMeta = bigquery.TableMetadata{
@@ -40,6 +40,6 @@ var WorkflowRunStatsTableMeta = bigquery.TableMetadata{
 		{Name: "failure_rate", Type: bigquery.FloatFieldType, Required: true},
 		{Name: "duration_avg", Type: bigquery.FloatFieldType, Required: true},
 		{Name: "duration_var", Type: bigquery.FloatFieldType, Required: true},
-		{Name: "lead_time", Type: bigquery.FloatFieldType, Required: true},
+		// {Name: "lead_time", Type: bigquery.FloatFieldType, Required: true},
 	},
 }
