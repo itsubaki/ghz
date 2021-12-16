@@ -21,7 +21,7 @@ type PullReqs struct {
 	MergeCommitSHA string    `bigquery:"merge_commit_sha"`
 }
 
-var PullReqsTableMeta = bigquery.TableMetadata{
+var PullReqsMeta = bigquery.TableMetadata{
 	Name: "pullreqs",
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},

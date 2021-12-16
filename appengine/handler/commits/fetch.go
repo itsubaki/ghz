@@ -24,7 +24,9 @@ func Fetch(c *gin.Context) {
 	repository := c.Param("repository")
 	datasetName := dataset.Name(owner, repository)
 
-	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.CommitsTableMeta); err != nil {
+	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+		dataset.CommitsMeta,
+	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
@@ -66,7 +68,7 @@ func Fetch(c *gin.Context) {
 				})
 			}
 
-			if err := dataset.Insert(ctx, datasetName, dataset.CommitsTableMeta.Name, items); err != nil {
+			if err := dataset.Insert(ctx, datasetName, dataset.CommitsMeta.Name, items); err != nil {
 				return fmt.Errorf("insert items: %v", err)
 			}
 
@@ -87,7 +89,7 @@ func NextToken(ctx context.Context, datasetName string) (string, error) {
 		return "", fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.CommitsTableMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.CommitsMeta.Name)
 	query := fmt.Sprintf("select sha from `%v` where date = (select max(date) from `%v` limit 1)", table, table)
 
 	var sha string

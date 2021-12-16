@@ -10,6 +10,7 @@ import (
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghstats/appengine/dataset"
+	"github.com/itsubaki/ghstats/appengine/dataset/view"
 	"github.com/itsubaki/ghstats/pkg/actions/jobs"
 )
 
@@ -20,7 +21,10 @@ func Fetch(c *gin.Context) {
 	repository := c.Param("repository")
 	datasetName := dataset.Name(owner, repository)
 
-	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.WorkflowJobsTableMeta); err != nil {
+	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+		dataset.WorkflowJobsMeta,
+		view.WorkflowJobsMeta(dataset.ProjectID(), datasetName, dataset.WorkflowJobsMeta.Name),
+	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
@@ -77,7 +81,7 @@ func Fetch(c *gin.Context) {
 			})
 		}
 
-		if err := dataset.Insert(ctx, datasetName, dataset.WorkflowJobsTableMeta.Name, items); err != nil {
+		if err := dataset.Insert(ctx, datasetName, dataset.WorkflowJobsMeta.Name, items); err != nil {
 			log.Printf("insert items: %v", err)
 			c.Status(http.StatusInternalServerError)
 			return
@@ -94,7 +98,7 @@ func GetRuns(ctx context.Context, datasetName string, nextToken int64) ([]datase
 		return nil, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunsTableMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("select workflow_id, workflow_name, run_id, run_number from `%v` where run_id > %v", table, nextToken)
 
 	runs := make([]dataset.WorkflowRun, 0)
@@ -118,7 +122,7 @@ func NextToken(ctx context.Context, datasetName string) (int64, int64, error) {
 		return -1, -1, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowJobsTableMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowJobsMeta.Name)
 	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v` limit 1", table)
 
 	var id, num int64

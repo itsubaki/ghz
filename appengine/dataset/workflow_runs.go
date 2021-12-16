@@ -20,7 +20,7 @@ type WorkflowRun struct {
 	HeadSHA      string    `bigquery:"head_sha"`
 }
 
-var WorkflowRunsTableMeta = bigquery.TableMetadata{
+var WorkflowRunsMeta = bigquery.TableMetadata{
 	Name: "workflow_runs",
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},

@@ -17,7 +17,7 @@ type PullReqCommits struct {
 	Message    string    `bigquery:"message"`
 }
 
-var PullReqCommitsTableMeta = bigquery.TableMetadata{
+var PullReqCommitsMeta = bigquery.TableMetadata{
 	Name: "pullreqs_commits",
 	TimePartitioning: &bigquery.TimePartitioning{
 		Type:  bigquery.MonthPartitioningType,

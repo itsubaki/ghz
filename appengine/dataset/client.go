@@ -33,7 +33,7 @@ func New(ctx context.Context) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) CreateIfNotExists(ctx context.Context, datasetName string, meta bigquery.TableMetadata) error {
+func (c *Client) CreateIfNotExists(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
 	location := "US"
 	if len(os.Getenv("DATASET_LOCATION")) > 0 {
 		location = os.Getenv("DATASET_LOCATION")
@@ -48,14 +48,16 @@ func (c *Client) CreateIfNotExists(ctx context.Context, datasetName string, meta
 		}
 	}
 
-	ref := c.client.Dataset(datasetName).Table(meta.Name)
-	if _, err := ref.Metadata(ctx); err == nil {
-		// already exists
-		return nil
-	}
+	for _, m := range meta {
+		ref := c.client.Dataset(datasetName).Table(m.Name)
+		if _, err := ref.Metadata(ctx); err == nil {
+			// already exists
+			continue
+		}
 
-	if err := ref.Create(ctx, &meta); err != nil {
-		return fmt.Errorf("create %v/%v: %v", datasetName, meta.Name, err)
+		if err := ref.Create(ctx, &m); err != nil {
+			return fmt.Errorf("create %v/%v: %v", datasetName, m.Name, err)
+		}
 	}
 
 	return nil
@@ -96,7 +98,16 @@ func (c *Client) Raw() *bigquery.Client {
 	return c.client
 }
 
-func CreateIfNotExists(ctx context.Context, datasetName string, meta bigquery.TableMetadata) error {
+func ProjectID() string {
+	creds, err := google.FindDefaultCredentials(context.Background())
+	if err != nil {
+		panic(fmt.Sprintf("find default credentials: %v", err))
+	}
+
+	return creds.ProjectID
+}
+
+func CreateIfNotExists(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
 	client, err := New(ctx)
 	if err != nil {
 		return fmt.Errorf("new bigquery client: %v", err)

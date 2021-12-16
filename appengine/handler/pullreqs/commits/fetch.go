@@ -23,7 +23,9 @@ func Fetch(c *gin.Context) {
 	repository := c.Param("repository")
 	datasetName := dataset.Name(owner, repository)
 
-	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.PullReqCommitsTableMeta); err != nil {
+	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+		dataset.PullReqCommitsMeta,
+	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
@@ -81,7 +83,7 @@ func Fetch(c *gin.Context) {
 			})
 		}
 
-		if err := dataset.Insert(ctx, datasetName, dataset.PullReqCommitsTableMeta.Name, items); err != nil {
+		if err := dataset.Insert(ctx, datasetName, dataset.PullReqCommitsMeta.Name, items); err != nil {
 			log.Printf("insert items: %v", err)
 			c.Status(http.StatusInternalServerError)
 			return
@@ -103,7 +105,7 @@ func GetPullReqs(ctx context.Context, datasetName string, nextToken int64) ([]Pu
 		return nil, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsTableMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where id > %v", table, nextToken)
 
 	prs := make([]PullReq, 0)
@@ -125,7 +127,7 @@ func NextToken(ctx context.Context, datasetName string) (int64, int64, error) {
 		return -1, -1, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqCommitsTableMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqCommitsMeta.Name)
 	query := fmt.Sprintf("select max(id), max(number) from `%v` limit 1", table)
 
 	var id, num int64

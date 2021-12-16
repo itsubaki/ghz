@@ -22,10 +22,7 @@ func New() *gin.Engine {
 
 	Root(g)
 	Status(g)
-
 	Fetch(g)
-	Stats(g)
-	GetStats(g)
 
 	return g
 }
@@ -62,19 +59,4 @@ func Fetch(g *gin.Engine) {
 	f.GET("/:owner/:repository/pullreqs/commits", prcommits.Fetch)
 	f.GET("/:owner/:repository/actions/runs", runs.Fetch)
 	f.GET("/:owner/:repository/actions/jobs", jobs.Fetch)
-}
-
-func Stats(g *gin.Engine) {
-	s := g.Group("/_stats")
-	s.Use(XAppEngineCron)
-
-	s.GET("/:owner/:repository/pullreqs", pullreqs.Stats)
-	s.GET("/:owner/:repository/actions/runs", runs.Stats)
-	s.GET("/:owner/:repository/actions/jobs", jobs.Stats)
-}
-
-func GetStats(g *gin.Engine) {
-	s := g.Group("/stats")
-
-	s.GET("/:owner/:repository/pullreqs", pullreqs.GetStats)
 }

@@ -15,7 +15,7 @@ type Commits struct {
 	Message    string    `bigquery:"message"`
 }
 
-var CommitsTableMeta = bigquery.TableMetadata{
+var CommitsMeta = bigquery.TableMetadata{
 	Name: "commits",
 	TimePartitioning: &bigquery.TimePartitioning{
 		Type:  bigquery.MonthPartitioningType,

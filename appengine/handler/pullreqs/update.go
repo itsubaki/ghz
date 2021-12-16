@@ -21,7 +21,9 @@ func Update(c *gin.Context) {
 	repository := c.Param("repository")
 	datasetName := dataset.Name(owner, repository)
 
-	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.PullReqsTableMeta); err != nil {
+	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+		dataset.PullReqsMeta,
+	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
@@ -76,7 +78,7 @@ func UpdatePullReq(ctx context.Context, datasetName string, r *github.PullReques
 		return fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsTableMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
 
 	var query string
 	if r.MergedAt != nil {
@@ -121,7 +123,7 @@ func GetPullReqs(ctx context.Context, datasetName, state string) ([]dataset.Pull
 		return nil, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsTableMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where state = \"%v\"", table, state)
 
 	out := make([]dataset.PullReqs, 0)

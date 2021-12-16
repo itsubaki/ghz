@@ -20,11 +20,11 @@ func TestCreateIfNotExists(t *testing.T) {
 		name string
 		meta bigquery.TableMetadata
 	}{
-		{"test", dataset.CommitsTableMeta},
-		{"test", dataset.PullReqsTableMeta},
-		{"test", dataset.PullReqCommitsTableMeta},
-		{"test", dataset.WorkflowRunsTableMeta},
-		{"test", dataset.WorkflowJobsTableMeta},
+		{"test", dataset.CommitsMeta},
+		{"test", dataset.PullReqsMeta},
+		{"test", dataset.PullReqCommitsMeta},
+		{"test", dataset.WorkflowRunsMeta},
+		{"test", dataset.WorkflowJobsMeta},
 	}
 
 	for _, c := range cases {
@@ -34,7 +34,7 @@ func TestCreateIfNotExists(t *testing.T) {
 			t.Fatalf("new bigquery client: %v", err)
 		}
 
-		if err := client.CreateIfNotExists(ctx, c.name, c.meta); err != nil {
+		if err := client.CreateIfNotExists(ctx, c.name, []bigquery.TableMetadata{c.meta}); err != nil {
 			t.Errorf("create if not exists: %v", err)
 		}
 	}

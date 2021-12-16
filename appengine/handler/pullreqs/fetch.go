@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghstats/appengine/dataset"
+	"github.com/itsubaki/ghstats/appengine/dataset/view"
 	"github.com/itsubaki/ghstats/pkg/pullreqs"
 )
 
@@ -24,7 +25,10 @@ func Fetch(c *gin.Context) {
 	repository := c.Param("repository")
 	datasetName := dataset.Name(owner, repository)
 
-	if err := dataset.CreateIfNotExists(ctx, datasetName, dataset.PullReqsTableMeta); err != nil {
+	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+		dataset.PullReqsMeta,
+		view.PullReqsMeta(dataset.ProjectID(), datasetName, dataset.PullReqsMeta.Name),
+	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
@@ -73,7 +77,7 @@ func Fetch(c *gin.Context) {
 				})
 			}
 
-			if err := dataset.Insert(ctx, datasetName, dataset.PullReqsTableMeta.Name, items); err != nil {
+			if err := dataset.Insert(ctx, datasetName, dataset.PullReqsMeta.Name, items); err != nil {
 				return fmt.Errorf("insert items: %v", err)
 			}
 
@@ -94,7 +98,7 @@ func NextToken(ctx context.Context, datasetName string) (int64, error) {
 		return -1, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsTableMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select max(id) from `%v` limit 1", table)
 
 	var id int64
