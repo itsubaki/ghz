@@ -28,7 +28,7 @@ func Fetch(c *gin.Context) {
 	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
 		dataset.PullReqsMeta,
 		view.PullReqsMeta(dataset.ProjectID(), datasetName, dataset.PullReqsMeta.Name),
-		view.PullReqsLeadTimeMeta(dataset.ProjectID(), datasetName),
+		view.LeadTimePullReqsMeta(dataset.ProjectID(), datasetName),
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -94,10 +94,8 @@ func Fetch(c *gin.Context) {
 }
 
 func NextToken(ctx context.Context, datasetName string) (int64, error) {
-	client, err := dataset.New(ctx)
-	if err != nil {
-		return -1, fmt.Errorf("new bigquery client: %v", err)
-	}
+	client := dataset.New(ctx)
+	defer client.Close()
 
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select max(id) from `%v` limit 1", table)

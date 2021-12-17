@@ -84,10 +84,8 @@ func Fetch(c *gin.Context) {
 }
 
 func NextToken(ctx context.Context, datasetName string) (string, error) {
-	client, err := dataset.New(ctx)
-	if err != nil {
-		return "", fmt.Errorf("new bigquery client: %v", err)
-	}
+	client := dataset.New(ctx)
+	defer client.Close()
 
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.CommitsMeta.Name)
 	query := fmt.Sprintf("select sha from `%v` where date = (select max(date) from `%v` limit 1)", table, table)

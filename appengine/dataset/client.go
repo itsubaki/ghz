@@ -16,21 +16,21 @@ type Client struct {
 	ProjectID string
 }
 
-func New(ctx context.Context) (*Client, error) {
+func New(ctx context.Context) *Client {
 	creds, err := google.FindDefaultCredentials(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("find default credentials: %v", err)
+		panic(fmt.Sprintf("find default credentials: %v", err))
 	}
 
 	client, err := bigquery.NewClient(ctx, creds.ProjectID)
 	if err != nil {
-		return nil, fmt.Errorf("new bigquery client: %v", err)
+		panic(fmt.Sprintf("new bigquery client: %v", err))
 	}
 
 	return &Client{
 		client:    client,
 		ProjectID: creds.ProjectID,
-	}, nil
+	}
 }
 
 func (c *Client) CreateIfNotExists(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
@@ -94,6 +94,10 @@ func (c *Client) Query(ctx context.Context, query string, fn func(values []bigqu
 	return nil
 }
 
+func (c *Client) Close() error {
+	return c.client.Close()
+}
+
 func (c *Client) Raw() *bigquery.Client {
 	return c.client
 }
@@ -108,28 +112,22 @@ func ProjectID() string {
 }
 
 func CreateIfNotExists(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
-	client, err := New(ctx)
-	if err != nil {
-		return fmt.Errorf("new bigquery client: %v", err)
-	}
+	client := New(ctx)
+	defer client.Close()
 
 	return client.CreateIfNotExists(ctx, datasetName, meta)
 }
 
 func Insert(ctx context.Context, datasetName, tableName string, items []interface{}) error {
-	client, err := New(ctx)
-	if err != nil {
-		return fmt.Errorf("new bigquery client: %v", err)
-	}
+	client := New(ctx)
+	defer client.Close()
 
 	return client.Insert(ctx, datasetName, tableName, items)
 }
 
 func Query(ctx context.Context, query string, fn func(values []bigquery.Value)) error {
-	client, err := New(ctx)
-	if err != nil {
-		return fmt.Errorf("new bigquery client: %v", err)
-	}
+	client := New(ctx)
+	defer client.Close()
 
 	return client.Query(ctx, query, fn)
 }

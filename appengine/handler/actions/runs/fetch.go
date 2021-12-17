@@ -25,6 +25,7 @@ func Fetch(c *gin.Context) {
 	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
 		dataset.WorkflowRunsMeta,
 		view.WorkflowRunsMeta(dataset.ProjectID(), datasetName, dataset.WorkflowRunsMeta.Name),
+		view.LeadTimeWorkflowMeta(dataset.ProjectID(), datasetName),
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -83,10 +84,8 @@ func Fetch(c *gin.Context) {
 }
 
 func NextToken(ctx context.Context, datasetName string) (int64, int64, error) {
-	client, err := dataset.New(ctx)
-	if err != nil {
-		return -1, -1, fmt.Errorf("new bigquery client: %v", err)
-	}
+	client := dataset.New(ctx)
+	defer client.Close()
 
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v` limit 1", table)

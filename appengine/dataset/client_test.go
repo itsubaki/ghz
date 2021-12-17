@@ -29,10 +29,8 @@ func TestCreateIfNotExists(t *testing.T) {
 
 	for _, c := range cases {
 		ctx := context.Background()
-		client, err := dataset.New(ctx)
-		if err != nil {
-			t.Fatalf("new bigquery client: %v", err)
-		}
+		client := dataset.New(ctx)
+		defer client.Close()
 
 		if err := client.CreateIfNotExists(ctx, c.name, []bigquery.TableMetadata{c.meta}); err != nil {
 			t.Errorf("create if not exists: %v", err)

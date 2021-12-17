@@ -7,12 +7,12 @@ import (
 )
 
 type Incident struct {
-	Owner        string    `bigquery:"owner"`
-	Repository   string    `bigquery:"repository"`
-	ID           int64     `bigquery:"id"`
-	DeploymentID int64     `bigquery:"deployment_id"`
-	CreatedAt    time.Time `bigquery:"created_at"`
-	ResolvedAt   time.Time `bigquery:"resolved_at"`
+	Owner      string    `bigquery:"owner"`
+	Repository string    `bigquery:"repository"`
+	ID         int64     `bigquery:"id"`
+	PullReqID  int64     `bigquery:"pullreq_id"`
+	CreatedAt  time.Time `bigquery:"created_at"`
+	ResolvedAt time.Time `bigquery:"resolved_at"`
 }
 
 var IncidentMeta = bigquery.TableMetadata{
@@ -21,7 +21,7 @@ var IncidentMeta = bigquery.TableMetadata{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},
 		{Name: "id", Type: bigquery.IntegerFieldType, Required: true},
-		{Name: "deployment_id", Type: bigquery.IntegerFieldType, Required: true},
+		{Name: "pullreq_id", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "created_at", Type: bigquery.TimestampFieldType, Required: true},
 		{Name: "resolved_at", Type: bigquery.TimestampFieldType, Required: true},
 	},

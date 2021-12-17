@@ -93,10 +93,8 @@ func Fetch(c *gin.Context) {
 }
 
 func GetRuns(ctx context.Context, datasetName string, nextToken int64) ([]dataset.WorkflowRun, error) {
-	client, err := dataset.New(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("new bigquery client: %v", err)
-	}
+	client := dataset.New(ctx)
+	defer client.Close()
 
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("select workflow_id, workflow_name, run_id, run_number from `%v` where run_id > %v", table, nextToken)
@@ -117,10 +115,8 @@ func GetRuns(ctx context.Context, datasetName string, nextToken int64) ([]datase
 }
 
 func NextToken(ctx context.Context, datasetName string) (int64, int64, error) {
-	client, err := dataset.New(ctx)
-	if err != nil {
-		return -1, -1, fmt.Errorf("new bigquery client: %v", err)
-	}
+	client := dataset.New(ctx)
+	defer client.Close()
 
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowJobsMeta.Name)
 	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v` limit 1", table)

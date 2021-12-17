@@ -73,10 +73,8 @@ func UpdatePullReqCommits(ctx context.Context, datasetName string, r *github.Pul
 }
 
 func UpdatePullReq(ctx context.Context, datasetName string, r *github.PullRequest) error {
-	client, err := dataset.New(ctx)
-	if err != nil {
-		return fmt.Errorf("new bigquery client: %v", err)
-	}
+	client := dataset.New(ctx)
+	defer client.Close()
 
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
 
@@ -118,10 +116,8 @@ func UpdatePullReq(ctx context.Context, datasetName string, r *github.PullReques
 }
 
 func GetPullReqs(ctx context.Context, datasetName, state string) ([]dataset.PullReqs, error) {
-	client, err := dataset.New(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("new bigquery client: %v", err)
-	}
+	client := dataset.New(ctx)
+	defer client.Close()
 
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where state = \"%v\"", table, state)
