@@ -3,6 +3,7 @@ package handler
 import (
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghstats/appengine/handler/actions/jobs"
@@ -41,16 +42,6 @@ func Status(g *gin.Engine) {
 	})
 }
 
-func XAppEngineCron(c *gin.Context) {
-	if c.GetHeader("X-Appengine-Cron") != "true" {
-		log.Printf("X-Appengine-Cron header is not set to true")
-		c.Status(http.StatusBadRequest)
-		return
-	}
-
-	c.Next()
-}
-
 func Fetch(g *gin.Engine) {
 	r := g.Group("/_fetch")
 	r.Use(XAppEngineCron)
@@ -65,7 +56,30 @@ func Fetch(g *gin.Engine) {
 
 func Incidents(g *gin.Engine) {
 	r := g.Group("/incidents")
+	r.Use(XAPIKey)
 
 	r.POST("/:owner/:repository", incidents.Create)
 	r.GET("/:owner/:repository", incidents.List)
+}
+
+func XAppEngineCron(c *gin.Context) {
+	if c.GetHeader("X-Appengine-Cron") != "true" {
+		log.Printf("X-Appengine-Cron header is not set to true")
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	c.Next()
+}
+
+var xapikey = os.Getenv("XAPIKEY")
+
+func XAPIKey(c *gin.Context) {
+	if c.GetHeader("X-Api-Key") != xapikey {
+		log.Printf("X-Api-Key is invalid")
+		c.Status(http.StatusBadRequest)
+		return
+	}
+
+	c.Next()
 }

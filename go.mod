@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go/bigquery v1.25.0
 	github.com/gin-gonic/gin v1.7.7
 	github.com/google/go-github/v40 v40.0.0
+	github.com/speps/go-hashids v2.0.0+incompatible
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
 	google.golang.org/api v0.62.0
