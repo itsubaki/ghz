@@ -11,7 +11,8 @@ func LeadTimePullReqsMeta(projectID, datasetName string) bigquery.TableMetadata 
 	return bigquery.TableMetadata{
 		Name: "_leadtime_pullreqs",
 		ViewQuery: fmt.Sprintf(
-			`SELECT
+			`
+			SELECT
 				B.owner,
 				B.repository,
 				A.id,
@@ -19,8 +20,8 @@ func LeadTimePullReqsMeta(projectID, datasetName string) bigquery.TableMetadata 
 				A.login,
 				B.title,
 				A.message,
-				B.merge_commit_sha,
 				A.sha,
+				B.merge_commit_sha,
 				A.date as committed_at,
 				B.merged_at,
 				TIMESTAMP_DIFF(B.merged_at, A.date, MINUTE) as lead_time

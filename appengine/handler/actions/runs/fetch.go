@@ -23,9 +23,13 @@ func Fetch(c *gin.Context) {
 	datasetName := dataset.Name(owner, repository)
 
 	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+		dataset.CommitsMeta,
+		dataset.PullReqsMeta,
+		dataset.PullReqCommitsMeta,
 		dataset.WorkflowRunsMeta,
 		view.WorkflowRunsMeta(dataset.ProjectID(), datasetName, dataset.WorkflowRunsMeta.Name),
-		view.LeadTimeWorkflowMeta(dataset.ProjectID(), datasetName),
+		view.LeadTimeWorkflowsMeta(dataset.ProjectID(), datasetName),
+		view.LeadTimeCommitsMeta(dataset.ProjectID(), datasetName),
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)

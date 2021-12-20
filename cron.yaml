@@ -60,3 +60,34 @@ cron:
     url: /_fetch/vercel/next.js/actions/jobs
     schedule: every day 01:00
     timezone: Asia/Tokyo
+
+  # itsubaki/q
+  - description: "itsubaki/q"
+    url: /_fetch/itsubaki/q/commits
+    schedule: every day 00:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/q"
+    url: /_fetch/itsubaki/q/pullreqs
+    schedule: every day 00:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/q"
+    url: /_fetch/itsubaki/q/actions/runs
+    schedule: every day 00:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/q"
+    url: /_fetch/itsubaki/q/pullreqs/update
+    schedule: every day 01:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/q"
+    url: /_fetch/itsubaki/q/pullreqs/commits
+    schedule: every day 01:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/q"
+    url: /_fetch/itsubaki/q/actions/jobs
+    schedule: every day 01:00
+    timezone: Asia/Tokyo

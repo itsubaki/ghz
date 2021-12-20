@@ -24,7 +24,14 @@ func Fetch(c *cli.Context) error {
 
 	fmt.Println("id, login, name, created_at, type, ")
 	for _, e := range events {
-		fmt.Printf("%v, %v, %v, %v, %v\n", *e.ID, *e.Actor.Login, *e.Repo.Name, e.CreatedAt.Format("2006-01-02 15:04:05"), *e.Type)
+		fmt.Printf(
+			"%v, %v, %v, %v, %v\n",
+			*e.ID,
+			*e.Actor.Login,
+			*e.Repo.Name,
+			e.CreatedAt.Format("2006-01-02 15:04:05"),
+			*e.Type,
+		)
 	}
 
 	return nil

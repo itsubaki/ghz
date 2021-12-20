@@ -10,7 +10,8 @@ func WorkflowRunsMeta(projectID, datasetName, tableName string) bigquery.TableMe
 	return bigquery.TableMetadata{
 		Name: "_workflow_runs",
 		ViewQuery: fmt.Sprintf(
-			`SELECT
+			`
+			SELECT
 				owner,
 				repository,
 				workflow_id,
@@ -21,7 +22,8 @@ func WorkflowRunsMeta(projectID, datasetName, tableName string) bigquery.TableMe
 				STDDEV(TIMESTAMP_DIFF(updated_at, created_at,MINUTE)) as duration_stddev
 			FROM %v
 			WHERE conclusion = "success"
-			GROUP BY owner, repository, workflow_id, workflow_name, week`,
+			GROUP BY owner, repository, workflow_id, workflow_name, week
+			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, tableName),
 		),
 	}
