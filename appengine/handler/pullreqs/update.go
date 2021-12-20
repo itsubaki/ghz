@@ -79,24 +79,13 @@ func UpdatePullReq(ctx context.Context, datasetName string, r *github.PullReques
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
 
 	var query string
-	if r.MergedAt != nil {
-		query = fmt.Sprintf("update %v set state = \"%v\", updated_at = \"%v\", merged_at = \"%v\", merge_commit_sha = \"%v\" where id = %v",
-			table,
-			r.GetState(),
-			r.UpdatedAt.Format("2006-01-02 15:04:05 UTC"),
-			r.MergedAt.Format("2006-01-02 15:04:05 UTC"),
-			r.GetMergeCommitSHA(),
-			r.GetID(),
-		)
-
-	}
-
 	if r.ClosedAt != nil {
-		query = fmt.Sprintf("update %v set state = \"%v\", updated_at = \"%v\", closed_at = \"%v\", merge_commit_sha = \"%v\" where id = %v",
+		query = fmt.Sprintf("update %v set state = \"%v\", updated_at = \"%v\", merged_at = \"%v\", closed_at = \"%v\", merge_commit_sha = \"%v\" where id = %v",
 			table,
 			r.GetState(),
-			r.UpdatedAt.Format("2006-01-02 15:04:05 UTC"),
-			r.ClosedAt.Format("2006-01-02 15:04:05 UTC"),
+			r.GetUpdatedAt().Format("2006-01-02 15:04:05 UTC"),
+			r.GetMergedAt().Format("2006-01-02 15:04:05 UTC"),
+			r.GetClosedAt().Format("2006-01-02 15:04:05 UTC"),
 			r.GetMergeCommitSHA(),
 			r.GetID(),
 		)
