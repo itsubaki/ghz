@@ -9,6 +9,7 @@ import (
 	"github.com/itsubaki/ghstats/appengine/handler/actions/jobs"
 	"github.com/itsubaki/ghstats/appengine/handler/actions/runs"
 	"github.com/itsubaki/ghstats/appengine/handler/commits"
+	"github.com/itsubaki/ghstats/appengine/handler/events"
 	"github.com/itsubaki/ghstats/appengine/handler/incidents"
 	"github.com/itsubaki/ghstats/appengine/handler/pullreqs"
 	prcommits "github.com/itsubaki/ghstats/appengine/handler/pullreqs/commits"
@@ -52,6 +53,7 @@ func Fetch(g *gin.Engine) {
 	r.GET("/:owner/:repository/pullreqs/commits", prcommits.Fetch)
 	r.GET("/:owner/:repository/actions/runs", runs.Fetch)
 	r.GET("/:owner/:repository/actions/jobs", jobs.Fetch)
+	r.GET("/:owner/:repository/events", events.Fetch)
 }
 
 func Incidents(g *gin.Engine) {
@@ -59,7 +61,6 @@ func Incidents(g *gin.Engine) {
 	r.Use(XAPIKey)
 
 	r.POST("/:owner/:repository", incidents.Create)
-	r.GET("/:owner/:repository", incidents.List)
 }
 
 func XAppEngineCron(c *gin.Context) {

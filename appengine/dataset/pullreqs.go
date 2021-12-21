@@ -6,7 +6,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-type PullReqs struct {
+type PullReq struct {
 	Owner          string    `bigquery:"owner"`
 	Repository     string    `bigquery:"repository"`
 	ID             int64     `bigquery:"id"`

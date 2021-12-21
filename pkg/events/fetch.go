@@ -16,7 +16,7 @@ type FetchInput struct {
 	PerPage    int
 }
 
-func Fetch(ctx context.Context, in *FetchInput) ([]*github.Event, error) {
+func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Event) error) ([]*github.Event, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -35,6 +35,12 @@ func Fetch(ctx context.Context, in *FetchInput) ([]*github.Event, error) {
 		events, resp, err := client.Activity.ListRepositoryEvents(ctx, in.Owner, in.Repository, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list workflow runs: %v", err)
+		}
+
+		for i, f := range fn {
+			if err := f(events); err != nil {
+				return nil, fmt.Errorf("func[%v]: %v", i, err)
+			}
 		}
 
 		out = append(out, events...)

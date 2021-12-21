@@ -30,6 +30,11 @@ cron:
     schedule: every day 01:00
     timezone: Asia/Tokyo
 
+  - description: "gin-gonic/gin"
+    url: /_fetch/gin-gonic/gin/events
+    schedule: every day 00:00
+    timezone: Asia/Tokyo
+
   # vercel/next.js
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/commits
@@ -61,6 +66,11 @@ cron:
     schedule: every day 01:00
     timezone: Asia/Tokyo
 
+  - description: "vercel/next.js"
+    url: /_fetch/vercel/next.js/events
+    schedule: every day 01:00
+    timezone: Asia/Tokyo
+
   # itsubaki/q
   - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/commits
@@ -89,5 +99,10 @@ cron:
 
   - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/actions/jobs
+    schedule: every day 01:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/q"
+    url: /_fetch/itsubaki/q/events
     schedule: every day 01:00
     timezone: Asia/Tokyo

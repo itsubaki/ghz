@@ -104,14 +104,14 @@ func UpdatePullReq(ctx context.Context, datasetName string, r *github.PullReques
 	return nil
 }
 
-func GetPullReqs(ctx context.Context, datasetName, state string) ([]dataset.PullReqs, error) {
+func GetPullReqs(ctx context.Context, datasetName, state string) ([]dataset.PullReq, error) {
 	client := dataset.New(ctx)
 	defer client.Close()
 
 	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where state = \"%v\"", table, state)
 
-	out := make([]dataset.PullReqs, 0)
+	out := make([]dataset.PullReq, 0)
 	if err := client.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 2 {
 			return
@@ -121,7 +121,7 @@ func GetPullReqs(ctx context.Context, datasetName, state string) ([]dataset.Pull
 			return
 		}
 
-		out = append(out, dataset.PullReqs{
+		out = append(out, dataset.PullReq{
 			ID:     values[0].(int64),
 			Number: values[1].(int64),
 			State:  state,

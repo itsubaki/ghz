@@ -62,7 +62,7 @@ func Fetch(c *gin.Context) {
 					title = title[0:64]
 				}
 
-				items = append(items, dataset.PullReqs{
+				items = append(items, dataset.PullReq{
 					Owner:          owner,
 					Repository:     repository,
 					ID:             r.GetID(),

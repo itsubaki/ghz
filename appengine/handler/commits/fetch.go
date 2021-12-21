@@ -58,7 +58,7 @@ func Fetch(c *gin.Context) {
 					message = message[0:64]
 				}
 
-				items = append(items, dataset.Commits{
+				items = append(items, dataset.Commit{
 					Owner:      owner,
 					Repository: repository,
 					SHA:        r.GetSHA(),

@@ -6,7 +6,7 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-type Commits struct {
+type Commit struct {
 	Owner      string    `bigquery:"owner"`
 	Repository string    `bigquery:"repository"`
 	SHA        string    `bigquery:"sha"`
