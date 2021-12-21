@@ -24,6 +24,7 @@ func Fetch(c *gin.Context) {
 
 	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
 		dataset.CommitsMeta,
+		dataset.EventsPushMeta,
 		dataset.PullReqsMeta,
 		dataset.PullReqCommitsMeta,
 		dataset.WorkflowRunsMeta,

@@ -14,18 +14,14 @@ func LeadTimeWorkflowsMeta(projectID, datasetName string) bigquery.TableMetadata
 			`
 			WITH A AS (
 				SELECT
-					B.owner,
-					B.repository,
+					B.title,
+					B.merge_commit_sha,
 					A.id,
 					A.number,
 					A.login,
-					B.title,
 					A.message,
 					A.sha,
-					B.merge_commit_sha,
-					A.date as committed_at,
-					B.merged_at,
-					TIMESTAMP_DIFF(B.merged_at, A.date, MINUTE) as lead_time
+					A.date,
 				FROM %v as A
 				INNER JOIN %v as B
 				ON A.id = B.id
@@ -42,9 +38,9 @@ func LeadTimeWorkflowsMeta(projectID, datasetName string) bigquery.TableMetadata
 			    A.title,
 				A.message,
 				A.sha as commit_sha,
-				A.committed_at,
+				A.date as committed_at,
 				B.updated_at as completed_at,
-				TIMESTAMP_DIFF(B.updated_at, A.committed_at, MINUTE) as lead_time
+				TIMESTAMP_DIFF(B.updated_at, A.date, MINUTE) as lead_time
 			FROM A
 			INNER JOIN %v as B
 			ON A.merge_commit_sha = B.head_sha

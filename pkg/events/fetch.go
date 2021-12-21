@@ -14,6 +14,7 @@ type FetchInput struct {
 	PAT        string
 	Page       int
 	PerPage    int
+	LastID     string
 }
 
 func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Event) error) ([]*github.Event, error) {
@@ -37,14 +38,25 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Event)
 			return nil, fmt.Errorf("list workflow runs: %v", err)
 		}
 
+		buf := make([]*github.Event, 0)
+		var last bool
+		for i := range events {
+			if in.LastID != "" && events[i].GetID() == in.LastID {
+				last = true
+				break
+			}
+
+			buf = append(buf, events[i])
+		}
+
 		for i, f := range fn {
-			if err := f(events); err != nil {
+			if err := f(buf); err != nil {
 				return nil, fmt.Errorf("func[%v]: %v", i, err)
 			}
 		}
 
-		out = append(out, events...)
-		if resp.NextPage == 0 {
+		out = append(out, buf...)
+		if last || resp.NextPage == 0 {
 			break
 		}
 

@@ -32,7 +32,14 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	log.Printf("path=%v, target=%v/%v, next=%v", c.Request.URL.Path, owner, repository, nil)
+	token, err := NextToken(ctx, datasetName)
+	if err != nil {
+		log.Printf("get lastSHA: %v", err)
+		c.Status(http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("path=%v, target=%v/%v, next=%v", c.Request.URL.Path, owner, repository, token)
 
 	if _, err := events.Fetch(ctx,
 		&events.FetchInput{
@@ -41,6 +48,7 @@ func Fetch(c *gin.Context) {
 			PAT:        os.Getenv("PAT"),
 			Page:       0,
 			PerPage:    100,
+			LastID:     token,
 		},
 		func(list []*github.Event) error {
 			items := make([]interface{}, 0)
@@ -83,4 +91,29 @@ func Fetch(c *gin.Context) {
 
 	log.Println("fetched")
 	c.Status(http.StatusOK)
+}
+
+func NextToken(ctx context.Context, datasetName string) (string, error) {
+	client := dataset.New(ctx)
+	defer client.Close()
+
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.EventsPushMeta.Name)
+	query := fmt.Sprintf("select max(id) from `%v`", table)
+
+	var id string
+	if err := client.Query(ctx, query, func(values []bigquery.Value) {
+		if len(values) != 1 {
+			return
+		}
+
+		if values[0] == nil {
+			return
+		}
+
+		id = values[0].(string)
+	}); err != nil {
+		return "", fmt.Errorf("query(%v): %v", query, err)
+	}
+
+	return id, nil
 }

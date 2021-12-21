@@ -43,7 +43,7 @@ func Fetch(ctx context.Context, in *ListInput, fn ...func(list []*github.Reposit
 		buf := make([]*github.RepositoryCommit, 0)
 		var last bool
 		for i := range commits {
-			if in.LastSHA != "" && *commits[i].SHA == in.LastSHA {
+			if in.LastSHA != "" && commits[i].GetSHA() == in.LastSHA {
 				last = true
 				break
 			}
