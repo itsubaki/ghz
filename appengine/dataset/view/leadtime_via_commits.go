@@ -20,15 +20,14 @@ func LeadTimeCommitsMeta(projectID, datasetName string) bigquery.TableMetadata {
 				A.login,
 				A.message,
 				A.sha,
-				A.date as commited_at,
+				A.created_at as commited_at,
 				B.updated_at as completed_at,
-				TIMESTAMP_DIFF(B.updated_at, A.date, MINUTE) as lead_time
 			FROM %v as A
 			INNER JOIN %v as B
 			ON A.sha = B.head_sha
 			WHERE B.conclusion = "success"
 			`,
-			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.CommitsMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.EventsPushMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.WorkflowRunsMeta.Name),
 		),
 	}

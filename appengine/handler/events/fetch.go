@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"regexp"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,8 @@ import (
 	"github.com/itsubaki/ghstats/appengine/dataset"
 	"github.com/itsubaki/ghstats/pkg/events"
 )
+
+var regexpnl = regexp.MustCompile(`\r\n|\r|\n`)
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
@@ -22,7 +25,7 @@ func Fetch(c *gin.Context) {
 	datasetName := dataset.Name(owner, repository)
 
 	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
-		dataset.EventsMeta,
+		dataset.EventsPushMeta,
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -46,18 +49,28 @@ func Fetch(c *gin.Context) {
 					continue
 				}
 
-				items = append(items, dataset.Event{
-					Owner:      owner,
-					Repository: repository,
-					ID:         e.GetID(),
-					Login:      e.GetActor().GetLogin(),
-					Type:       e.GetType(),
-					CreatedAt:  e.GetCreatedAt(),
-					RawPayload: string(e.GetRawPayload()),
-				})
+				p := e.Payload().(*github.PushEvent)
+				for _, c := range p.Commits {
+					message := regexpnl.ReplaceAllString(c.GetMessage(), " ")
+					if len(message) > 64 {
+						message = message[0:64]
+					}
+
+					items = append(items, dataset.PushEvent{
+						Owner:      owner,
+						Repository: repository,
+						ID:         e.GetID(),
+						Login:      e.GetActor().GetLogin(),
+						Type:       e.GetType(),
+						CreatedAt:  e.GetCreatedAt(),
+						HeadSHA:    p.GetHead(),
+						SHA:        c.GetSHA(),
+						Message:    message,
+					})
+				}
 			}
 
-			if err := dataset.Insert(ctx, datasetName, dataset.EventsMeta.Name, items); err != nil {
+			if err := dataset.Insert(ctx, datasetName, dataset.EventsPushMeta.Name, items); err != nil {
 				return fmt.Errorf("insert items: %v", err)
 			}
 
