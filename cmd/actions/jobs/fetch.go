@@ -17,7 +17,7 @@ import (
 const Filename = "jobs.json"
 
 func Fetch(c *cli.Context) error {
-	dir := fmt.Sprintf("%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"))
+	dir := fmt.Sprintf("%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repository"))
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.MkdirAll(dir, os.ModePerm)
 	}
@@ -30,7 +30,7 @@ func Fetch(c *cli.Context) error {
 
 	in := jobs.FetchInput{
 		Owner:      c.String("owner"),
-		Repository: c.String("repo"),
+		Repository: c.String("repository"),
 		PAT:        c.String("pat"),
 		Page:       c.Int("page"),
 		PerPage:    c.Int("perpage"),
@@ -41,7 +41,7 @@ func Fetch(c *cli.Context) error {
 	fmt.Printf("workflow_id: %v\n", wid)
 	fmt.Printf("last_run_id: %v\n", lastRunID)
 
-	runspath := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"), runs.Filename)
+	runspath := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repository"), runs.Filename)
 	runs, err := runs.Deserialize(runspath)
 	if err != nil {
 		return fmt.Errorf("deserialize: %v", err)

@@ -11,7 +11,7 @@ import (
 func Fetch(c *cli.Context) error {
 	in := issues.FetchInput{
 		Owner:      c.String("owner"),
-		Repository: c.String("repo"),
+		Repository: c.String("repository"),
 		PAT:        c.String("pat"),
 		Page:       c.Int("page"),
 		PerPage:    c.Int("perpage"),

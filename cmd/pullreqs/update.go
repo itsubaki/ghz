@@ -10,7 +10,7 @@ import (
 )
 
 func Update(c *cli.Context) error {
-	path := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"), Filename)
+	path := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repository"), Filename)
 	list, err := Deserialize(path)
 	if err != nil {
 		return fmt.Errorf("deserialize: %v", err)
@@ -30,7 +30,7 @@ func Update(c *cli.Context) error {
 	for i := range open {
 		in := pullreqs.GetInput{
 			Owner:      c.String("owner"),
-			Repository: c.String("repo"),
+			Repository: c.String("repository"),
 			PAT:        c.String("pat"),
 			Number:     *open[i].Number,
 		}

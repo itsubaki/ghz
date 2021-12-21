@@ -16,7 +16,7 @@ func LeadTimeCommitsMeta(projectID, datasetName string) bigquery.TableMetadata {
 				B.owner,
 				B.repository,
 				B.workflow_id,
-                B.workflow_name,
+				B.workflow_name,
 				A.login,
 				A.message,
 				A.sha,

@@ -16,7 +16,7 @@ import (
 const Filename = "pullreqs.json"
 
 func Fetch(c *cli.Context) error {
-	dir := fmt.Sprintf("%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"))
+	dir := fmt.Sprintf("%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repository"))
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.MkdirAll(dir, os.ModePerm)
 	}
@@ -29,7 +29,7 @@ func Fetch(c *cli.Context) error {
 
 	in := pullreqs.ListInput{
 		Owner:      c.String("owner"),
-		Repository: c.String("repo"),
+		Repository: c.String("repository"),
 		PAT:        c.String("pat"),
 		Page:       c.Int("page"),
 		PerPage:    c.Int("perpage"),

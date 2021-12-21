@@ -10,7 +10,7 @@ import (
 )
 
 func Stats(c *cli.Context) error {
-	path := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"), Filename)
+	path := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repository"), Filename)
 	list, err := Deserialize(path)
 	if err != nil {
 		return fmt.Errorf("deserialize: %v", err)

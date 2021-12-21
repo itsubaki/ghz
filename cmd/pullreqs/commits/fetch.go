@@ -38,7 +38,7 @@ func (c CommitWithPRID) CSV() string {
 }
 
 func Fetch(c *cli.Context) error {
-	dir := fmt.Sprintf("%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"))
+	dir := fmt.Sprintf("%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repository"))
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.MkdirAll(dir, os.ModePerm)
 	}
@@ -51,7 +51,7 @@ func Fetch(c *cli.Context) error {
 
 	in := commits.FetchInput{
 		Owner:      c.String("owner"),
-		Repository: c.String("repo"),
+		Repository: c.String("repository"),
 		PAT:        c.String("pat"),
 		Page:       c.Int("page"),
 		PerPage:    c.Int("perpage"),
@@ -60,7 +60,7 @@ func Fetch(c *cli.Context) error {
 	fmt.Printf("target: %v/%v\n", in.Owner, in.Repository)
 	fmt.Printf("last_id: %v(%v)\n", lastID, lastNum)
 
-	prpath := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repo"), pullreqs.Filename)
+	prpath := fmt.Sprintf("%v/%v/%v/%v", c.String("dir"), c.String("owner"), c.String("repository"), pullreqs.Filename)
 	prs, err := pullreqs.Deserialize(prpath)
 	if err != nil {
 		return fmt.Errorf("deserialize: %v", err)

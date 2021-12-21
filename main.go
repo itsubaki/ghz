@@ -35,7 +35,7 @@ func New(version string) *cli.App {
 	}
 
 	repo := cli.StringFlag{
-		Name:    "repo",
+		Name:    "repository",
 		Aliases: []string{"r"},
 		Value:   "q",
 	}
