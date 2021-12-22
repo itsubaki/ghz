@@ -35,7 +35,7 @@ func LeadTimeWorkflowsMeta(projectID, datasetName string) bigquery.TableMetadata
 				A.id as pullreq_id,
 				A.number as pullreq_number,
 				A.login,
-			    A.title,
+				A.title,
 				A.message,
 				A.sha as commit_sha,
 				A.date as committed_at,

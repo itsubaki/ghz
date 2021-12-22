@@ -19,7 +19,7 @@ func LeadTimeCommitsMeta(projectID, datasetName string) bigquery.TableMetadata {
 					A.sha,
 					A.date,
 					B.head_sha
-					FROM %v as A
+				FROM %v as A
 				INNER JOIN %v as B
 				ON A.sha = B.sha
 			)
