@@ -6,20 +6,18 @@ import (
 	"cloud.google.com/go/bigquery"
 )
 
-type PushEvent struct {
+type Event struct {
 	Owner      string    `bigquery:"owner"`
 	Repository string    `bigquery:"repository"`
 	ID         string    `bigquery:"id"`
 	CreatedAt  time.Time `bigquery:"created_at"`
 	Login      string    `bigquery:"login"`
 	Type       string    `bigquery:"type"`
-	HeadSHA    string    `bigquery:"head_sha"`
-	SHA        string    `bigquery:"sha"`
-	Message    string    `bigquery:"message"`
+	RawPayload string    `bigquery:"raw_payload"`
 }
 
-var EventsPushMeta = bigquery.TableMetadata{
-	Name: "events_push",
+var EventsMeta = bigquery.TableMetadata{
+	Name: "events",
 	TimePartitioning: &bigquery.TimePartitioning{
 		Type:  bigquery.MonthPartitioningType,
 		Field: "created_at",
@@ -31,8 +29,6 @@ var EventsPushMeta = bigquery.TableMetadata{
 		{Name: "created_at", Type: bigquery.TimestampFieldType, Required: true},
 		{Name: "login", Type: bigquery.StringFieldType, Required: true},
 		{Name: "type", Type: bigquery.StringFieldType, Required: true},
-		{Name: "head_sha", Type: bigquery.StringFieldType, Required: true},
-		{Name: "sha", Type: bigquery.StringFieldType, Required: true},
-		{Name: "message", Type: bigquery.StringFieldType, Required: true},
+		{Name: "raw_payload", Type: bigquery.StringFieldType, Required: true},
 	},
 }

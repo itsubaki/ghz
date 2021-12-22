@@ -26,6 +26,7 @@ func Fetch(c *gin.Context) {
 
 	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
 		dataset.EventsPushMeta,
+		dataset.EventsMeta,
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -49,6 +50,26 @@ func Fetch(c *gin.Context) {
 			Page:       0,
 			PerPage:    100,
 			LastID:     token,
+		},
+		func(list []*github.Event) error {
+			items := make([]interface{}, 0)
+			for _, e := range list {
+				items = append(items, dataset.Event{
+					Owner:      owner,
+					Repository: repository,
+					ID:         e.GetID(),
+					Login:      e.GetActor().GetLogin(),
+					Type:       e.GetType(),
+					CreatedAt:  e.GetCreatedAt(),
+					RawPayload: string(e.GetRawPayload()),
+				})
+			}
+
+			if err := dataset.Insert(ctx, datasetName, dataset.EventsMeta.Name, items); err != nil {
+				return fmt.Errorf("insert items: %v", err)
+			}
+
+			return nil
 		},
 		func(list []*github.Event) error {
 			items := make([]interface{}, 0)
@@ -83,7 +104,8 @@ func Fetch(c *gin.Context) {
 			}
 
 			return nil
-		}); err != nil {
+		},
+	); err != nil {
 		log.Printf("fetch: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
@@ -97,7 +119,7 @@ func NextToken(ctx context.Context, datasetName string) (string, error) {
 	client := dataset.New(ctx)
 	defer client.Close()
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.EventsPushMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.EventsMeta.Name)
 	query := fmt.Sprintf("select max(id) from `%v`", table)
 
 	var id string
