@@ -18,7 +18,7 @@ func WorkflowJobsMeta(projectID, datasetName, tableName string) bigquery.TableMe
 				workflow_name,
 				job_name,
 				DATE_ADD(DATE(started_at), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(started_at), INTERVAL -0 DAY)) +1 DAY) as week,
-				count(workflow_id) / 7 as runs_per_day,
+				count(job_name) as runs,
 				AVG(TIMESTAMP_DIFF(completed_at, started_at,MINUTE)) as duration_avg,
 				STDDEV(TIMESTAMP_DIFF(completed_at, started_at,MINUTE)) as duration_stddev
 			FROM %v
