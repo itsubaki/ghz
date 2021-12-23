@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghstats/appengine/dataset"
+	"github.com/itsubaki/ghstats/appengine/dataset/view"
 	"github.com/itsubaki/ghstats/pkg/commits"
 )
 
@@ -26,6 +27,8 @@ func Fetch(c *gin.Context) {
 
 	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
 		dataset.CommitsMeta,
+		dataset.IncidentsMeta,
+		view.CommitsMeta(dataset.ProjectID(), datasetName),
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)

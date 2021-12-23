@@ -7,9 +7,9 @@ import (
 	"github.com/itsubaki/ghstats/appengine/dataset"
 )
 
-func IncidentsMeta(projectID, datasetName string) bigquery.TableMetadata {
+func CommitsMeta(projectID, datasetName string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
-		Name: "_incidents",
+		Name: "_commits",
 		ViewQuery: fmt.Sprintf(
 			`
 			WITH A AS (
