@@ -47,7 +47,7 @@ func Create(c *gin.Context) {
 
 	ctx := context.Background()
 	datasetName := dataset.Name(in.Owner, in.Repository)
-	exists, err := Exists(ctx, datasetName, in.PullReqNumber)
+	exists, err := Exists(ctx, datasetName, in.SHA)
 	if err != nil {
 		log.Printf(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -57,7 +57,7 @@ func Create(c *gin.Context) {
 	}
 
 	if !exists {
-		message := fmt.Sprintf("pullreq number(%v) is not exists", in.PullReqNumber)
+		message := fmt.Sprintf("commit(%v) is not exists", in.SHA)
 		log.Printf(message)
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": message,
@@ -85,12 +85,12 @@ func Create(c *gin.Context) {
 	c.JSON(http.StatusOK, in)
 }
 
-func Exists(ctx context.Context, datasetName string, number int64) (bool, error) {
+func Exists(ctx context.Context, datasetName, sha string) (bool, error) {
 	client := dataset.New(ctx)
 	defer client.Close()
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
-	query := fmt.Sprintf("select count(number) from `%v` where number = %v", table, number)
+	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.CommitsMeta.Name)
+	query := fmt.Sprintf("select count(sha) from `%v` where sha = \"%v\"", table, sha)
 
 	var count int64
 	if err := client.Query(ctx, query, func(values []bigquery.Value) {
