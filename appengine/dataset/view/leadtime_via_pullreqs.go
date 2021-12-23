@@ -45,6 +45,8 @@ func LeadTimeWorkflowsMeta(projectID, datasetName string) bigquery.TableMetadata
 			INNER JOIN %v as B
 			ON A.merge_commit_sha = B.head_sha
 			WHERE B.conclusion = "success"
+			ORDER BY completed_at DESC
+			LIMIT 1000
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqCommitsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqsMeta.Name),

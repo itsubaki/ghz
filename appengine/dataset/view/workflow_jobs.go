@@ -24,6 +24,8 @@ func WorkflowJobsMeta(projectID, datasetName, tableName string) bigquery.TableMe
 			FROM %v
 			WHERE conclusion = "success"
 			GROUP BY owner, repository, workflow_id, workflow_name, job_name, week
+			ORDER BY week DESC
+			LIMIT 1000
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, tableName),
 		),

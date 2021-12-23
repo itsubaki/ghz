@@ -21,6 +21,8 @@ func PullReqsMeta(projectID, datasetName, tableName string) bigquery.TableMetada
 			FROM %v
 			WHERE state = "closed" AND merged_at != "0001-01-01 00:00:00 UTC"
 			GROUP BY owner, repository, week
+			ORDER BY week DESC
+			LIMIT 1000
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, tableName),
 		),

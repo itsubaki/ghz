@@ -37,6 +37,8 @@ func IncidentsMeta(projectID, datasetName string) bigquery.TableMetadata {
 			FROM A
 			LEFT JOIN B
 			ON A.week = B.week
+			ORDER BY week DESC
+			LIMIT 1000
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.CommitsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.IncidentsMeta.Name),
