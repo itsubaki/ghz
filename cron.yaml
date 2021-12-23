@@ -106,3 +106,8 @@ cron:
     url: /_fetch/itsubaki/q/events
     schedule: every day 01:00
     timezone: Asia/Tokyo
+
+  - description: "itsubaki/q"
+    url: /_fetch/itsubaki/q/incidents
+    schedule: every day 01:00
+    timezone: Asia/Tokyo

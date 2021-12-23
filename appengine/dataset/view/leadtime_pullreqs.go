@@ -28,7 +28,8 @@ func LeadTimePullReqsMeta(projectID, datasetName string) bigquery.TableMetadata 
 			FROM %v as A
 			INNER JOIN %v as B
 			ON A.id = B.id
-			WHERE B.merged_at != "0001-01-01 00:00:00 UTC"`,
+			WHERE B.merged_at != "0001-01-01 00:00:00 UTC"
+			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqCommitsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqsMeta.Name),
 		),

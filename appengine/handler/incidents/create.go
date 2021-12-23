@@ -13,6 +13,7 @@ import (
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghstats/appengine/dataset"
+	"github.com/itsubaki/ghstats/appengine/dataset/view"
 	"github.com/speps/go-hashids"
 )
 
@@ -66,7 +67,8 @@ func Create(c *gin.Context) {
 	}
 
 	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
-		dataset.IncidentMeta,
+		dataset.IncidentsMeta,
+		view.IncidentsMeta(dataset.ProjectID(), datasetName),
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -76,7 +78,7 @@ func Create(c *gin.Context) {
 	items := make([]interface{}, 0)
 	items = append(items, in)
 
-	if err := dataset.Insert(ctx, datasetName, dataset.IncidentMeta.Name, items); err != nil {
+	if err := dataset.Insert(ctx, datasetName, dataset.IncidentsMeta.Name, items); err != nil {
 		log.Printf("insert items: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return

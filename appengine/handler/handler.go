@@ -53,6 +53,7 @@ func Fetch(g *gin.Engine) {
 	r.GET("/:owner/:repository/actions/runs", runs.Fetch)
 	r.GET("/:owner/:repository/actions/jobs", jobs.Fetch)
 	r.GET("/:owner/:repository/events", events.Fetch)
+	r.GET("/:owner/:repository/incidents", incidents.Fetch)
 }
 
 func Incidents(g *gin.Engine) {

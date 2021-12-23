@@ -16,7 +16,7 @@ type Incident struct {
 	ResolvedAt  time.Time `bigquery:"resolved_at" json:"resolved_at"`
 }
 
-var IncidentMeta = bigquery.TableMetadata{
+var IncidentsMeta = bigquery.TableMetadata{
 	Name: "incidents",
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},

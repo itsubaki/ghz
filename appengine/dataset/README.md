@@ -1,5 +1,28 @@
 # Query Example
 
+## Insert
+
+```sql
+INSERT INTO `PROJECT_ID.DATASET_NAME.incidents` (
+  owner,
+  repository,
+  id,
+  description,
+  sha,
+  created_at,
+  resolved_at
+)
+VALUES (
+  'itsubaki',
+  'q',
+  '1',
+  'TEST',
+  '2c76bb8c5e18ec7652a5205b294fec46f888fd52',
+  '2021-12-18 02:42:02 UTC',
+  '2021-12-24 02:42:02 UTC'
+)
+```
+
 ## JSON_EXTRACT
 
 ```sql
