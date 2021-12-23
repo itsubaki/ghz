@@ -22,6 +22,7 @@ func IncidentsMeta(projectID, datasetName string) bigquery.TableMetadata {
 				GROUP BY owner, repository, week
 			), B AS (
 				SELECT
+					avg(TIMESTAMP_DIFF(resolved_at, created_at, MINUTE)) as MTTR,
 					count(created_at) as failure,
 					DATE_ADD(DATE(created_at), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(created_at), INTERVAL -0 DAY)) +1 DAY) as week
 				FROM %v
@@ -33,7 +34,8 @@ func IncidentsMeta(projectID, datasetName string) bigquery.TableMetadata {
 				A.week,
 				commits,
 				IFNULL(failure, 0) as failure ,
-				IFNULL(failure,0)/commits as failure_rate
+				IFNULL(failure, 0)/commits as failure_rate,
+				IFNULL(MTTR, 0) as MTTR
 			FROM A
 			LEFT JOIN B
 			ON A.week = B.week
