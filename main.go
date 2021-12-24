@@ -92,26 +92,6 @@ func New(version string) *cli.App {
 					&format,
 				},
 			},
-			{
-				Name:    "stats",
-				Aliases: []string{"s"},
-				Action:  runs.Stats,
-				Flags: []cli.Flag{
-					&dir,
-					&own,
-					&repo,
-					&format,
-					&cli.Int64Flag{
-						Name:  "weeks",
-						Value: 52,
-					},
-					&cli.BoolFlag{
-						Name:    "excluding_weekends",
-						Aliases: []string{"ew"},
-						Value:   false,
-					},
-				},
-			},
 		},
 	}
 
@@ -146,26 +126,6 @@ func New(version string) *cli.App {
 					&own,
 					&repo,
 					&format,
-				},
-			},
-			{
-				Name:    "stats",
-				Aliases: []string{"s"},
-				Action:  jobs.Stats,
-				Flags: []cli.Flag{
-					&dir,
-					&own,
-					&repo,
-					&format,
-					&cli.Int64Flag{
-						Name:  "weeks",
-						Value: 52,
-					},
-					&cli.BoolFlag{
-						Name:    "excluding_weekends",
-						Aliases: []string{"ew"},
-						Value:   false,
-					},
 				},
 			},
 		},
