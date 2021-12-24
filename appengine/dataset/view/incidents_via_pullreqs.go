@@ -17,32 +17,32 @@ func IncidentsPullReqsMeta(projectID, datasetName string) bigquery.TableMetadata
 					owner,
 					repository,
 					count(merged_at) as merged,
-					DATE_ADD(DATE(merged_at), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(merged_at), INTERVAL -0 DAY)) +1 DAY) as week
+					DATE(merged_at) as date
 				FROM %v
 				WHERE state = "closed" AND merged_at != "0001-01-01 00:00:00 UTC"
-				GROUP BY owner, repository, week
+				GROUP BY owner, repository, date
 			), B AS (
 				SELECT
-					avg(TIMESTAMP_DIFF(B.resolved_at, A.date, MINUTE)) as MTTR,
+					Date(A.date) as date,
 					count(A.date) as failure,
-					DATE_ADD(DATE(A.date), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(A.date), INTERVAL -0 DAY)) +1 DAY) as week
+					avg(TIMESTAMP_DIFF(B.resolved_at, A.date, MINUTE)) as MTTR					
 				FROM %v as A
 				INNER JOIN %v as B
 				ON A.sha = B.sha
-				GROUP BY week
+				GROUP BY date
 			)
 			SELECT
 				owner,
 				repository,
-				A.week,
+				A.date,
 				merged,
 				IFNULL(failure, 0) as failure ,
 				IFNULL(failure, 0) / merged as failure_rate,
 				IFNULL(MTTR, 0) as MTTR
 			FROM A
 			LEFT JOIN B
-			ON A.week = B.week
-			ORDER BY week DESC
+			ON A.date = B.date
+			ORDER BY date DESC
 			LIMIT 1000
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqsMeta.Name),

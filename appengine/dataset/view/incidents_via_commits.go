@@ -16,32 +16,32 @@ func IncidentsCommitsMeta(projectID, datasetName string) bigquery.TableMetadata 
 				SELECT
 					owner,
 					repository,
-					count(date) as commits,
-					DATE_ADD(DATE(date), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(date), INTERVAL -0 DAY)) +1 DAY) as week
+					DATE(date) as date,
+					count(date) as commits
 				FROM %v
-				GROUP BY owner, repository, week
+				GROUP BY owner, repository, date
 			), B AS (
 				SELECT
-					avg(TIMESTAMP_DIFF(B.resolved_at, A.date, MINUTE)) as MTTR,
+					DATE(A.date) as date,
 					count(A.date) as failure,
-					DATE_ADD(DATE(A.date), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(A.date), INTERVAL -0 DAY)) +1 DAY) as week
+					avg(TIMESTAMP_DIFF(B.resolved_at, A.date, MINUTE)) as MTTR
 				FROM %v as A
 				INNER JOIN %v as B
 				ON A.sha = B.sha
-				GROUP BY week
+				GROUP BY date
 			)
 			SELECT
 				owner,
 				repository,
-				A.week,
+				A.date,
 				commits,
-				IFNULL(failure, 0) as failure ,
+				IFNULL(failure, 0) as failure,
 				IFNULL(failure, 0) / commits as failure_rate,
 				IFNULL(MTTR, 0) as MTTR
 			FROM A
 			LEFT JOIN B
-			ON A.week = B.week
-			ORDER BY week DESC
+			ON A.date = B.date
+			ORDER BY date DESC
 			LIMIT 1000
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.CommitsMeta.Name),
