@@ -28,7 +28,9 @@ func Fetch(c *gin.Context) {
 	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
 		dataset.CommitsMeta,
 		dataset.IncidentsMeta,
-		view.CommitsMeta(dataset.ProjectID(), datasetName),
+		dataset.PullReqsMeta,
+		view.IncidentsCommitsMeta(dataset.ProjectID(), datasetName),
+		view.IncidentsPullReqsMeta(dataset.ProjectID(), datasetName),
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)

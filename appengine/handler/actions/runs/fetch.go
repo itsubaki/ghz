@@ -28,7 +28,7 @@ func Fetch(c *gin.Context) {
 		dataset.PullReqsMeta,
 		dataset.PullReqCommitsMeta,
 		dataset.WorkflowRunsMeta,
-		view.WorkflowRunsMeta(dataset.ProjectID(), datasetName, dataset.WorkflowRunsMeta.Name),
+		view.WorkflowRunsMeta(dataset.ProjectID(), datasetName),
 		view.LeadTimeWorkflowsMeta(dataset.ProjectID(), datasetName),
 		view.LeadTimeCommitsMeta(dataset.ProjectID(), datasetName),
 	}); err != nil {

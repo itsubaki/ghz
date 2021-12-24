@@ -23,7 +23,7 @@ func Fetch(c *gin.Context) {
 
 	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
 		dataset.WorkflowJobsMeta,
-		view.WorkflowJobsMeta(dataset.ProjectID(), datasetName, dataset.WorkflowJobsMeta.Name),
+		view.WorkflowJobsMeta(dataset.ProjectID(), datasetName),
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)

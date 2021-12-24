@@ -16,8 +16,7 @@ func PullReqsMeta(projectID, datasetName, tableName string) bigquery.TableMetada
 				repository,
 				DATE_ADD(DATE(created_at), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(created_at), INTERVAL -0 DAY)) +1 DAY) as week,
 				count(owner) as merged,
-				AVG(TIMESTAMP_DIFF(merged_at, created_at,MINUTE)) as duration_avg,
-				STDDEV(TIMESTAMP_DIFF(merged_at, created_at,MINUTE)) as duration_stddev
+				AVG(TIMESTAMP_DIFF(merged_at, created_at,MINUTE)) as duration_avg
 			FROM %v
 			WHERE state = "closed" AND merged_at != "0001-01-01 00:00:00 UTC"
 			GROUP BY owner, repository, week

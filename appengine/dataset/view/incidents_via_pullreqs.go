@@ -7,18 +7,19 @@ import (
 	"github.com/itsubaki/ghstats/appengine/dataset"
 )
 
-func CommitsMeta(projectID, datasetName string) bigquery.TableMetadata {
+func IncidentsPullReqsMeta(projectID, datasetName string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
-		Name: "_commits",
+		Name: "_incidents_via_pullreqs",
 		ViewQuery: fmt.Sprintf(
 			`
 			WITH A AS (
 				SELECT
 					owner,
 					repository,
-					count(date) as commits,
-					DATE_ADD(DATE(date), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(date), INTERVAL -0 DAY)) +1 DAY) as week
+					count(merged_at) as merged,
+					DATE_ADD(DATE(merged_at), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(merged_at), INTERVAL -0 DAY)) +1 DAY) as week
 				FROM %v
+				WHERE state = "closed" AND merged_at != "0001-01-01 00:00:00 UTC"
 				GROUP BY owner, repository, week
 			), B AS (
 				SELECT
@@ -34,9 +35,9 @@ func CommitsMeta(projectID, datasetName string) bigquery.TableMetadata {
 				owner,
 				repository,
 				A.week,
-				commits,
+				merged,
 				IFNULL(failure, 0) as failure ,
-				IFNULL(failure, 0)/commits as failure_rate,
+				IFNULL(failure, 0) / merged as failure_rate,
 				IFNULL(MTTR, 0) as MTTR
 			FROM A
 			LEFT JOIN B
@@ -44,7 +45,7 @@ func CommitsMeta(projectID, datasetName string) bigquery.TableMetadata {
 			ORDER BY week DESC
 			LIMIT 1000
 			`,
-			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.CommitsMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.CommitsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.IncidentsMeta.Name),
 		),
