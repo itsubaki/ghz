@@ -21,9 +21,9 @@ func Fetch(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	datasetName := dataset.Name(owner, repository)
+	id, dsn := dataset.Name(owner, repository)
 
-	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
 		dataset.PullReqCommitsMeta,
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
@@ -31,7 +31,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	token, num, err := NextToken(ctx, datasetName)
+	token, num, err := NextToken(ctx, id, dsn)
 	if err != nil {
 		log.Printf("get lastID: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -40,7 +40,7 @@ func Fetch(c *gin.Context) {
 
 	log.Printf("path=%v, target=%v/%v, next=%v(%v)", c.Request.URL.Path, owner, repository, token, num)
 
-	prs, err := GetPullReqs(ctx, datasetName, token)
+	prs, err := GetPullReqs(ctx, id, dsn, token)
 	if err != nil {
 		log.Printf("get pull requests: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -83,7 +83,7 @@ func Fetch(c *gin.Context) {
 			})
 		}
 
-		if err := dataset.Insert(ctx, datasetName, dataset.PullReqCommitsMeta.Name, items); err != nil {
+		if err := dataset.Insert(ctx, dsn, dataset.PullReqCommitsMeta.Name, items); err != nil {
 			log.Printf("insert items: %v", err)
 			c.Status(http.StatusInternalServerError)
 			return
@@ -99,11 +99,11 @@ type PullReq struct {
 	Number int64
 }
 
-func GetPullReqs(ctx context.Context, datasetName string, nextToken int64) ([]PullReq, error) {
+func GetPullReqs(ctx context.Context, projectID, datasetName string, nextToken int64) ([]PullReq, error) {
 	client := dataset.New(ctx)
 	defer client.Close()
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where id > %v", table, nextToken)
 
 	prs := make([]PullReq, 0)
@@ -119,11 +119,11 @@ func GetPullReqs(ctx context.Context, datasetName string, nextToken int64) ([]Pu
 	return prs, nil
 }
 
-func NextToken(ctx context.Context, datasetName string) (int64, int64, error) {
+func NextToken(ctx context.Context, projectID, datasetName string) (int64, int64, error) {
 	client := dataset.New(ctx)
 	defer client.Close()
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqCommitsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqCommitsMeta.Name)
 	query := fmt.Sprintf("select max(id), max(number) from `%v` limit 1", table)
 
 	var id, num int64

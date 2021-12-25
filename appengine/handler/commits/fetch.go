@@ -23,21 +23,21 @@ func Fetch(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	datasetName := dataset.Name(owner, repository)
+	id, dsn := dataset.Name(owner, repository)
 
-	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
 		dataset.CommitsMeta,
 		dataset.IncidentsMeta,
 		dataset.PullReqsMeta,
-		view.IncidentsCommitsMeta(dataset.ProjectID(), datasetName),
-		view.IncidentsPullReqsMeta(dataset.ProjectID(), datasetName),
+		view.IncidentsCommitsMeta(id, dsn),
+		view.IncidentsPullReqsMeta(id, dsn),
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	token, err := NextToken(ctx, datasetName)
+	token, err := NextToken(ctx, id, dsn)
 	if err != nil {
 		log.Printf("get lastSHA: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -73,7 +73,7 @@ func Fetch(c *gin.Context) {
 				})
 			}
 
-			if err := dataset.Insert(ctx, datasetName, dataset.CommitsMeta.Name, items); err != nil {
+			if err := dataset.Insert(ctx, dsn, dataset.CommitsMeta.Name, items); err != nil {
 				return fmt.Errorf("insert items: %v", err)
 			}
 
@@ -88,11 +88,11 @@ func Fetch(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func NextToken(ctx context.Context, datasetName string) (string, error) {
+func NextToken(ctx context.Context, projectID, datasetName string) (string, error) {
 	client := dataset.New(ctx)
 	defer client.Close()
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.CommitsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.CommitsMeta.Name)
 	query := fmt.Sprintf("select sha from `%v` where date = (select max(date) from `%v` limit 1)", table, table)
 
 	var sha string

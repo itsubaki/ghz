@@ -46,8 +46,8 @@ func Create(c *gin.Context) {
 	}
 
 	ctx := context.Background()
-	datasetName := dataset.Name(in.Owner, in.Repository)
-	exists, err := Exists(ctx, datasetName, in.SHA)
+	id, dsn := dataset.Name(in.Owner, in.Repository)
+	exists, err := Exists(ctx, id, dsn, in.SHA)
 	if err != nil {
 		log.Printf(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -65,7 +65,7 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
 		dataset.IncidentsMeta,
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
@@ -76,7 +76,7 @@ func Create(c *gin.Context) {
 	items := make([]interface{}, 0)
 	items = append(items, in)
 
-	if err := dataset.Insert(ctx, datasetName, dataset.IncidentsMeta.Name, items); err != nil {
+	if err := dataset.Insert(ctx, dsn, dataset.IncidentsMeta.Name, items); err != nil {
 		log.Printf("insert items: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
@@ -85,11 +85,11 @@ func Create(c *gin.Context) {
 	c.JSON(http.StatusOK, in)
 }
 
-func Exists(ctx context.Context, datasetName, sha string) (bool, error) {
+func Exists(ctx context.Context, projectID, datasetName, sha string) (bool, error) {
 	client := dataset.New(ctx)
 	defer client.Close()
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.CommitsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.CommitsMeta.Name)
 	query := fmt.Sprintf("select count(sha) from `%v` where sha = \"%v\"", table, sha)
 
 	var count int64

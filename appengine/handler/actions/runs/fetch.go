@@ -20,24 +20,24 @@ func Fetch(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	datasetName := dataset.Name(owner, repository)
+	id, dsn := dataset.Name(owner, repository)
 
-	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
 		dataset.CommitsMeta,
 		dataset.EventsPushMeta,
 		dataset.PullReqsMeta,
 		dataset.PullReqCommitsMeta,
 		dataset.WorkflowRunsMeta,
-		view.WorkflowRunsMeta(dataset.ProjectID(), datasetName),
-		view.LeadTimeWorkflowsMeta(dataset.ProjectID(), datasetName),
-		view.LeadTimeCommitsMeta(dataset.ProjectID(), datasetName),
+		view.WorkflowRunsMeta(id, dsn),
+		view.LeadTimeWorkflowsMeta(id, dsn),
+		view.LeadTimeCommitsMeta(id, dsn),
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	token, num, err := NextToken(ctx, datasetName)
+	token, num, err := NextToken(ctx, id, dsn)
 	if err != nil {
 		log.Printf("get lastID: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -73,7 +73,7 @@ func Fetch(c *gin.Context) {
 				})
 			}
 
-			if err := dataset.Insert(ctx, datasetName, dataset.WorkflowRunsMeta.Name, items); err != nil {
+			if err := dataset.Insert(ctx, dsn, dataset.WorkflowRunsMeta.Name, items); err != nil {
 				return fmt.Errorf("insert items: %v", err)
 			}
 
@@ -88,11 +88,11 @@ func Fetch(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func NextToken(ctx context.Context, datasetName string) (int64, int64, error) {
+func NextToken(ctx context.Context, projectID, datasetName string) (int64, int64, error) {
 	client := dataset.New(ctx)
 	defer client.Close()
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v` limit 1", table)
 
 	var id, num int64

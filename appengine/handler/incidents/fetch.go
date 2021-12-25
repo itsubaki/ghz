@@ -15,9 +15,9 @@ func Fetch(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	datasetName := dataset.Name(owner, repository)
+	_, dsn := dataset.Name(owner, repository)
 
-	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
 		dataset.IncidentsMeta,
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)

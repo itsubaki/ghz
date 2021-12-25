@@ -19,9 +19,9 @@ func Update(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	datasetName := dataset.Name(owner, repository)
+	id, dsn := dataset.Name(owner, repository)
 
-	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
 		dataset.PullReqsMeta,
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
@@ -29,7 +29,7 @@ func Update(c *gin.Context) {
 		return
 	}
 
-	open, err := GetPullReqs(ctx, datasetName, "open")
+	open, err := GetPullReqs(ctx, id, dsn, "open")
 	if err != nil {
 		log.Printf("get pullreq with: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -51,13 +51,13 @@ func Update(c *gin.Context) {
 			return
 		}
 
-		if err := UpdatePullReq(ctx, datasetName, pr); err != nil {
+		if err := UpdatePullReq(ctx, id, dsn, pr); err != nil {
 			log.Printf("update pullreq: %v", err)
 			c.Status(http.StatusInternalServerError)
 			return
 		}
 
-		if err := UpdatePullReqCommits(ctx, datasetName, pr); err != nil {
+		if err := UpdatePullReqCommits(ctx, id, dsn, pr); err != nil {
 			log.Printf("update pullreq commits: %v", err)
 			c.Status(http.StatusInternalServerError)
 			return
@@ -68,15 +68,15 @@ func Update(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func UpdatePullReqCommits(ctx context.Context, datasetName string, r *github.PullRequest) error {
+func UpdatePullReqCommits(ctx context.Context, projectID, datasetName string, r *github.PullRequest) error {
 	return nil
 }
 
-func UpdatePullReq(ctx context.Context, datasetName string, r *github.PullRequest) error {
+func UpdatePullReq(ctx context.Context, projectID, datasetName string, r *github.PullRequest) error {
 	client := dataset.New(ctx)
 	defer client.Close()
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqsMeta.Name)
 
 	var query string
 	if r.ClosedAt != nil {
@@ -104,11 +104,11 @@ func UpdatePullReq(ctx context.Context, datasetName string, r *github.PullReques
 	return nil
 }
 
-func GetPullReqs(ctx context.Context, datasetName, state string) ([]dataset.PullReq, error) {
+func GetPullReqs(ctx context.Context, projectID, datasetName, state string) ([]dataset.PullReq, error) {
 	client := dataset.New(ctx)
 	defer client.Close()
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.PullReqsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where state = \"%v\"", table, state)
 
 	out := make([]dataset.PullReq, 0)

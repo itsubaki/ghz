@@ -19,18 +19,18 @@ func Fetch(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	datasetName := dataset.Name(owner, repository)
+	id, dsn := dataset.Name(owner, repository)
 
-	if err := dataset.CreateIfNotExists(ctx, datasetName, []bigquery.TableMetadata{
+	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
 		dataset.WorkflowJobsMeta,
-		view.WorkflowJobsMeta(dataset.ProjectID(), datasetName),
+		view.WorkflowJobsMeta(id, dsn),
 	}); err != nil {
 		log.Printf("create if not exists: %v", err)
 		c.Status(http.StatusInternalServerError)
 		return
 	}
 
-	token, num, err := NextToken(ctx, datasetName)
+	token, num, err := NextToken(ctx, id, dsn)
 	if err != nil {
 		log.Printf("get lastRunID: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -39,7 +39,7 @@ func Fetch(c *gin.Context) {
 
 	log.Printf("path=%v, target=%v/%v, next=%v(%v)", c.Request.URL.Path, owner, repository, token, num)
 
-	runs, err := GetRuns(ctx, datasetName, token)
+	runs, err := GetRuns(ctx, id, dsn, token)
 	if err != nil {
 		log.Printf("get runs: %v", err)
 		c.Status(http.StatusInternalServerError)
@@ -81,7 +81,7 @@ func Fetch(c *gin.Context) {
 			})
 		}
 
-		if err := dataset.Insert(ctx, datasetName, dataset.WorkflowJobsMeta.Name, items); err != nil {
+		if err := dataset.Insert(ctx, dsn, dataset.WorkflowJobsMeta.Name, items); err != nil {
 			log.Printf("insert items: %v", err)
 			c.Status(http.StatusInternalServerError)
 			return
@@ -92,11 +92,11 @@ func Fetch(c *gin.Context) {
 	c.Status(http.StatusOK)
 }
 
-func GetRuns(ctx context.Context, datasetName string, nextToken int64) ([]dataset.WorkflowRun, error) {
+func GetRuns(ctx context.Context, projectID, datasetName string, nextToken int64) ([]dataset.WorkflowRun, error) {
 	client := dataset.New(ctx)
 	defer client.Close()
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowRunsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("select workflow_id, workflow_name, run_id, run_number from `%v` where run_id > %v", table, nextToken)
 
 	runs := make([]dataset.WorkflowRun, 0)
@@ -114,11 +114,11 @@ func GetRuns(ctx context.Context, datasetName string, nextToken int64) ([]datase
 	return runs, nil
 }
 
-func NextToken(ctx context.Context, datasetName string) (int64, int64, error) {
+func NextToken(ctx context.Context, projectID, datasetName string) (int64, int64, error) {
 	client := dataset.New(ctx)
 	defer client.Close()
 
-	table := fmt.Sprintf("%v.%v.%v", client.ProjectID, datasetName, dataset.WorkflowJobsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowJobsMeta.Name)
 	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v` limit 1", table)
 
 	var id, num int64

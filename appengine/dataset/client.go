@@ -11,9 +11,25 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+var projectID = func() string {
+	creds, err := google.FindDefaultCredentials(context.Background())
+	if err != nil {
+		panic(fmt.Sprintf("find default credentials: %v", err))
+	}
+
+	return creds.ProjectID
+}()
+
+var invalid = regexp.MustCompile(`[!?"'#$%&@\+\-\*/=~^;:,.|()\[\]{}<>]`)
+
+func Name(owner, repository string) (string, string) {
+	own := invalid.ReplaceAllString(owner, "_")
+	rep := invalid.ReplaceAllString(repository, "_")
+	return projectID, fmt.Sprintf("%v_%v", own, rep)
+}
+
 type Client struct {
-	client    *bigquery.Client
-	ProjectID string
+	client *bigquery.Client
 }
 
 func New(ctx context.Context) *Client {
@@ -28,8 +44,7 @@ func New(ctx context.Context) *Client {
 	}
 
 	return &Client{
-		client:    client,
-		ProjectID: creds.ProjectID,
+		client: client,
 	}
 }
 
@@ -102,15 +117,6 @@ func (c *Client) Raw() *bigquery.Client {
 	return c.client
 }
 
-func ProjectID() string {
-	creds, err := google.FindDefaultCredentials(context.Background())
-	if err != nil {
-		panic(fmt.Sprintf("find default credentials: %v", err))
-	}
-
-	return creds.ProjectID
-}
-
 func CreateIfNotExists(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
 	client := New(ctx)
 	defer client.Close()
@@ -130,12 +136,4 @@ func Query(ctx context.Context, query string, fn func(values []bigquery.Value)) 
 	defer client.Close()
 
 	return client.Query(ctx, query, fn)
-}
-
-var invalid = regexp.MustCompile(`[!?"'#$%&@\+\-\*/=~^;:,.|()\[\]{}<>]`)
-
-func Name(owner, repository string) string {
-	own := invalid.ReplaceAllString(owner, "_")
-	rep := invalid.ReplaceAllString(repository, "_")
-	return fmt.Sprintf("%v_%v", own, rep)
 }
