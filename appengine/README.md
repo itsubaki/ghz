@@ -15,3 +15,9 @@ $ cat secrets.yaml
 env_variables:
   PAT: YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
 ```
+
+## Deploy
+
+```shell
+$ gcloud beta app deploy app.yaml cron.yaml
+```

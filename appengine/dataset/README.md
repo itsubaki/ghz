@@ -3,7 +3,7 @@
 ## Insert
 
 ```sql
-INSERT INTO `PROJECT_ID.DATASET_NAME.incidents` (
+INSERT INTO `PROJECT_ID.itsubaki_q.incidents` (
   owner,
   repository,
   id,
@@ -42,7 +42,7 @@ SELECT
     created_at,
     JSON_EXTRACT_SCALAR(raw_payload,'$.head') as head_sha,
     JSON2ARRAY(JSON_EXTRACT(raw_payload,'$.commits')) as commits
-FROM `PROJECT_ID.DATASET_NAME.events`
+FROM `PROJECT_ID.itsubaki_q.events`
 WHERE type = "PushEvent"
 )
 
@@ -58,14 +58,70 @@ SELECT
 FROM A, UNNEST(commits) AS commit
 ```
 
+```json
+[
+  {
+    "owner": "itsubaki",
+    "repository": "q",
+    "id": "19394201253",
+    "login": "itsubaki",
+    "type": "PushEvent",
+    "created_at": "2021-12-18 02:42:02 UTC",
+    "head_sha": "2c76bb8c5e18ec7652a5205b294fec46f888fd52",
+    "sha": "2c76bb8c5e18ec7652a5205b294fec46f888fd52"
+  },
+  {
+    "owner": "itsubaki",
+    "repository": "q",
+    "id": "19394167370",
+    "login": "itsubaki",
+    "type": "PushEvent",
+    "created_at": "2021-12-18 02:33:12 UTC",
+    "head_sha": "667231cbfd88c9162f986e6021dd6303151230a4",
+    "sha": "667231cbfd88c9162f986e6021dd6303151230a4"
+  },
+  {
+    "owner": "itsubaki",
+    "repository": "q",
+    "id": "19221665438",
+    "login": "itsubaki",
+    "type": "PushEvent",
+    "created_at": "2021-12-07 14:59:05 UTC",
+    "head_sha": "42b43a568b29448e0bc60fecf8f94aa3df1c2798",
+    "sha": "d00f69dcfa519148b769c2e2c9d7495e2a16b731"
+  },
+  {
+    "owner": "itsubaki",
+    "repository": "q",
+    "id": "19221665438",
+    "login": "itsubaki",
+    "type": "PushEvent",
+    "created_at": "2021-12-07 14:59:05 UTC",
+    "head_sha": "42b43a568b29448e0bc60fecf8f94aa3df1c2798",
+    "sha": "42b43a568b29448e0bc60fecf8f94aa3df1c2798"
+  }
+]
+```
+
 ## Weekly
 
 ```sql
 SELECT
-  owner,
-  repository,
-  count(date) as commits,
-  DATE_ADD(DATE(date), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(date), INTERVAL -0 DAY)) +1 DAY) as week
-FROM `PROJECT_ID.DATASET_NAME.commits`
-GROUP BY owner, repository, week
+    DATE_ADD(DATE(date), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(date), INTERVAL -0 DAY)) +1 DAY) as week,
+    count(merged) as merged
+FROM `PROJECT_ID.itsubaki_q._pullreqs`
+GROUP BY week
+```
+
+```json
+[
+  {
+    "week": "2021-07-25",
+    "merged": "1"
+  },
+  {
+    "week": "2018-07-29",
+    "merged": "1"
+  }
+]
 ```
