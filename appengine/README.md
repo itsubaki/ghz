@@ -1,4 +1,7 @@
-# appengine
+# Using Google AppEngine, BigQuery
+
+- Automatically fetch repository metadata and insert into BigQuery
+- Provides some views
 
 ## Required
 
