@@ -89,14 +89,11 @@ func Fetch(c *gin.Context) {
 }
 
 func NextToken(ctx context.Context, projectID, datasetName string) (int64, int64, error) {
-	client := dataset.New(ctx)
-	defer client.Close()
-
 	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v` limit 1", table)
 
 	var id, num int64
-	if err := client.Query(ctx, query, func(values []bigquery.Value) {
+	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 2 {
 			return
 		}

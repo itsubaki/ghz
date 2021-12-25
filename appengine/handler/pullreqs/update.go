@@ -73,9 +73,6 @@ func UpdatePullReqCommits(ctx context.Context, projectID, datasetName string, r 
 }
 
 func UpdatePullReq(ctx context.Context, projectID, datasetName string, r *github.PullRequest) error {
-	client := dataset.New(ctx)
-	defer client.Close()
-
 	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqsMeta.Name)
 
 	var query string
@@ -95,7 +92,7 @@ func UpdatePullReq(ctx context.Context, projectID, datasetName string, r *github
 		return nil
 	}
 
-	if err := client.Query(ctx, query, func(values []bigquery.Value) {
+	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
 		return
 	}); err != nil {
 		return fmt.Errorf("query(%v): %v", query, err)
@@ -105,14 +102,11 @@ func UpdatePullReq(ctx context.Context, projectID, datasetName string, r *github
 }
 
 func GetPullReqs(ctx context.Context, projectID, datasetName, state string) ([]dataset.PullReq, error) {
-	client := dataset.New(ctx)
-	defer client.Close()
-
 	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where state = \"%v\"", table, state)
 
 	out := make([]dataset.PullReq, 0)
-	if err := client.Query(ctx, query, func(values []bigquery.Value) {
+	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 2 {
 			return
 		}

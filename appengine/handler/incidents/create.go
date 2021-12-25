@@ -86,14 +86,11 @@ func Create(c *gin.Context) {
 }
 
 func Exists(ctx context.Context, projectID, datasetName, sha string) (bool, error) {
-	client := dataset.New(ctx)
-	defer client.Close()
-
 	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.CommitsMeta.Name)
 	query := fmt.Sprintf("select count(sha) from `%v` where sha = \"%v\"", table, sha)
 
 	var count int64
-	if err := client.Query(ctx, query, func(values []bigquery.Value) {
+	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 1 {
 			return
 		}

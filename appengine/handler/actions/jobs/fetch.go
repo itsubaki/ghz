@@ -93,14 +93,11 @@ func Fetch(c *gin.Context) {
 }
 
 func GetRuns(ctx context.Context, projectID, datasetName string, nextToken int64) ([]dataset.WorkflowRun, error) {
-	client := dataset.New(ctx)
-	defer client.Close()
-
 	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("select workflow_id, workflow_name, run_id, run_number from `%v` where run_id > %v", table, nextToken)
 
 	runs := make([]dataset.WorkflowRun, 0)
-	if err := client.Query(ctx, query, func(values []bigquery.Value) {
+	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
 		runs = append(runs, dataset.WorkflowRun{
 			WorkflowID:   values[0].(int64),
 			WorkflowName: values[1].(string),
@@ -115,14 +112,11 @@ func GetRuns(ctx context.Context, projectID, datasetName string, nextToken int64
 }
 
 func NextToken(ctx context.Context, projectID, datasetName string) (int64, int64, error) {
-	client := dataset.New(ctx)
-	defer client.Close()
-
 	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowJobsMeta.Name)
 	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v` limit 1", table)
 
 	var id, num int64
-	if err := client.Query(ctx, query, func(values []bigquery.Value) {
+	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 2 {
 			return
 		}
