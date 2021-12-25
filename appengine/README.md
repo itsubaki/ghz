@@ -11,7 +11,7 @@
 ## Configuration
 
 - `cron.yaml`
-- `secrets.yaml`
+- create `secrets.yaml`
 
 ```shell
 $ cat secrets.yaml
