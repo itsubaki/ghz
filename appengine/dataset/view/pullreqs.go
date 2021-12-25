@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	"cloud.google.com/go/bigquery"
+	"github.com/itsubaki/ghstats/appengine/dataset"
 )
 
-func PullReqsMeta(projectID, datasetName, tableName string) bigquery.TableMetadata {
+func PullReqsMeta(projectID, datasetName string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
 		Name: "_pullreqs",
 		ViewQuery: fmt.Sprintf(
@@ -23,7 +24,7 @@ func PullReqsMeta(projectID, datasetName, tableName string) bigquery.TableMetada
 			ORDER BY date DESC
 			LIMIT 1000
 			`,
-			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, tableName),
+			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqsMeta.Name),
 		),
 	}
 }

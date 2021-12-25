@@ -57,3 +57,15 @@ SELECT
     JSON_EXTRACT_SCALAR(commit,'$.sha') as sha
 FROM A, UNNEST(commits) AS commit
 ```
+
+## Weekly
+
+```sql
+SELECT
+  owner,
+  repository,
+  count(date) as commits,
+  DATE_ADD(DATE(date), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(date), INTERVAL -0 DAY)) +1 DAY) as week
+FROM `PROJECT_ID.DATASET_NAME.commits`
+GROUP BY owner, repository, week
+```
