@@ -6,15 +6,13 @@
 - One of the indicators of productivity
 - [DORA's Four Keys](https://github.com/GoogleCloudPlatform/fourkeys)
 
-## CLI
-
-### Install
+## Install
 
 ```shell
 go install github.com/itsubaki/ghstats@latest
 ```
 
-### Example
+## Example
 
 ```shell
 $ ghstats commits fetch --owner itsubaki -repo q
