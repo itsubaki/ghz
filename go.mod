@@ -1,4 +1,4 @@
-module github.com/itsubaki/ghstats
+module github.com/itsubaki/ghz
 
 go 1.17
 

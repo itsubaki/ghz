@@ -11,9 +11,9 @@ import (
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v40/github"
-	"github.com/itsubaki/ghstats/appengine/dataset"
-	"github.com/itsubaki/ghstats/appengine/dataset/view"
-	"github.com/itsubaki/ghstats/pkg/pullreqs"
+	"github.com/itsubaki/ghz/appengine/dataset"
+	"github.com/itsubaki/ghz/appengine/dataset/view"
+	"github.com/itsubaki/ghz/pkg/pullreqs"
 )
 
 var regexpnl = regexp.MustCompile(`\r\n|\r|\n`)

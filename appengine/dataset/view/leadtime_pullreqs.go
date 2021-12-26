@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"cloud.google.com/go/bigquery"
-	"github.com/itsubaki/ghstats/appengine/dataset"
+	"github.com/itsubaki/ghz/appengine/dataset"
 )
 
 func LeadTimePullReqsMeta(projectID, datasetName string) bigquery.TableMetadata {

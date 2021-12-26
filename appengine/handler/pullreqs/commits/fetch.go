@@ -10,8 +10,8 @@ import (
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
-	"github.com/itsubaki/ghstats/appengine/dataset"
-	"github.com/itsubaki/ghstats/pkg/pullreqs/commits"
+	"github.com/itsubaki/ghz/appengine/dataset"
+	"github.com/itsubaki/ghz/pkg/pullreqs/commits"
 )
 
 var regexpnl = regexp.MustCompile(`\r\n|\r|\n`)

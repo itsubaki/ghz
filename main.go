@@ -4,15 +4,15 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/itsubaki/ghstats/cmd/actions/jobs"
-	"github.com/itsubaki/ghstats/cmd/actions/runs"
-	"github.com/itsubaki/ghstats/cmd/commits"
-	"github.com/itsubaki/ghstats/cmd/events"
-	"github.com/itsubaki/ghstats/cmd/issues"
-	"github.com/itsubaki/ghstats/cmd/pullreqs"
-	prcommits "github.com/itsubaki/ghstats/cmd/pullreqs/commits"
-	"github.com/itsubaki/ghstats/cmd/releases"
-	"github.com/itsubaki/ghstats/cmd/tags"
+	"github.com/itsubaki/ghz/cmd/actions/jobs"
+	"github.com/itsubaki/ghz/cmd/actions/runs"
+	"github.com/itsubaki/ghz/cmd/commits"
+	"github.com/itsubaki/ghz/cmd/events"
+	"github.com/itsubaki/ghz/cmd/issues"
+	"github.com/itsubaki/ghz/cmd/pullreqs"
+	prcommits "github.com/itsubaki/ghz/cmd/pullreqs/commits"
+	"github.com/itsubaki/ghz/cmd/releases"
+	"github.com/itsubaki/ghz/cmd/tags"
 	"github.com/urfave/cli/v2"
 )
 
@@ -20,7 +20,7 @@ var date, hash, goversion string
 
 func New(version string) *cli.App {
 	app := cli.NewApp()
-	app.Name = "ghstats"
+	app.Name = "ghz"
 	app.Usage = "Github Stats"
 	app.Version = version
 

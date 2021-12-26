@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/google/go-github/v40/github"
-	"github.com/itsubaki/ghstats/pkg/commits"
+	"github.com/itsubaki/ghz/pkg/commits"
 	"github.com/urfave/cli/v2"
 )
 

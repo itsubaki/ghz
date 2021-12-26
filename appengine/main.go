@@ -10,7 +10,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/itsubaki/ghstats/appengine/handler"
+	"github.com/itsubaki/ghz/appengine/handler"
 )
 
 func main() {

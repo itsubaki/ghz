@@ -10,8 +10,8 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v40/github"
-	"github.com/itsubaki/ghstats/cmd/pullreqs"
-	"github.com/itsubaki/ghstats/pkg/pullreqs/commits"
+	"github.com/itsubaki/ghz/cmd/pullreqs"
+	"github.com/itsubaki/ghz/pkg/pullreqs/commits"
 	"github.com/urfave/cli/v2"
 )
 

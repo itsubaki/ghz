@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/itsubaki/ghstats/pkg/issues"
+	"github.com/itsubaki/ghz/pkg/issues"
 	"github.com/urfave/cli/v2"
 )
 

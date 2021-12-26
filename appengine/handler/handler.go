@@ -5,15 +5,15 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/itsubaki/ghstats/appengine/handler/actions/jobs"
-	"github.com/itsubaki/ghstats/appengine/handler/actions/runs"
-	"github.com/itsubaki/ghstats/appengine/handler/commits"
-	"github.com/itsubaki/ghstats/appengine/handler/events"
-	"github.com/itsubaki/ghstats/appengine/handler/incidents"
-	"github.com/itsubaki/ghstats/appengine/handler/pullreqs"
-	prcommits "github.com/itsubaki/ghstats/appengine/handler/pullreqs/commits"
-	"github.com/itsubaki/ghstats/appengine/handler/releases"
-	"github.com/itsubaki/ghstats/appengine/handler/tags"
+	"github.com/itsubaki/ghz/appengine/handler/actions/jobs"
+	"github.com/itsubaki/ghz/appengine/handler/actions/runs"
+	"github.com/itsubaki/ghz/appengine/handler/commits"
+	"github.com/itsubaki/ghz/appengine/handler/events"
+	"github.com/itsubaki/ghz/appengine/handler/incidents"
+	"github.com/itsubaki/ghz/appengine/handler/pullreqs"
+	prcommits "github.com/itsubaki/ghz/appengine/handler/pullreqs/commits"
+	"github.com/itsubaki/ghz/appengine/handler/releases"
+	"github.com/itsubaki/ghz/appengine/handler/tags"
 )
 
 func New() *gin.Engine {
