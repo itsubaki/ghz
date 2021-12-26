@@ -32,7 +32,7 @@ func LeadTimeCommitsMeta(projectID, datasetName string) bigquery.TableMetadata {
 				A.message,
 				B.head_sha,
 				A.sha,
-				A.date as commited_at,
+				A.date as committed_at,
 				B.updated_at as completed_at,
 				TIMESTAMP_DIFF(B.updated_at, A.date, MINUTE) as lead_time
 			FROM A
