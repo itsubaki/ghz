@@ -45,7 +45,7 @@ func Fetch(c *gin.Context) {
 	log.Printf("path=%v, target=%v/%v, next=%v", c.Request.URL.Path, owner, repository, token)
 
 	if _, err := pullreqs.Fetch(ctx,
-		&pullreqs.ListInput{
+		&pullreqs.FetchInput{
 			Owner:      owner,
 			Repository: repository,
 			PAT:        os.Getenv("PAT"),

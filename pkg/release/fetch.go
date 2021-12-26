@@ -1,4 +1,4 @@
-package commits
+package release
 
 import (
 	"context"
@@ -14,10 +14,10 @@ type FetchInput struct {
 	PAT        string
 	Page       int
 	PerPage    int
-	LastSHA    string
+	LastID     int64
 }
 
-func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.RepositoryCommit) error) ([]*github.RepositoryCommit, error) {
+func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.RepositoryRelease) error) ([]*github.RepositoryRelease, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -26,29 +26,27 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Reposi
 		)))
 	}
 
-	opts := github.CommitsListOptions{
-		ListOptions: github.ListOptions{
-			Page:    in.Page,
-			PerPage: in.PerPage,
-		},
+	opts := github.ListOptions{
+		Page:    in.Page,
+		PerPage: in.PerPage,
 	}
 
-	out := make([]*github.RepositoryCommit, 0)
+	out := make([]*github.RepositoryRelease, 0)
 	for {
-		commits, resp, err := client.Repositories.ListCommits(ctx, in.Owner, in.Repository, &opts)
+		rel, resp, err := client.Repositories.ListReleases(ctx, in.Owner, in.Repository, &opts)
 		if err != nil {
-			return nil, fmt.Errorf("list commits: %v", err)
+			return nil, fmt.Errorf("list pullreqs: %v", err)
 		}
 
-		buf := make([]*github.RepositoryCommit, 0)
+		buf := make([]*github.RepositoryRelease, 0)
 		var last bool
-		for i := range commits {
-			if in.LastSHA != "" && commits[i].GetSHA() == in.LastSHA {
+		for i := range rel {
+			if rel[i].GetID() <= in.LastID {
 				last = true
 				break
 			}
 
-			buf = append(buf, commits[i])
+			buf = append(buf, rel[i])
 		}
 
 		for i, f := range fn {

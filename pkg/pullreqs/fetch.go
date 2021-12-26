@@ -8,7 +8,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-type ListInput struct {
+type FetchInput struct {
 	Owner      string
 	Repository string
 	PAT        string
@@ -18,7 +18,7 @@ type ListInput struct {
 	LastID     int64
 }
 
-func Fetch(ctx context.Context, in *ListInput, fn ...func(list []*github.PullRequest) error) ([]*github.PullRequest, error) {
+func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.PullRequest) error) ([]*github.PullRequest, error) {
 	client := github.NewClient(nil)
 
 	if in.PAT != "" {
@@ -45,7 +45,7 @@ func Fetch(ctx context.Context, in *ListInput, fn ...func(list []*github.PullReq
 		buf := make([]*github.PullRequest, 0)
 		var last bool
 		for i := range pr {
-			if *pr[i].ID <= in.LastID {
+			if pr[i].GetID() <= in.LastID {
 				last = true
 				break
 			}

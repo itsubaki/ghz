@@ -27,7 +27,7 @@ func Fetch(c *cli.Context) error {
 		return fmt.Errorf("last id: %v", err)
 	}
 
-	in := pullreqs.ListInput{
+	in := pullreqs.FetchInput{
 		Owner:      c.String("owner"),
 		Repository: c.String("repository"),
 		PAT:        c.String("pat"),
