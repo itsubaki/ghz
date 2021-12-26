@@ -12,6 +12,8 @@ import (
 	"github.com/itsubaki/ghstats/appengine/handler/incidents"
 	"github.com/itsubaki/ghstats/appengine/handler/pullreqs"
 	prcommits "github.com/itsubaki/ghstats/appengine/handler/pullreqs/commits"
+	"github.com/itsubaki/ghstats/appengine/handler/releases"
+	"github.com/itsubaki/ghstats/appengine/handler/tags"
 )
 
 func New() *gin.Engine {
@@ -54,6 +56,8 @@ func Fetch(g *gin.Engine) {
 	r.GET("/:owner/:repository/actions/jobs", jobs.Fetch)
 	r.GET("/:owner/:repository/events", events.Fetch)
 	r.GET("/:owner/:repository/incidents", incidents.Fetch)
+	r.GET("/:owner/:repository/releases", releases.Fetch)
+	r.GET("/:owner/:repository/tags", tags.Fetch)
 }
 
 func Incidents(g *gin.Engine) {
