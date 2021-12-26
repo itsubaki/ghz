@@ -32,12 +32,12 @@ func Fetch(ctx context.Context, in *FetchInput, number int) ([]*github.Repositor
 
 	out := make([]*github.RepositoryCommit, 0)
 	for {
-		c, resp, err := client.PullRequests.ListCommits(ctx, in.Owner, in.Repository, number, &opts)
+		commits, resp, err := client.PullRequests.ListCommits(ctx, in.Owner, in.Repository, number, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list commits: %v", err)
 		}
 
-		out = append(out, c...)
+		out = append(out, commits...)
 		if resp.NextPage == 0 {
 			break
 		}

@@ -1,15 +1,15 @@
-package release
+package tags
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/itsubaki/ghstats/pkg/release"
+	"github.com/itsubaki/ghstats/pkg/tags"
 	"github.com/urfave/cli/v2"
 )
 
 func Fetch(c *cli.Context) error {
-	in := release.FetchInput{
+	in := tags.FetchInput{
 		Owner:      c.String("owner"),
 		Repository: c.String("repository"),
 		PAT:        c.String("pat"),
@@ -17,13 +17,13 @@ func Fetch(c *cli.Context) error {
 		PerPage:    c.Int("perpage"),
 	}
 
-	rel, err := release.Fetch(context.Background(), &in)
+	tags, err := tags.Fetch(context.Background(), &in)
 	if err != nil {
 		return fmt.Errorf("fetch: %v", err)
 	}
 
-	for _, r := range rel {
-		fmt.Printf("%v\n", r)
+	for _, t := range tags {
+		fmt.Printf("%v, %v\n", t.GetName(), t.GetCommit().GetSHA())
 	}
 
 	return nil

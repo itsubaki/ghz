@@ -1,4 +1,4 @@
-package release
+package releases
 
 import (
 	"context"
@@ -33,20 +33,20 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Reposi
 
 	out := make([]*github.RepositoryRelease, 0)
 	for {
-		rel, resp, err := client.Repositories.ListReleases(ctx, in.Owner, in.Repository, &opts)
+		rels, resp, err := client.Repositories.ListReleases(ctx, in.Owner, in.Repository, &opts)
 		if err != nil {
 			return nil, fmt.Errorf("list pullreqs: %v", err)
 		}
 
 		buf := make([]*github.RepositoryRelease, 0)
 		var last bool
-		for i := range rel {
-			if rel[i].GetID() <= in.LastID {
+		for i := range rels {
+			if rels[i].GetID() <= in.LastID {
 				last = true
 				break
 			}
 
-			buf = append(buf, rel[i])
+			buf = append(buf, rels[i])
 		}
 
 		for i, f := range fn {

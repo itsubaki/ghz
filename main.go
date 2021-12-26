@@ -11,7 +11,8 @@ import (
 	"github.com/itsubaki/ghstats/cmd/issues"
 	"github.com/itsubaki/ghstats/cmd/pullreqs"
 	prcommits "github.com/itsubaki/ghstats/cmd/pullreqs/commits"
-	"github.com/itsubaki/ghstats/cmd/release"
+	"github.com/itsubaki/ghstats/cmd/releases"
+	"github.com/itsubaki/ghstats/cmd/tags"
 	"github.com/urfave/cli/v2"
 )
 
@@ -299,7 +300,27 @@ func New(version string) *cli.App {
 			{
 				Name:    "fetch",
 				Aliases: []string{"f"},
-				Action:  release.Fetch,
+				Action:  releases.Fetch,
+				Flags: []cli.Flag{
+					&dir,
+					&own,
+					&repo,
+					&pat,
+					&page,
+					&perpage,
+				},
+			},
+		},
+	}
+
+	tags := cli.Command{
+		Name:    "tags",
+		Aliases: []string{"t"},
+		Subcommands: []*cli.Command{
+			{
+				Name:    "fetch",
+				Aliases: []string{"f"},
+				Action:  tags.Fetch,
 				Flags: []cli.Flag{
 					&dir,
 					&own,
@@ -319,6 +340,7 @@ func New(version string) *cli.App {
 		&events,
 		&issues,
 		&releases,
+		&tags,
 	}
 
 	return app
