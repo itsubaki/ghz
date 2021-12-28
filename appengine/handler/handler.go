@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -66,8 +65,9 @@ func Incidents(g *gin.Engine) {
 
 func XAppEngineCron(c *gin.Context) {
 	if c.GetHeader("X-Appengine-Cron") != "true" {
-		log.Printf("X-Appengine-Cron header is not set to true")
-		c.AbortWithStatus(http.StatusBadRequest)
+		c.AbortWithStatusJSON(http.StatusBadGateway, gin.H{
+			"message": "X-Appengine-Cron header is not set to true",
+		})
 		return
 	}
 

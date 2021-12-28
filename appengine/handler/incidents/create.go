@@ -3,7 +3,6 @@ package incidents
 import (
 	"context"
 	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
@@ -19,8 +18,9 @@ import (
 func Create(c *gin.Context) {
 	var in dataset.Incident
 	if err := c.BindJSON(&in); err != nil {
-		log.Printf("bind json: %v", err)
-		c.Status(http.StatusBadRequest)
+		c.JSON(http.StatusBadRequest, gin.H{
+			"message": fmt.Sprintf("bind json: %v", err),
+		})
 		return
 	}
 	in.Owner = c.Param("owner")
@@ -28,19 +28,15 @@ func Create(c *gin.Context) {
 	in.ID = NewRandomID()
 
 	if in.CreatedAt.Year() == 1 {
-		message := fmt.Sprintf("created_at(%v) is invalid", in.CreatedAt)
-		log.Printf(message)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": message,
+			"message": fmt.Sprintf("created_at(%v) is invalid", in.CreatedAt),
 		})
 		return
 	}
 
 	if in.ResolvedAt.Year() == 1 {
-		message := fmt.Sprintf("resolved_at(%v) is invalid", in.ResolvedAt)
-		log.Printf(message)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": message,
+			"message": fmt.Sprintf("resolved_at(%v) is invalid", in.ResolvedAt),
 		})
 		return
 	}
@@ -49,18 +45,15 @@ func Create(c *gin.Context) {
 	id, dsn := dataset.Name(in.Owner, in.Repository)
 	exists, err := Exists(ctx, id, dsn, in.SHA)
 	if err != nil {
-		log.Printf(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": err.Error(),
+			"message": fmt.Sprintf("exists commit: %v", err),
 		})
 		return
 	}
 
 	if !exists {
-		message := fmt.Sprintf("commit(%v) is not exists", in.SHA)
-		log.Printf(message)
 		c.JSON(http.StatusBadRequest, gin.H{
-			"message": message,
+			"message": fmt.Sprintf("commit(%v) is not exists", in.SHA),
 		})
 		return
 	}
@@ -68,8 +61,9 @@ func Create(c *gin.Context) {
 	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
 		dataset.IncidentsMeta,
 	}); err != nil {
-		log.Printf("create if not exists: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": fmt.Sprintf("create if not exists: %v", err),
+		})
 		return
 	}
 
@@ -77,8 +71,9 @@ func Create(c *gin.Context) {
 	items = append(items, in)
 
 	if err := dataset.Insert(ctx, dsn, dataset.IncidentsMeta.Name, items); err != nil {
-		log.Printf("insert items: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"message": fmt.Sprintf("insert items: %v", err),
+		})
 		return
 	}
 
