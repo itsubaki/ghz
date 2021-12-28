@@ -32,20 +32,20 @@ type Client struct {
 	client *bigquery.Client
 }
 
-func New(ctx context.Context) *Client {
+func New(ctx context.Context) (*Client, error) {
 	creds, err := google.FindDefaultCredentials(ctx)
 	if err != nil {
-		panic(fmt.Sprintf("find default credentials: %v", err))
+		return nil, fmt.Errorf("find default credentials: %v", err)
 	}
 
 	client, err := bigquery.NewClient(ctx, creds.ProjectID)
 	if err != nil {
-		panic(fmt.Sprintf("new bigquery client: %v", err))
+		return nil, fmt.Errorf("new bigquery client: %v", err)
 	}
 
 	return &Client{
 		client: client,
-	}
+	}, nil
 }
 
 func (c *Client) CreateIfNotExists(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
@@ -73,6 +73,14 @@ func (c *Client) CreateIfNotExists(ctx context.Context, datasetName string, meta
 		if err := ref.Create(ctx, &m); err != nil {
 			return fmt.Errorf("create %v/%v: %v", datasetName, m.Name, err)
 		}
+	}
+
+	return nil
+}
+
+func (c *Client) DeleteWithContents(ctx context.Context, datasetName string) error {
+	if err := c.client.Dataset(datasetName).DeleteWithContents(ctx); err != nil {
+		return fmt.Errorf("delete %v: %v", datasetName, err)
 	}
 
 	return nil
@@ -117,23 +125,42 @@ func (c *Client) Raw() *bigquery.Client {
 	return c.client
 }
 
-func CreateIfNotExists(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
-	client := New(ctx)
-	defer client.Close()
+func DeleteWithContents(ctx context.Context, datasetName string) error {
+	c, err := New(ctx)
+	if err != nil {
+		return fmt.Errorf("new client: %v", err)
+	}
+	defer c.Close()
 
-	return client.CreateIfNotExists(ctx, datasetName, meta)
+	return c.DeleteWithContents(ctx, datasetName)
+}
+
+func CreateIfNotExists(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
+	c, err := New(ctx)
+	if err != nil {
+		return fmt.Errorf("new client: %v", err)
+	}
+	defer c.Close()
+
+	return c.CreateIfNotExists(ctx, datasetName, meta)
 }
 
 func Insert(ctx context.Context, datasetName, tableName string, items []interface{}) error {
-	client := New(ctx)
-	defer client.Close()
+	c, err := New(ctx)
+	if err != nil {
+		return fmt.Errorf("new client: %v", err)
+	}
+	defer c.Close()
 
-	return client.Insert(ctx, datasetName, tableName, items)
+	return c.Insert(ctx, datasetName, tableName, items)
 }
 
 func Query(ctx context.Context, query string, fn func(values []bigquery.Value)) error {
-	client := New(ctx)
-	defer client.Close()
+	c, err := New(ctx)
+	if err != nil {
+		return fmt.Errorf("new client: %v", err)
+	}
+	defer c.Close()
 
-	return client.Query(ctx, query, fn)
+	return c.Query(ctx, query, fn)
 }

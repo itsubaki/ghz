@@ -27,11 +27,14 @@ func TestCreateIfNotExists(t *testing.T) {
 		{"test", dataset.WorkflowJobsMeta},
 	}
 
-	for _, c := range cases {
-		ctx := context.Background()
-		client := dataset.New(ctx)
-		defer client.Close()
+	ctx := context.Background()
+	client, err := dataset.New(ctx)
+	if err != nil {
+		t.Fail()
+	}
+	defer client.Close()
 
+	for _, c := range cases {
 		if err := client.CreateIfNotExists(ctx, c.name, []bigquery.TableMetadata{c.meta}); err != nil {
 			t.Errorf("create if not exists: %v", err)
 		}

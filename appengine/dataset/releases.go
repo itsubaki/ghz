@@ -11,10 +11,10 @@ type Release struct {
 	Repository      string    `bigquery:"repository"`
 	ID              int64     `bigquery:"id"`
 	TagName         string    `bigquery:"tag_name"`
+	TagSHA          string    `bigquery:"tag_sha"`
 	Login           string    `bigquery:"login"`
 	TargetCommitish string    `bigquery:"target_commitish"`
 	Name            string    `bigquery:"name"`
-	Body            string    `bigquery:"body"`
 	CreatedAt       time.Time `bigquery:"created_at"`
 	PublishedAt     time.Time `bigquery:"published_at"`
 }
@@ -26,10 +26,10 @@ var ReleasesMeta = bigquery.TableMetadata{
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},
 		{Name: "id", Type: bigquery.IntegerFieldType, Required: true},
 		{Name: "tag_name", Type: bigquery.StringFieldType, Required: true},
+		{Name: "tag_sha", Type: bigquery.StringFieldType, Required: true},
 		{Name: "login", Type: bigquery.StringFieldType, Required: true},
 		{Name: "target_commitish", Type: bigquery.StringFieldType, Required: true},
 		{Name: "name", Type: bigquery.StringFieldType, Required: true},
-		{Name: "body", Type: bigquery.StringFieldType, Required: true},
 		{Name: "created_at", Type: bigquery.TimestampFieldType, Required: true},
 		{Name: "published_at", Type: bigquery.TimestampFieldType, Required: true},
 	},

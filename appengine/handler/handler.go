@@ -13,7 +13,6 @@ import (
 	"github.com/itsubaki/ghz/appengine/handler/pullreqs"
 	prcommits "github.com/itsubaki/ghz/appengine/handler/pullreqs/commits"
 	"github.com/itsubaki/ghz/appengine/handler/releases"
-	"github.com/itsubaki/ghz/appengine/handler/tags"
 )
 
 func New() *gin.Engine {
@@ -57,7 +56,6 @@ func Fetch(g *gin.Engine) {
 	r.GET("/:owner/:repository/events", events.Fetch)
 	r.GET("/:owner/:repository/incidents", incidents.Fetch)
 	r.GET("/:owner/:repository/releases", releases.Fetch)
-	r.GET("/:owner/:repository/tags", tags.Fetch)
 }
 
 func Incidents(g *gin.Engine) {
@@ -69,7 +67,7 @@ func Incidents(g *gin.Engine) {
 func XAppEngineCron(c *gin.Context) {
 	if c.GetHeader("X-Appengine-Cron") != "true" {
 		log.Printf("X-Appengine-Cron header is not set to true")
-		c.Status(http.StatusBadRequest)
+		c.AbortWithStatus(http.StatusBadRequest)
 		return
 	}
 

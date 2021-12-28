@@ -11,10 +11,18 @@ install:
 
 .PHONY: test
 test:
-	go test -cover $(shell go list ./... | grep -v /vendor/ | grep -v /build/ | grep -v /appengine/) -v
+	go test -v -cover $(shell go list ./... | grep pkg) -coverprofile=coverage.out -covermode=atomic
+
+itest:
+	GOOGLE_APPLICATION_CREDENTIALS=../credentials.json go test ./appengine --godog.format=pretty -v -coverprofile=coverage-it.out -covermode=atomic -coverpkg ./...
 
 run:
-	go run appengine/main.go
+	GOOGLE_APPLICATION_CREDENTIALS=./credentials.json go run appengine/main.go
+
+merge:
+	echo "" > coverage.txt
+	cat coverage.out    >> coverage.txt
+	cat coverage-it.out >> coverage.txt
 
 deploy:
 	gcloud beta app deploy app.yaml cron.yaml
