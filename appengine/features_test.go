@@ -87,7 +87,7 @@ func (a *apiFeature) SetHeader(k, v string) error {
 }
 
 func InitializeTestSuite(ctx *godog.TestSuiteContext) {
-	id, dsn := dataset.Name("itsubaki", "q")
+	id, dsn := dataset.Name("itsubaki", "ghz")
 	dataset.Delete(context.Background(), id, dsn, []string{
 		dataset.CommitsMeta.Name,
 		dataset.EventsMeta.Name,
