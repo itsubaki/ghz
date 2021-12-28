@@ -11,10 +11,10 @@ install:
 
 .PHONY: test
 test:
-	go test -v -cover $(shell go list ./... | grep pkg) -coverprofile=coverage.out -covermode=atomic
-
-itest:
 	GOOGLE_APPLICATION_CREDENTIALS=../credentials.json go test ./appengine --godog.format=pretty -v -coverprofile=coverage-it.out -covermode=atomic -coverpkg ./...
+
+testpkg:
+	go test -v -cover $(shell go list ./... | grep pkg) -coverprofile=coverage.out -covermode=atomic
 
 run:
 	GOOGLE_APPLICATION_CREDENTIALS=./credentials.json go run appengine/main.go

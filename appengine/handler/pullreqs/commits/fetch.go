@@ -3,7 +3,6 @@ package commits
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -13,6 +12,12 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset"
 	"github.com/itsubaki/ghz/pkg/pullreqs/commits"
 )
+
+type Response struct {
+	Path      string `json:"path"`
+	NextToken int64  `json:"next_token"`
+	Message   string `json:"message,omitempty"`
+}
 
 var regexpnl = regexp.MustCompile(`\r\n|\r|\n`)
 
@@ -24,26 +29,32 @@ func Fetch(c *gin.Context) {
 	id, dsn := dataset.Name(owner, repository)
 
 	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
+		dataset.PullReqsMeta,
 		dataset.PullReqCommitsMeta,
 	}); err != nil {
-		log.Printf("create if not exists: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("create if not exists: %v", err),
+		})
 		return
 	}
 
-	token, num, err := NextToken(ctx, id, dsn)
+	token, _, err := NextToken(ctx, id, dsn)
 	if err != nil {
-		log.Printf("get lastID: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("next token: %v", err),
+		})
 		return
 	}
 
-	log.Printf("path=%v, target=%v/%v, next=%v(%v)", c.Request.URL.Path, owner, repository, token, num)
-
-	prs, err := GetPullReqs(ctx, id, dsn, token)
+	prs, err := ListPullReqs(ctx, id, dsn, token)
 	if err != nil {
-		log.Printf("get pull requests: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:      c.Request.URL.Path,
+			NextToken: token,
+			Message:   fmt.Sprintf("list pullreqs: %v", err),
+		})
 		return
 	}
 
@@ -59,8 +70,11 @@ func Fetch(c *gin.Context) {
 			int(p.Number),
 		)
 		if err != nil {
-			log.Printf("fetch: %v", err)
-			c.Status(http.StatusInternalServerError)
+			c.JSON(http.StatusInternalServerError, Response{
+				Path:      c.Request.URL.Path,
+				NextToken: token,
+				Message:   fmt.Sprintf("fetch: %v", err),
+			})
 			return
 		}
 
@@ -84,14 +98,19 @@ func Fetch(c *gin.Context) {
 		}
 
 		if err := dataset.Insert(ctx, dsn, dataset.PullReqCommitsMeta.Name, items); err != nil {
-			log.Printf("insert items: %v", err)
-			c.Status(http.StatusInternalServerError)
+			c.JSON(http.StatusInternalServerError, Response{
+				Path:      c.Request.URL.Path,
+				NextToken: token,
+				Message:   fmt.Sprintf("insert items: %v", err),
+			})
 			return
 		}
 	}
 
-	log.Println("fetched")
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, Response{
+		Path:      c.Request.URL.Path,
+		NextToken: token,
+	})
 }
 
 type PullReq struct {
@@ -99,7 +118,7 @@ type PullReq struct {
 	Number int64
 }
 
-func GetPullReqs(ctx context.Context, projectID, datasetName string, nextToken int64) ([]PullReq, error) {
+func ListPullReqs(ctx context.Context, projectID, datasetName string, nextToken int64) ([]PullReq, error) {
 	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where id > %v", table, nextToken)
 

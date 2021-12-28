@@ -3,7 +3,6 @@ package pullreqs
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -15,6 +14,12 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset/view"
 	"github.com/itsubaki/ghz/pkg/pullreqs"
 )
+
+type Response struct {
+	Path      string `json:"path"`
+	NextToken int64  `json:"next_token"`
+	Message   string `json:"message,omitempty"`
+}
 
 var regexpnl = regexp.MustCompile(`\r\n|\r|\n`)
 
@@ -31,19 +36,21 @@ func Fetch(c *gin.Context) {
 		view.PullReqsMeta(id, dsn),
 		view.LeadTimePullReqsMeta(id, dsn),
 	}); err != nil {
-		log.Printf("create if not exists: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("create if not exists: %v", err),
+		})
 		return
 	}
 
 	token, err := NextToken(ctx, id, dsn)
 	if err != nil {
-		log.Printf("get lastID: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("next token: %v", err),
+		})
 		return
 	}
-
-	log.Printf("path=%v, target=%v/%v, next=%v", c.Request.URL.Path, owner, repository, token)
 
 	if _, err := pullreqs.Fetch(ctx,
 		&pullreqs.FetchInput{
@@ -85,13 +92,18 @@ func Fetch(c *gin.Context) {
 
 			return nil
 		}); err != nil {
-		log.Printf("fetch: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:      c.Request.URL.Path,
+			NextToken: token,
+			Message:   fmt.Sprintf("fetch: %v", err),
+		})
 		return
 	}
 
-	log.Println("fetched")
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, Response{
+		Path:      c.Request.URL.Path,
+		NextToken: token,
+	})
 }
 
 func NextToken(ctx context.Context, projectID, datasetName string) (int64, error) {

@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghz/appengine/dataset"
 	"github.com/itsubaki/ghz/appengine/handler"
+	"github.com/jfilipczyk/gomatch"
 )
 
 var api = &apiFeature{}
@@ -64,6 +65,22 @@ func (a *apiFeature) ResponseCodeShouldBe(code int) error {
 	return fmt.Errorf("got=%v, want=%v", a.resp.Code, code)
 }
 
+func (a *apiFeature) ResponseShouldMatchJSON(body *godog.DocString) error {
+	want := a.replace(body.Content)
+	got := a.resp.Body.String()
+
+	ok, err := gomatch.NewDefaultJSONMatcher().Match(want, got)
+	if err != nil {
+		return fmt.Errorf("got=%v, want=%v, match: %v", got, want, err)
+	}
+
+	if !ok {
+		return fmt.Errorf("got=%v, want=%v", got, want)
+	}
+
+	return nil
+}
+
 func (a *apiFeature) SetHeader(k, v string) error {
 	a.header.Add(k, v)
 	return nil
@@ -71,9 +88,16 @@ func (a *apiFeature) SetHeader(k, v string) error {
 
 func InitializeTestSuite(ctx *godog.TestSuiteContext) {
 	id, dsn := dataset.Name("itsubaki", "q")
-	if err := dataset.DeleteWithContents(context.Background(), dsn); err != nil {
-		panic(fmt.Sprintf("delete dataset(%v/%v): %v", id, dsn, err))
-	}
+	dataset.Delete(context.Background(), id, dsn, []string{
+		dataset.CommitsMeta.Name,
+		dataset.EventsMeta.Name,
+		dataset.IncidentsMeta.Name,
+		dataset.PullReqCommitsMeta.Name,
+		dataset.PullReqsMeta.Name,
+		dataset.ReleasesMeta.Name,
+		dataset.WorkflowRunsMeta.Name,
+		dataset.WorkflowJobsMeta.Name,
+	})
 
 	ctx.BeforeSuite(func() {
 		gin.SetMode(gin.ReleaseMode)
@@ -89,4 +113,5 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I set "([^"]*)" header with "([^"]*)"$`, api.SetHeader)
 	ctx.Step(`^I send "([^"]*)" request to "([^"]*)"$`, api.Request)
 	ctx.Step(`^the response code should be (\d+)$`, api.ResponseCodeShouldBe)
+	ctx.Step(`^the response should match json:$`, api.ResponseShouldMatchJSON)
 }

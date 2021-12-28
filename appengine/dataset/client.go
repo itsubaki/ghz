@@ -78,9 +78,12 @@ func (c *Client) CreateIfNotExists(ctx context.Context, datasetName string, meta
 	return nil
 }
 
-func (c *Client) DeleteWithContents(ctx context.Context, datasetName string) error {
-	if err := c.client.Dataset(datasetName).DeleteWithContents(ctx); err != nil {
-		return fmt.Errorf("delete %v: %v", datasetName, err)
+func (c *Client) Delete(ctx context.Context, projectID, datasetName string, tableName []string) error {
+	for _, n := range tableName {
+		q := fmt.Sprintf("DELETE From `%v.%v.%v` WHERE true", projectID, datasetName, n)
+		if err := c.Query(ctx, q, func(values []bigquery.Value) {}); err != nil {
+			return fmt.Errorf("query(%v): %v", q, err)
+		}
 	}
 
 	return nil
@@ -125,14 +128,14 @@ func (c *Client) Raw() *bigquery.Client {
 	return c.client
 }
 
-func DeleteWithContents(ctx context.Context, datasetName string) error {
+func Delete(ctx context.Context, projectID, datasetName string, tableName []string) error {
 	c, err := New(ctx)
 	if err != nil {
 		return fmt.Errorf("new client: %v", err)
 	}
 	defer c.Close()
 
-	return c.DeleteWithContents(ctx, datasetName)
+	return c.Delete(ctx, projectID, datasetName, tableName)
 }
 
 func CreateIfNotExists(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {

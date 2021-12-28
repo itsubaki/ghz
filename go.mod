@@ -7,6 +7,7 @@ require (
 	github.com/cucumber/godog v0.12.2
 	github.com/gin-gonic/gin v1.7.7
 	github.com/google/go-github/v40 v40.0.0
+	github.com/jfilipczyk/gomatch v1.2.1
 	github.com/speps/go-hashids v2.0.0+incompatible
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8
@@ -34,6 +35,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/google/go-querystring v1.1.0 // indirect
+	github.com/google/uuid v1.1.2 // indirect
 	github.com/googleapis/gax-go/v2 v2.1.1 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.0 // indirect
 	github.com/hashicorp/go-memdb v1.3.0 // indirect

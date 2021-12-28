@@ -3,7 +3,6 @@ package events
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"regexp"
@@ -14,6 +13,12 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset"
 	"github.com/itsubaki/ghz/pkg/events"
 )
+
+type Response struct {
+	Path      string `json:"path"`
+	NextToken string `json:"next_token"`
+	Message   string `json:"message,omitempty"`
+}
 
 var regexpnl = regexp.MustCompile(`\r\n|\r|\n`)
 
@@ -28,19 +33,21 @@ func Fetch(c *gin.Context) {
 		dataset.EventsPushMeta,
 		dataset.EventsMeta,
 	}); err != nil {
-		log.Printf("create if not exists: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("create if not exists: %v", err),
+		})
 		return
 	}
 
 	token, err := NextToken(ctx, id, dsn)
 	if err != nil {
-		log.Printf("get lastSHA: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("next token: %v", err),
+		})
 		return
 	}
-
-	log.Printf("path=%v, target=%v/%v, next=%v", c.Request.URL.Path, owner, repository, token)
 
 	if _, err := events.Fetch(ctx,
 		&events.FetchInput{
@@ -106,13 +113,17 @@ func Fetch(c *gin.Context) {
 			return nil
 		},
 	); err != nil {
-		log.Printf("fetch: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("fetch: %v", err),
+		})
 		return
 	}
 
-	log.Println("fetched")
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, Response{
+		Path:      c.Request.URL.Path,
+		NextToken: token,
+	})
 }
 
 func NextToken(ctx context.Context, projectID, datasetName string) (string, error) {

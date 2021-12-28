@@ -3,7 +3,6 @@ package pullreqs
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -13,6 +12,11 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset"
 	"github.com/itsubaki/ghz/pkg/pullreqs"
 )
+
+type UpdateResponse struct {
+	Path    string `json:"path"`
+	Message string `json:"message,omitempty"`
+}
 
 func Update(c *gin.Context) {
 	ctx := context.Background()
@@ -24,19 +28,21 @@ func Update(c *gin.Context) {
 	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
 		dataset.PullReqsMeta,
 	}); err != nil {
-		log.Printf("create if not exists: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, UpdateResponse{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("create if not exists: %v", err),
+		})
 		return
 	}
 
-	open, err := GetPullReqs(ctx, id, dsn, "open")
+	open, err := ListPullReqs(ctx, id, dsn, "open")
 	if err != nil {
-		log.Printf("get pullreq with: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, UpdateResponse{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("list pullreqs: %v", err),
+		})
 		return
 	}
-
-	log.Printf("path=%v, target=%v/%v, len(open)=%v", c.Request.URL.Path, owner, repository, len(open))
 
 	for _, r := range open {
 		pr, err := pullreqs.Get(ctx, &pullreqs.GetInput{
@@ -46,26 +52,33 @@ func Update(c *gin.Context) {
 			Number:     int(r.Number),
 		})
 		if err != nil {
-			log.Printf("get pullreq: %v", err)
-			c.Status(http.StatusInternalServerError)
+			c.JSON(http.StatusInternalServerError, UpdateResponse{
+				Path:    c.Request.URL.Path,
+				Message: fmt.Sprintf("get pullreq: %v", err),
+			})
 			return
 		}
 
 		if err := UpdatePullReq(ctx, id, dsn, pr); err != nil {
-			log.Printf("update pullreq: %v", err)
-			c.Status(http.StatusInternalServerError)
+			c.JSON(http.StatusInternalServerError, UpdateResponse{
+				Path:    c.Request.URL.Path,
+				Message: fmt.Sprintf("update pullreq: %v", err),
+			})
 			return
 		}
 
 		if err := UpdatePullReqCommits(ctx, id, dsn, pr); err != nil {
-			log.Printf("update pullreq commits: %v", err)
-			c.Status(http.StatusInternalServerError)
+			c.JSON(http.StatusInternalServerError, UpdateResponse{
+				Path:    c.Request.URL.Path,
+				Message: fmt.Sprintf("update commits: %v", err),
+			})
 			return
 		}
 	}
 
-	log.Println("updated")
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, UpdateResponse{
+		Path: c.Request.URL.Path,
+	})
 }
 
 func UpdatePullReqCommits(ctx context.Context, projectID, datasetName string, r *github.PullRequest) error {
@@ -101,7 +114,7 @@ func UpdatePullReq(ctx context.Context, projectID, datasetName string, r *github
 	return nil
 }
 
-func GetPullReqs(ctx context.Context, projectID, datasetName, state string) ([]dataset.PullReq, error) {
+func ListPullReqs(ctx context.Context, projectID, datasetName, state string) ([]dataset.PullReq, error) {
 	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where state = \"%v\"", table, state)
 

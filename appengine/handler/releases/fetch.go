@@ -3,7 +3,6 @@ package releases
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -15,6 +14,12 @@ import (
 	"github.com/itsubaki/ghz/pkg/tags"
 )
 
+type Response struct {
+	Path      string `json:"path"`
+	NextToken int64  `json:"next_token"`
+	Message   string `json:"message,omitempty"`
+}
+
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
 
@@ -25,19 +30,21 @@ func Fetch(c *gin.Context) {
 	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
 		dataset.ReleasesMeta,
 	}); err != nil {
-		log.Printf("create if not exists: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("create if not exists: %v", err),
+		})
 		return
 	}
 
 	token, err := NextToken(ctx, id, dsn)
 	if err != nil {
-		log.Printf("get lastSHA: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("next token: %v", err),
+		})
 		return
 	}
-
-	log.Printf("path=%v, target=%v/%v, next=%v", c.Request.URL.Path, owner, repository, token)
 
 	t, err := tags.Fetch(ctx,
 		&tags.FetchInput{
@@ -49,8 +56,10 @@ func Fetch(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		log.Printf("fetch: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("fetch tags: %v", err),
+		})
 		return
 	}
 
@@ -92,13 +101,16 @@ func Fetch(c *gin.Context) {
 			return nil
 		},
 	); err != nil {
-		log.Printf("fetch: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("fetch: %v", err),
+		})
 		return
 	}
-
-	log.Println("fetched")
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, Response{
+		Path:      c.Request.URL.Path,
+		NextToken: token,
+	})
 }
 
 func NextToken(ctx context.Context, projectID, datasetName string) (int64, error) {

@@ -3,7 +3,6 @@ package jobs
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 
@@ -14,6 +13,12 @@ import (
 	"github.com/itsubaki/ghz/pkg/actions/jobs"
 )
 
+type Response struct {
+	Path      string `json:"path"`
+	NextToken int64  `json:"next_token"`
+	Message   string `json:"message,omitempty"`
+}
+
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
 
@@ -22,27 +27,33 @@ func Fetch(c *gin.Context) {
 	id, dsn := dataset.Name(owner, repository)
 
 	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
+		dataset.WorkflowRunsMeta,
 		dataset.WorkflowJobsMeta,
 		view.WorkflowJobsMeta(id, dsn),
 	}); err != nil {
-		log.Printf("create if not exists: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("create if not exists: %v", err),
+		})
 		return
 	}
 
-	token, num, err := NextToken(ctx, id, dsn)
+	token, _, err := NextToken(ctx, id, dsn)
 	if err != nil {
-		log.Printf("get lastRunID: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("next token: %v", err),
+		})
 		return
 	}
 
-	log.Printf("path=%v, target=%v/%v, next=%v(%v)", c.Request.URL.Path, owner, repository, token, num)
-
-	runs, err := GetRuns(ctx, id, dsn, token)
+	runs, err := ListRuns(ctx, id, dsn, token)
 	if err != nil {
-		log.Printf("get runs: %v", err)
-		c.Status(http.StatusInternalServerError)
+		c.JSON(http.StatusInternalServerError, Response{
+			Path:      c.Request.URL.Path,
+			NextToken: token,
+			Message:   fmt.Sprintf("list runs: %v", err),
+		})
 		return
 	}
 
@@ -58,8 +69,11 @@ func Fetch(c *gin.Context) {
 			r.RunID,
 		)
 		if err != nil {
-			log.Printf("fetch: %v", err)
-			c.Status(http.StatusInternalServerError)
+			c.JSON(http.StatusInternalServerError, Response{
+				Path:      c.Request.URL.Path,
+				NextToken: token,
+				Message:   fmt.Sprintf("fetch: %v", err),
+			})
 			return
 		}
 
@@ -82,17 +96,22 @@ func Fetch(c *gin.Context) {
 		}
 
 		if err := dataset.Insert(ctx, dsn, dataset.WorkflowJobsMeta.Name, items); err != nil {
-			log.Printf("insert items: %v", err)
-			c.Status(http.StatusInternalServerError)
+			c.JSON(http.StatusInternalServerError, Response{
+				Path:      c.Request.URL.Path,
+				NextToken: token,
+				Message:   fmt.Sprintf("insert items: %v", err),
+			})
 			return
 		}
 	}
 
-	log.Println("fetched")
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, Response{
+		Path:      c.Request.URL.Path,
+		NextToken: token,
+	})
 }
 
-func GetRuns(ctx context.Context, projectID, datasetName string, nextToken int64) ([]dataset.WorkflowRun, error) {
+func ListRuns(ctx context.Context, projectID, datasetName string, nextToken int64) ([]dataset.WorkflowRun, error) {
 	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("select workflow_id, workflow_name, run_id, run_number from `%v` where run_id > %v", table, nextToken)
 
