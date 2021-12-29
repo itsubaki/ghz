@@ -32,8 +32,8 @@ $ gcloud beta app deploy app.yaml cron.yaml
 - put `credentials.json` to root directory.
 
 ```shell
-$ make itest
-% make itest
+$ make test
+% make test
 GOOGLE_APPLICATION_CREDENTIALS=../credentials.json go test ./appengine -v -coverprofile=coverage-it.out -covermode=atomic --godog.format=pretty -coverpkg ./...
 
 Feature:
