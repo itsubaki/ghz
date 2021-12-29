@@ -1,9 +1,9 @@
 Feature:
-    In order to get indicator of incidents
-    As a BiqQuery User
+    In order to get indicators of incident
+    As a BigQuery User
     I need to be able to incidents request
 
-    Scenario: should insert into incidents via pullrequest
+    Scenario: should get failure_rate and MTTR via pullrequest
         Given the following incidents exist:
             | owner    | repository | description                     | sha                                      | resolved_at             |
             | itsubaki | q          | [TEST] Incident via PullRequest | 7b2619e89065d96e683d70a72512e2883c1a2cf6 | 2021-07-30 13:04:37 UTC |
@@ -12,7 +12,7 @@ Feature:
             | owner    | repository | date       | merged | failure | failure_rate | MTTR |
             | itsubaki | q          | 2021-07-30 | 1      | 1       | 1.0          | 60.0 |
 
-    Scenario: should insert into incidents via commit
+    Scenario: should get failure_rate and MTTR via commit
         Given the following incidents exist:
             | owner    | repository | description                | sha                                      | resolved_at             |
             | itsubaki | q          | [TEST] Incident via Commit | ad79208ce9ad1fce87b298ae28c6c518dc2a0486 | 2021-12-26 15:31:05 UTC |
