@@ -43,7 +43,7 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Workfl
 		buf := make([]*github.WorkflowRun, 0)
 		var last bool
 		for i := range runs.WorkflowRuns {
-			if *runs.WorkflowRuns[i].ID <= in.LastID {
+			if runs.WorkflowRuns[i].GetID() <= in.LastID {
 				last = true
 				break
 			}
