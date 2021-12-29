@@ -33,8 +33,7 @@ $ gcloud beta app deploy app.yaml cron.yaml
 
 ```shell
 $ make test
-% make test
-GOOGLE_APPLICATION_CREDENTIALS=../credentials.json go test ./appengine -v -coverprofile=coverage-it.out -covermode=atomic --godog.format=pretty -coverpkg ./...
+GOOGLE_APPLICATION_CREDENTIALS=../credentials.json go test ./appengine -v -coverprofile=coverage.out -covermode=atomic --godog.format=pretty -coverpkg ./...
 
 Feature:
   In order to fetch repository metadata
