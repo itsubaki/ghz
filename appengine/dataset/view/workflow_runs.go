@@ -18,13 +18,12 @@ func WorkflowRunsMeta(projectID, datasetName string) bigquery.TableMetadata {
 				workflow_id,
 				workflow_name,
 				DATE(created_at) as date,
-				count(workflow_name) as runs,
+				COUNT(workflow_name) as runs,
 				AVG(TIMESTAMP_DIFF(updated_at, created_at, MINUTE)) as duration_avg
 			FROM %v
 			WHERE conclusion = "success"
 			GROUP BY owner, repository, workflow_id, workflow_name, date
-			ORDER BY date DESC
-			LIMIT 1000
+			ORDER BY date DESCs
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.WorkflowRunsMeta.Name),
 		),

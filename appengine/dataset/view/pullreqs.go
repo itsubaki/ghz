@@ -16,13 +16,12 @@ func PullReqsMeta(projectID, datasetName string) bigquery.TableMetadata {
 				owner,
 				repository,
 				DATE(merged_at) as date,
-				count(owner) as merged,
+				COUNT(owner) as merged,
 				AVG(TIMESTAMP_DIFF(merged_at, created_at, MINUTE)) as duration_avg
 			FROM %v
 			WHERE state = "closed" AND merged_at != "0001-01-01 00:00:00 UTC"
 			GROUP BY owner, repository, date
 			ORDER BY date DESC
-			LIMIT 1000
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqsMeta.Name),
 		),

@@ -40,7 +40,6 @@ func LeadTimeCommitsMeta(projectID, datasetName string) bigquery.TableMetadata {
 			ON A.head_sha = B.head_sha
 			WHERE B.conclusion = "success"
 			ORDER BY completed_at DESC
-			LIMIT 1000
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.CommitsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.EventsPushMeta.Name),

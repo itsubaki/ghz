@@ -27,13 +27,6 @@ func Create(c *gin.Context) {
 	in.Repository = c.Param("repository")
 	in.ID = NewRandomID()
 
-	if in.CreatedAt.Year() == 1 {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"message": fmt.Sprintf("created_at(%v) is invalid", in.CreatedAt),
-		})
-		return
-	}
-
 	if in.ResolvedAt.Year() == 1 {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"message": fmt.Sprintf("resolved_at(%v) is invalid", in.ResolvedAt),

@@ -20,8 +20,8 @@ func LeadTimePullReqsMeta(projectID, datasetName string) bigquery.TableMetadata 
 				A.login,
 				B.title,
 				A.message,
-				A.sha,
 				B.merge_commit_sha,
+				A.sha,
 				A.date as committed_at,
 				B.merged_at,
 				TIMESTAMP_DIFF(B.merged_at, A.date, MINUTE) as lead_time
@@ -30,7 +30,6 @@ func LeadTimePullReqsMeta(projectID, datasetName string) bigquery.TableMetadata 
 			ON A.id = B.id
 			WHERE B.merged_at != "0001-01-01 00:00:00 UTC"
 			ORDER BY merged_at DESC
-			LIMIT 1000
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqCommitsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqsMeta.Name),

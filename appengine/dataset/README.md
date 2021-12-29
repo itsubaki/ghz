@@ -9,17 +9,34 @@ INSERT INTO `PROJECT_ID.itsubaki_q.incidents` (
   id,
   description,
   sha,
-  created_at,
   resolved_at
 )
 VALUES (
   'itsubaki',
   'q',
   '1',
-  'TEST',
-  '2c76bb8c5e18ec7652a5205b294fec46f888fd52',
-  '2021-12-18 02:42:02 UTC',
-  '2021-12-24 02:42:02 UTC'
+  '[TEST] Incident via PullRequest',
+  '7b2619e89065d96e683d70a72512e2883c1a2cf6',
+  '2021-07-30 13:04:37 UTC'
+)
+```
+
+```sql
+INSERT INTO `PROJECT_ID.itsubaki_q.incidents` (
+  owner,
+  repository,
+  id,
+  description,
+  sha,
+  resolved_at
+)
+VALUES (
+  'itsubaki',
+  'q',
+  '1',
+  '[TEST] Incident via Commit',
+  'ad79208ce9ad1fce87b298ae28c6c518dc2a0486',
+  '2021-12-26 15:31:05 UTC'
 )
 ```
 

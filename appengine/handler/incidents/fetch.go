@@ -8,6 +8,7 @@ import (
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghz/appengine/dataset"
+	"github.com/itsubaki/ghz/appengine/dataset/view"
 )
 
 type Response struct {
@@ -20,10 +21,12 @@ func Fetch(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	_, dsn := dataset.Name(owner, repository)
+	id, dsn := dataset.Name(owner, repository)
 
 	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
 		dataset.IncidentsMeta,
+		view.IncidentsCommitsMeta(id, dsn),
+		view.IncidentsPullReqsMeta(id, dsn),
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, Response{
 			Path:    c.Request.URL.Path,
