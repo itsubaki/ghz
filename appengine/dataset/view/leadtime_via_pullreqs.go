@@ -37,7 +37,8 @@ func LeadTimeWorkflowsMeta(projectID, datasetName string) bigquery.TableMetadata
 				A.login,
 				A.title,
 				A.message,
-				A.sha as commit_sha,
+				A.merge_commit_sha,
+				A.sha,
 				A.date as committed_at,
 				B.updated_at as completed_at,
 				TIMESTAMP_DIFF(B.updated_at, A.date, MINUTE) as lead_time

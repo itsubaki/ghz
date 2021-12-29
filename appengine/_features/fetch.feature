@@ -7,88 +7,88 @@ Feature:
         Given I set "X-Appengine-Cron" header with "true"
 
     Scenario: should fetch commits
-        When I send "GET" request to "/_fetch/itsubaki/ghz/commits"
+        When I send "GET" request to "/_fetch/itsubaki/q/commits"
         Then the response code should be 200
         Then the response should match json:
             """
             {
-                "path": "/_fetch/itsubaki/ghz/commits",
+                "path": "/_fetch/itsubaki/q/commits",
                 "next_token": "@string@"
             }
             """
 
     Scenario: should fetch pullreqs
-        When I send "GET" request to "/_fetch/itsubaki/ghz/pullreqs"
+        When I send "GET" request to "/_fetch/itsubaki/q/pullreqs"
         Then the response code should be 200
         Then the response should match json:
             """
             {
-                "path": "/_fetch/itsubaki/ghz/pullreqs",
+                "path": "/_fetch/itsubaki/q/pullreqs",
                 "next_token": "@number@"
             }
             """
 
     Scenario: should fetch pullreqs/commits
-        When I send "GET" request to "/_fetch/itsubaki/ghz/pullreqs/commits"
+        When I send "GET" request to "/_fetch/itsubaki/q/pullreqs/commits"
         Then the response code should be 200
         Then the response should match json:
             """
             {
-                "path": "/_fetch/itsubaki/ghz/pullreqs/commits",
+                "path": "/_fetch/itsubaki/q/pullreqs/commits",
                 "next_token": "@number@"
             }
             """
 
     Scenario: should fetch events
-        When I send "GET" request to "/_fetch/itsubaki/ghz/events"
+        When I send "GET" request to "/_fetch/itsubaki/q/events"
         Then the response code should be 200
         Then the response should match json:
             """
             {
-                "path": "/_fetch/itsubaki/ghz/events",
+                "path": "/_fetch/itsubaki/q/events",
                 "next_token": "@string@"
             }
             """
 
     Scenario: should fetch releases
-        When I send "GET" request to "/_fetch/itsubaki/ghz/releases"
+        When I send "GET" request to "/_fetch/itsubaki/q/releases"
         Then the response code should be 200
         Then the response should match json:
             """
             {
-                "path": "/_fetch/itsubaki/ghz/releases",
+                "path": "/_fetch/itsubaki/q/releases",
                 "next_token": "@number@"
             }
             """
 
     Scenario: should fetch incidents
-        When I send "GET" request to "/_fetch/itsubaki/ghz/incidents"
+        When I send "GET" request to "/_fetch/itsubaki/q/incidents"
         Then the response code should be 200
         Then the response should match json:
             """
             {
-                "path": "/_fetch/itsubaki/ghz/incidents"
+                "path": "/_fetch/itsubaki/q/incidents"
             }
             """
 
     Scenario: should fetch actions runs
-        When I send "GET" request to "/_fetch/itsubaki/ghz/actions/runs"
+        When I send "GET" request to "/_fetch/itsubaki/q/actions/runs"
         Then the response code should be 200
         Then the response should match json:
             """
             {
-                "path": "/_fetch/itsubaki/ghz/actions/runs",
+                "path": "/_fetch/itsubaki/q/actions/runs",
                 "next_token": "@number@"
             }
             """
 
     Scenario: should fetch actions jobs
-        When I send "GET" request to "/_fetch/itsubaki/ghz/actions/jobs"
+        When I send "GET" request to "/_fetch/itsubaki/q/actions/jobs"
         Then the response code should be 200
         Then the response should match json:
             """
             {
-                "path": "/_fetch/itsubaki/ghz/actions/jobs",
+                "path": "/_fetch/itsubaki/q/actions/jobs",
                 "next_token": "@number@"
             }
             """
