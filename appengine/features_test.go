@@ -86,6 +86,18 @@ func (a *apiFeature) SetHeader(k, v string) error {
 	return nil
 }
 
+func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
+	return godog.ErrPending
+}
+
+func (a *apiFeature) ExecuteQuery(query string) error {
+	return godog.ErrPending
+}
+
+func (a *apiFeature) QueryResult(result *godog.Table) error {
+	return godog.ErrPending
+}
+
 func InitializeTestSuite(ctx *godog.TestSuiteContext) {
 	id, dsn := dataset.Name("itsubaki", "ghz")
 	dataset.Delete(context.Background(), id, dsn, []string{
@@ -114,4 +126,7 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I send "([^"]*)" request to "([^"]*)"$`, api.Request)
 	ctx.Step(`^the response code should be (\d+)$`, api.ResponseCodeShouldBe)
 	ctx.Step(`^the response should match json:$`, api.ResponseShouldMatchJSON)
+	ctx.Step(`^the following incidents exist:$`, api.IncidentsExists)
+	ctx.Step(`^I execute query with:$`, api.ExecuteQuery)
+	ctx.Step(`^I get the following result:$`, api.QueryResult)
 }
