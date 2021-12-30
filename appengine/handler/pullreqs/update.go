@@ -62,7 +62,7 @@ func Update(c *gin.Context) {
 		if err := UpdatePullReq(ctx, id, dsn, pr); err != nil {
 			c.JSON(http.StatusInternalServerError, UpdateResponse{
 				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("update pullreq: %v", err),
+				Message: fmt.Sprintf("update pullreq(%v): %v", r.Number, err),
 			})
 			return
 		}
@@ -70,7 +70,7 @@ func Update(c *gin.Context) {
 		if err := UpdatePullReqCommits(ctx, id, dsn, pr); err != nil {
 			c.JSON(http.StatusInternalServerError, UpdateResponse{
 				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("update commits: %v", err),
+				Message: fmt.Sprintf("update commits(%v): %v", r.Number, err),
 			})
 			return
 		}
