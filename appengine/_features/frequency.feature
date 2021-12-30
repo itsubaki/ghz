@@ -55,3 +55,12 @@ Feature:
                 "next_token": "@number@"
             }
             """
+
+    Scenario: should get deployment frequency via releases
+        When I execute query with:
+            """
+            SELECT owner, repository, Date(published_at) as date, count(name) as releases FROM `$PROJECT_ID.itsubaki_ghz.releases` GROUP BY owner, repository, date LIMIT 1
+            """
+        Then I get the following result:
+            | owner    | repository | date       | releases |
+            | itsubaki | ghz        | 2021-12-30 | 1        |
