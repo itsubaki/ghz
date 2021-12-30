@@ -17,7 +17,7 @@ func IncidentsCommitsMeta(projectID, datasetName string) bigquery.TableMetadata 
 					owner,
 					repository,
 					DATE(created_at) as date,
-					COUNT((DISTINCT(head_sha)) as pushed
+					COUNT(DISTINCT(head_sha)) as pushed
 				FROM %v
 				GROUP BY owner, repository, date
 			), B AS (
