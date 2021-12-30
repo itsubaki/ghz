@@ -1,7 +1,6 @@
 Feature:
     In order to fetch repository metadata
-    As an X-Appengine-Cron
-    I need to be able to fetch request
+    As a X-Appengine-Cron
 
     Background:
         Given I set "X-Appengine-Cron" header with "true"

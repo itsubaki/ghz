@@ -1,7 +1,6 @@
 Feature:
     In order to get indicators of incident
-    As a BigQuery User
-    I need to be able to incidents request
+    As a DevOps practitioner
 
     Scenario: should get failure_rate and MTTR via pullrequest
         Given the following incidents exist:
