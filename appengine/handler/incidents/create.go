@@ -31,7 +31,7 @@ func Create(c *gin.Context) {
 	ctx := context.Background()
 	_, dsn := dataset.Name(in.Owner, in.Repository)
 
-	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
+	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
 		dataset.IncidentsMeta,
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{

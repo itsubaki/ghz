@@ -25,7 +25,7 @@ func Update(c *gin.Context) {
 	repository := c.Param("repository")
 	id, dsn := dataset.Name(owner, repository)
 
-	if err := dataset.CreateIfNotExists(ctx, dsn, []bigquery.TableMetadata{
+	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
 		dataset.PullReqsMeta,
 	}); err != nil {
 		c.JSON(http.StatusInternalServerError, UpdateResponse{

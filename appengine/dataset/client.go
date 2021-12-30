@@ -11,7 +11,7 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-var projectID = func() string {
+var ProjectID = func() string {
 	creds, err := google.FindDefaultCredentials(context.Background())
 	if err != nil {
 		panic(fmt.Sprintf("find default credentials: %v", err))
@@ -25,7 +25,7 @@ var invalid = regexp.MustCompile(`[!?"'#$%&@\+\-\*/=~^;:,.|()\[\]{}<>]`)
 func Name(owner, repository string) (string, string) {
 	own := invalid.ReplaceAllString(owner, "_")
 	rep := invalid.ReplaceAllString(repository, "_")
-	return projectID, fmt.Sprintf("%v_%v", own, rep)
+	return ProjectID, fmt.Sprintf("%v_%v", own, rep)
 }
 
 type Client struct {
@@ -48,7 +48,7 @@ func New(ctx context.Context) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) CreateIfNotExists(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
+func (c *Client) Create(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
 	location := "US"
 	if len(os.Getenv("DATASET_LOCATION")) > 0 {
 		location = os.Getenv("DATASET_LOCATION")
@@ -78,12 +78,14 @@ func (c *Client) CreateIfNotExists(ctx context.Context, datasetName string, meta
 	return nil
 }
 
-func (c *Client) Delete(ctx context.Context, projectID, datasetName string, tableName []string) error {
-	for _, n := range tableName {
-		q := fmt.Sprintf("DELETE From `%v.%v.%v` WHERE true", projectID, datasetName, n)
-		if err := c.Query(ctx, q, func(values []bigquery.Value) {}); err != nil {
-			return fmt.Errorf("query(%v): %v", q, err)
-		}
+func (c *Client) DeleteWithContents(ctx context.Context, datasetName string) error {
+	if _, err := c.client.Dataset(datasetName).Metadata(ctx); err != nil {
+		// not found. nothing to do.
+		return nil
+	}
+
+	if err := c.client.Dataset(datasetName).DeleteWithContents(ctx); err != nil {
+		return fmt.Errorf("delete with contents: %v", err)
 	}
 
 	return nil
@@ -91,7 +93,7 @@ func (c *Client) Delete(ctx context.Context, projectID, datasetName string, tabl
 
 func (c *Client) Insert(ctx context.Context, datasetName, tableName string, items []interface{}) error {
 	if err := c.client.Dataset(datasetName).Table(tableName).Inserter().Put(ctx, items); err != nil {
-		return fmt.Errorf("insert %v/%v: %v", datasetName, tableName, err)
+		return fmt.Errorf("insert %v.%v.%v: %v", ProjectID, datasetName, tableName, err)
 	}
 
 	return nil
@@ -128,24 +130,24 @@ func (c *Client) Raw() *bigquery.Client {
 	return c.client
 }
 
-func Delete(ctx context.Context, projectID, datasetName string, tableName []string) error {
+func DeleteWithContents(ctx context.Context, datasetName string) error {
 	c, err := New(ctx)
 	if err != nil {
 		return fmt.Errorf("new client: %v", err)
 	}
 	defer c.Close()
 
-	return c.Delete(ctx, projectID, datasetName, tableName)
+	return c.DeleteWithContents(ctx, datasetName)
 }
 
-func CreateIfNotExists(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
+func Create(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
 	c, err := New(ctx)
 	if err != nil {
 		return fmt.Errorf("new client: %v", err)
 	}
 	defer c.Close()
 
-	return c.CreateIfNotExists(ctx, datasetName, meta)
+	return c.Create(ctx, datasetName, meta)
 }
 
 func Insert(ctx context.Context, datasetName, tableName string, items []interface{}) error {

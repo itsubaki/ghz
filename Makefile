@@ -11,7 +11,7 @@ install:
 
 .PHONY: test
 test:
-	GOOGLE_APPLICATION_CREDENTIALS=../credentials.json go test ./appengine --godog.format=pretty -v -coverprofile=coverage.out -covermode=atomic -coverpkg ./...
+	GOOGLE_APPLICATION_CREDENTIALS=../credentials.json DATASET_LOCATION=asia-northeast1 go test ./appengine --godog.format=pretty -v -coverprofile=coverage.out -covermode=atomic -coverpkg ./...
 
 testpkg:
 	go test -v -cover $(shell go list ./... | grep pkg) -coverprofile=coverage-pkg.out -covermode=atomic

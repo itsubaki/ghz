@@ -35,7 +35,7 @@ func TestCreateIfNotExists(t *testing.T) {
 	defer client.Close()
 
 	for _, c := range cases {
-		if err := client.CreateIfNotExists(ctx, c.name, []bigquery.TableMetadata{c.meta}); err != nil {
+		if err := client.Create(ctx, c.name, []bigquery.TableMetadata{c.meta}); err != nil {
 			t.Errorf("create if not exists: %v", err)
 		}
 	}

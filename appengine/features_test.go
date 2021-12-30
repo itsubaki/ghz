@@ -6,9 +6,12 @@ import (
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
 	"strings"
 	"time"
 
+	"cloud.google.com/go/bigquery"
+	"cloud.google.com/go/civil"
 	"github.com/cucumber/godog"
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghz/appengine/dataset"
@@ -25,17 +28,20 @@ type apiFeature struct {
 
 	server *gin.Engine
 	keep   map[string]interface{}
+	result [][]bigquery.Value
 }
 
 func (a *apiFeature) start() {
 	a.server = handler.New()
 	a.keep = make(map[string]interface{})
+	a.result = make([][]bigquery.Value, 0)
 }
 
 func (a *apiFeature) reset(sc *godog.Scenario) {
 	a.header = make(http.Header)
 	a.body = nil
 	a.resp = httptest.NewRecorder()
+	a.result = make([][]bigquery.Value, 0)
 }
 
 func (a *apiFeature) replace(str string) string {
@@ -88,8 +94,27 @@ func (a *apiFeature) SetHeader(k, v string) error {
 }
 
 func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
+	owner := incidents.Rows[1].Cells[0].Value
+	repository := incidents.Rows[1].Cells[1].Value
+	id, dsn := dataset.Name(owner, repository)
+
 	items := make([]interface{}, 0)
 	for i := 1; i < len(incidents.Rows); i++ {
+		var count int64
+		if err := dataset.Query(context.Background(),
+			fmt.Sprintf("SELECT count(*) FROM `%v.%v.%v` WHERE sha = \"%v\"", id, dsn, dataset.IncidentsMeta.Name, incidents.Rows[i].Cells[3].Value),
+			func(values []bigquery.Value) {
+				count = values[0].(int64)
+			},
+		); err != nil {
+			return fmt.Errorf("query: %v", err)
+		}
+
+		if count > 0 {
+			// already exists
+			continue
+		}
+
 		resolvedAt, err := time.Parse("2006-01-02 15:04:05 UTC", incidents.Rows[i].Cells[4].Value)
 		if err != nil {
 			return fmt.Errorf("parse(%v): %v", incidents.Rows[i].Cells[4].Value, err)
@@ -104,10 +129,6 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 		})
 	}
 
-	owner := incidents.Rows[1].Cells[0].Value
-	repository := incidents.Rows[1].Cells[1].Value
-	_, dsn := dataset.Name(owner, repository)
-
 	if err := dataset.Insert(context.Background(), dsn, dataset.IncidentsMeta.Name, items); err != nil {
 		return fmt.Errorf("insert into %v: %v", dsn, err)
 	}
@@ -116,26 +137,56 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 }
 
 func (a *apiFeature) ExecuteQuery(query string) error {
-	return godog.ErrPending
+	q := strings.ReplaceAll(query, "$PROJECT_ID", dataset.ProjectID)
+	if err := dataset.Query(context.Background(), q, func(values []bigquery.Value) {
+		a.result = append(a.result, values)
+	}); err != nil {
+		return fmt.Errorf("execute query: %v", err)
+	}
+
+	return nil
 }
 
 func (a *apiFeature) QueryResult(result *godog.Table) error {
-	return godog.ErrPending
+	for i := range a.result {
+		for j := range a.result[i] {
+			name := result.Rows[0].Cells[j].Value
+			want := result.Rows[i+1].Cells[j].Value
+			switch got := a.result[i][j].(type) {
+			case string:
+				if want != got {
+					return fmt.Errorf("%v want=%v, got=%v", name, want, got)
+				}
+			case civil.Date:
+				if want != got.String() {
+					return fmt.Errorf("%v want=%v, got=%v", name, want, got)
+				}
+			case int64:
+				p, err := strconv.ParseInt(want, 10, 64)
+				if err != nil {
+					return fmt.Errorf("parse int(%v): %v", want, err)
+				}
+
+				if p != got {
+					return fmt.Errorf("%v want=%v, got=%v", name, p, got)
+				}
+			case float64:
+				p, err := strconv.ParseFloat(want, 64)
+				if err != nil {
+					return fmt.Errorf("parse float(%v): %v", want, err)
+				}
+
+				if p != got {
+					return fmt.Errorf("%v want=%v, got=%v", name, p, got)
+				}
+			}
+		}
+	}
+
+	return nil
 }
 
 func InitializeTestSuite(ctx *godog.TestSuiteContext) {
-	id, dsn := dataset.Name("itsubaki", "q")
-	dataset.Delete(context.Background(), id, dsn, []string{
-		dataset.CommitsMeta.Name,
-		dataset.EventsMeta.Name,
-		dataset.IncidentsMeta.Name,
-		dataset.PullReqCommitsMeta.Name,
-		dataset.PullReqsMeta.Name,
-		dataset.ReleasesMeta.Name,
-		dataset.WorkflowRunsMeta.Name,
-		dataset.WorkflowJobsMeta.Name,
-	})
-
 	ctx.BeforeSuite(func() {
 		gin.SetMode(gin.ReleaseMode)
 		api.start()
