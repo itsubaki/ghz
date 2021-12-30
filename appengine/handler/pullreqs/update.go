@@ -63,7 +63,7 @@ func Update(c *gin.Context) {
 		if err := UpdatePullReq(ctx, id, dsn, pr); err != nil {
 			log.Printf("%v", UpdateResponse{
 				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("update pullreq(%v): %v", r.Number, err),
+				Message: fmt.Sprintf("update pullreq(%v)", r.Number),
 			})
 			continue
 		}
@@ -71,7 +71,7 @@ func Update(c *gin.Context) {
 		if err := UpdatePullReqCommits(ctx, id, dsn, pr); err != nil {
 			log.Printf("%v", UpdateResponse{
 				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("update commits(%v): %v", r.Number, err),
+				Message: fmt.Sprintf("update commits(%v)", r.Number),
 			})
 			continue
 		}

@@ -107,7 +107,7 @@ func (c *Client) Query(ctx context.Context, query string, fn func(values []bigqu
 
 	it, err := q.Read(ctx)
 	if err != nil {
-		return fmt.Errorf("query(%v): %v", query, err)
+		return fmt.Errorf("query: %v", err)
 	}
 
 	var values []bigquery.Value

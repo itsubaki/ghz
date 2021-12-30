@@ -66,7 +66,7 @@ func Update(c *gin.Context) {
 		if err := UpdateJob(ctx, id, dsn, job); err != nil {
 			log.Printf("%v", UpdateResponse{
 				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("update job(%v): %v", j.JobID, err),
+				Message: fmt.Sprintf("update job(%v)", j.JobID),
 			})
 			continue
 		}
