@@ -99,7 +99,7 @@ func (a *apiFeature) QueryResult(result *godog.Table) error {
 }
 
 func InitializeTestSuite(ctx *godog.TestSuiteContext) {
-	id, dsn := dataset.Name("itsubaki", "ghz")
+	id, dsn := dataset.Name("itsubaki", "q")
 	dataset.Delete(context.Background(), id, dsn, []string{
 		dataset.CommitsMeta.Name,
 		dataset.EventsMeta.Name,

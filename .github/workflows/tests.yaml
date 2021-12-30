@@ -26,6 +26,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Unit Tests
+      - name: Unit Test
         run: |
           make testpkg
+
+      - name: Integration Test
+        run: |
+          echo ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} > ./credentials.json
+          make test
