@@ -37,8 +37,12 @@ jobs:
           echo ${GOOGLE_APPLICATION_CREDENTIALS} > ./credentials.json
           make test
 
+      - name: Auth Google Cloud
+        uses: "google-github-actions/auth@v0"
+        with:
+          credentials_json: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
+
       - name: "Deploy to Google App Engine"
         uses: "google-github-actions/deploy-appengine@v0"
         with:
           deliverables: "app.yaml cron.yaml"
-          credentials: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
