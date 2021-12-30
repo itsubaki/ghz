@@ -155,11 +155,11 @@ func (a *apiFeature) QueryResult(result *godog.Table) error {
 			switch got := a.result[i][j].(type) {
 			case string:
 				if want != got {
-					return fmt.Errorf("%v want=%v, got=%v", name, want, got)
+					return fmt.Errorf("%v got=%v, want=%v", name, got, want)
 				}
 			case civil.Date:
 				if want != got.String() {
-					return fmt.Errorf("%v want=%v, got=%v", name, want, got)
+					return fmt.Errorf("%v got=%v, want=%v", name, got, want)
 				}
 			case int64:
 				p, err := strconv.ParseInt(want, 10, 64)
@@ -168,7 +168,7 @@ func (a *apiFeature) QueryResult(result *godog.Table) error {
 				}
 
 				if p != got {
-					return fmt.Errorf("%v want=%v, got=%v", name, p, got)
+					return fmt.Errorf("%v got=%v, want=%v", name, got, want)
 				}
 			case float64:
 				p, err := strconv.ParseFloat(want, 64)
@@ -177,7 +177,7 @@ func (a *apiFeature) QueryResult(result *godog.Table) error {
 				}
 
 				if p != got {
-					return fmt.Errorf("%v want=%v, got=%v", name, p, got)
+					return fmt.Errorf("%v got=%v, want=%v", name, got, want)
 				}
 			}
 		}

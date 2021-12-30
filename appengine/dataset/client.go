@@ -29,7 +29,8 @@ func Name(owner, repository string) (string, string) {
 }
 
 type Client struct {
-	client *bigquery.Client
+	client   *bigquery.Client
+	location string
 }
 
 func New(ctx context.Context) (*Client, error) {
@@ -43,21 +44,22 @@ func New(ctx context.Context) (*Client, error) {
 		return nil, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	return &Client{
-		client: client,
-	}, nil
-}
-
-func (c *Client) Create(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
 	location := "US"
 	if len(os.Getenv("DATASET_LOCATION")) > 0 {
 		location = os.Getenv("DATASET_LOCATION")
 	}
 
+	return &Client{
+		client:   client,
+		location: location,
+	}, nil
+}
+
+func (c *Client) Create(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
 	if _, err := c.client.Dataset(datasetName).Metadata(ctx); err != nil {
 		// not found then create dataset
 		if err := c.client.Dataset(datasetName).Create(ctx, &bigquery.DatasetMetadata{
-			Location: location,
+			Location: c.location,
 		}); err != nil {
 			return fmt.Errorf("create %v: %v", datasetName, err)
 		}
@@ -100,7 +102,10 @@ func (c *Client) Insert(ctx context.Context, datasetName, tableName string, item
 }
 
 func (c *Client) Query(ctx context.Context, query string, fn func(values []bigquery.Value)) error {
-	it, err := c.client.Query(query).Read(ctx)
+	q := c.client.Query(query)
+	q.Location = c.location
+
+	it, err := q.Read(ctx)
 	if err != nil {
 		return fmt.Errorf("query(%v): %v", query, err)
 	}
