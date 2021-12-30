@@ -23,7 +23,7 @@ func WorkflowRunsMeta(projectID, datasetName string) bigquery.TableMetadata {
 			FROM %v
 			WHERE conclusion = "success"
 			GROUP BY owner, repository, workflow_id, workflow_name, date
-			ORDER BY date DESCs
+			ORDER BY date DESC
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.WorkflowRunsMeta.Name),
 		),
