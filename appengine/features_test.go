@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"strings"
+	"time"
 
 	"github.com/cucumber/godog"
 	"github.com/gin-gonic/gin"
@@ -87,7 +88,31 @@ func (a *apiFeature) SetHeader(k, v string) error {
 }
 
 func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
-	return godog.ErrPending
+	items := make([]interface{}, 0)
+	for i := 1; i < len(incidents.Rows); i++ {
+		resolvedAt, err := time.Parse("2006-01-02 15:04:05 UTC", incidents.Rows[i].Cells[4].Value)
+		if err != nil {
+			return fmt.Errorf("parse(%v): %v", incidents.Rows[i].Cells[4].Value, err)
+		}
+
+		items = append(items, dataset.Incident{
+			Owner:       incidents.Rows[i].Cells[0].Value,
+			Repository:  incidents.Rows[i].Cells[1].Value,
+			Description: incidents.Rows[i].Cells[2].Value,
+			SHA:         incidents.Rows[i].Cells[3].Value,
+			ResolvedAt:  resolvedAt,
+		})
+	}
+
+	owner := incidents.Rows[1].Cells[0].Value
+	repository := incidents.Rows[1].Cells[1].Value
+	_, dsn := dataset.Name(owner, repository)
+
+	if err := dataset.Insert(context.Background(), dsn, dataset.IncidentsMeta.Name, items); err != nil {
+		return fmt.Errorf("insert into %v: %v", dsn, err)
+	}
+
+	return nil
 }
 
 func (a *apiFeature) ExecuteQuery(query string) error {
