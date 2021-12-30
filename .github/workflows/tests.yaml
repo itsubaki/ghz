@@ -31,6 +31,8 @@ jobs:
           make testpkg
 
       - name: Integration Test
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: |
-          echo ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} > ./credentials.json
+          echo ${GOOGLE_APPLICATION_CREDENTIALS} > ./credentials.json
           make test
