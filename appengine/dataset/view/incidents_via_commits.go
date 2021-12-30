@@ -16,8 +16,8 @@ func IncidentsCommitsMeta(projectID, datasetName string) bigquery.TableMetadata 
 				SELECT
 					owner,
 					repository,
-					DATE(date) as date,
-					COUNT(date) as commits
+					DATE(created_at) as date,
+					COUNT((DISTINCT(head_sha)) as pushed
 				FROM %v
 				GROUP BY owner, repository, date
 			), B AS (
@@ -34,16 +34,16 @@ func IncidentsCommitsMeta(projectID, datasetName string) bigquery.TableMetadata 
 				owner,
 				repository,
 				A.date,
-				commits,
+				pushed,
 				IFNULL(failure, 0) as failure,
-				IFNULL(failure, 0) / commits as failure_rate,
+				IFNULL(failure, 0) / pushed as failure_rate,
 				IFNULL(MTTR, 0) as MTTR
 			FROM A
 			LEFT JOIN B
 			ON A.date = B.date
 			ORDER BY date DESC
 			`,
-			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.CommitsMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.EventsPushMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.EventsPushMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.IncidentsMeta.Name),
 		),

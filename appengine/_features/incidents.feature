@@ -1,8 +1,67 @@
 Feature:
-    In order to get indicators of incident
+    In order to get indicators of "Time to Restore Services" and "Change Failure Rate"
     As a DevOps practitioner
 
-    Scenario: should get failure_rate and MTTR via pullrequest
+    Scenario: should create incidents table
+        Given I set "X-Appengine-Cron" header with "true"
+        When I send "GET" request to "/_fetch/itsubaki/ghz/incidents"
+        Then the response code should be 200
+        Then the response should match json:
+            """
+            {
+                "path": "/_fetch/itsubaki/ghz/incidents"
+            }
+            """
+
+    Scenario: should fetch events
+        Given I set "X-Appengine-Cron" header with "true"
+        When I send "GET" request to "/_fetch/itsubaki/ghz/events"
+        Then the response code should be 200
+        Then the response should match json:
+            """
+            {
+                "path": "/_fetch/itsubaki/ghz/events",
+                "next_token": "@string@"
+            }
+            """
+
+    Scenario: should get failure_rate and MTTR via commits
+        Given the following incidents exist:
+            | owner    | repository | description                | sha                                      | resolved_at             |
+            | itsubaki | ghz        | [TEST] Incident via Commit | 6f5dc2fc9b933ef6fd5f075924a5fec114405a25 | 2021-12-24 10:01:29 UTC |
+        When I execute query with:
+            """
+            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_commits` WHERE date = "2021-12-24" LIMIT 1
+            """
+        Then I get the following result:
+            | owner    | repository | date       | pushed | failure | failure_rate | MTTR |
+            | itsubaki | ghz        | 2021-12-24 | 2      | 1       | 0.5          | 60.0 |
+
+    Scenario: should fetch pullreqs
+        Given I set "X-Appengine-Cron" header with "true"
+        When I send "GET" request to "/_fetch/itsubaki/ghz/pullreqs"
+        Then the response code should be 200
+        Then the response should match json:
+            """
+            {
+                "path": "/_fetch/itsubaki/ghz/pullreqs",
+                "next_token": "@number@"
+            }
+            """
+
+    Scenario: should fetch pullreqs/commits
+        Given I set "X-Appengine-Cron" header with "true"
+        When I send "GET" request to "/_fetch/itsubaki/ghz/pullreqs/commits"
+        Then the response code should be 200
+        Then the response should match json:
+            """
+            {
+                "path": "/_fetch/itsubaki/ghz/pullreqs/commits",
+                "next_token": "@number@"
+            }
+            """
+
+    Scenario: should get failure_rate and MTTR via pullrequests
         Given the following incidents exist:
             | owner    | repository | description                     | sha                                      | resolved_at             |
             | itsubaki | ghz        | [TEST] Incident via PullRequest | aa0d19452f820c2088cbbe63d2fe2e18b67d3e4d | 2021-12-08 10:41:12 UTC |
@@ -13,15 +72,3 @@ Feature:
         Then I get the following result:
             | owner    | repository | date       | merged | failure | failure_rate | MTTR |
             | itsubaki | ghz        | 2021-12-08 | 1      | 1       | 1.0          | 60.0 |
-
-    Scenario: should get failure_rate and MTTR via commit
-        Given the following incidents exist:
-            | owner    | repository | description                | sha                                      | resolved_at             |
-            | itsubaki | ghz        | [TEST] Incident via Commit | 6f5dc2fc9b933ef6fd5f075924a5fec114405a25 | 2021-12-24 10:01:29 UTC |
-        When I execute query with:
-            """
-            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_commits` WHERE date = "2021-12-24" LIMIT 1
-            """
-        Then I get the following result:
-            | owner    | repository | date       | commits | failure | failure_rate       | MTTR |
-            | itsubaki | ghz        | 2021-12-24 | 3       | 1       | 0.3333333333333333 | 60.0 |
