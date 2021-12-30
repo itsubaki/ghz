@@ -81,39 +81,6 @@ func Update(c *gin.Context) {
 	})
 }
 
-func UpdatePullReqCommits(ctx context.Context, projectID, datasetName string, r *github.PullRequest) error {
-	return nil
-}
-
-func UpdatePullReq(ctx context.Context, projectID, datasetName string, r *github.PullRequest) error {
-	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqsMeta.Name)
-
-	var query string
-	if r.ClosedAt != nil {
-		query = fmt.Sprintf("update %v set state = \"%v\", updated_at = \"%v\", merged_at = \"%v\", closed_at = \"%v\", merge_commit_sha = \"%v\" where id = %v",
-			table,
-			r.GetState(),
-			r.GetUpdatedAt().Format("2006-01-02 15:04:05 UTC"),
-			r.GetMergedAt().Format("2006-01-02 15:04:05 UTC"),
-			r.GetClosedAt().Format("2006-01-02 15:04:05 UTC"),
-			r.GetMergeCommitSHA(),
-			r.GetID(),
-		)
-	}
-
-	if query == "" {
-		return nil
-	}
-
-	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
-		return
-	}); err != nil {
-		return fmt.Errorf("query(%v): %v", query, err)
-	}
-
-	return nil
-}
-
 func ListPullReqs(ctx context.Context, projectID, datasetName, state string) ([]dataset.PullReq, error) {
 	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where state = \"%v\"", table, state)
@@ -138,4 +105,33 @@ func ListPullReqs(ctx context.Context, projectID, datasetName, state string) ([]
 	}
 
 	return out, nil
+}
+
+func UpdatePullReq(ctx context.Context, projectID, datasetName string, r *github.PullRequest) error {
+	if r.ClosedAt == nil {
+		return nil
+	}
+
+	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqsMeta.Name)
+	query := fmt.Sprintf("update %v set state = \"%v\", updated_at = \"%v\", merged_at = \"%v\", closed_at = \"%v\", merge_commit_sha = \"%v\" where id = %v",
+		table,
+		r.GetState(),
+		r.GetUpdatedAt().Format("2006-01-02 15:04:05 UTC"),
+		r.GetMergedAt().Format("2006-01-02 15:04:05 UTC"),
+		r.GetClosedAt().Format("2006-01-02 15:04:05 UTC"),
+		r.GetMergeCommitSHA(),
+		r.GetID(),
+	)
+
+	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
+		return
+	}); err != nil {
+		return fmt.Errorf("query(%v): %v", query, err)
+	}
+
+	return nil
+}
+
+func UpdatePullReqCommits(ctx context.Context, projectID, datasetName string, r *github.PullRequest) error {
+	return nil
 }

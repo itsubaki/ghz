@@ -174,7 +174,17 @@ cron:
     timezone: Asia/Tokyo
 
   - description: "itsubaki/ghz"
+    url: /_fetch/itsubaki/ghz/actions/runs/update
+    schedule: every day 06:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/ghz"
     url: /_fetch/itsubaki/ghz/actions/jobs
+    schedule: every day 06:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/ghz"
+    url: /_fetch/itsubaki/ghz/actions/jobs/update
     schedule: every day 06:00
     timezone: Asia/Tokyo
 

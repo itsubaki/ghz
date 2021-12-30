@@ -36,3 +36,10 @@ jobs:
         run: |
           echo ${GOOGLE_APPLICATION_CREDENTIALS} > ./credentials.json
           make test
+
+      - name: Deploy
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+        run: |
+          echo ${GOOGLE_APPLICATION_CREDENTIALS} > ./credentials.json
+          make deploy

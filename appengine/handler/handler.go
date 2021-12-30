@@ -47,14 +47,16 @@ func Fetch(g *gin.Engine) {
 	r.Use(XAppEngineCron)
 
 	r.GET("/:owner/:repository/commits", commits.Fetch)
+	r.GET("/:owner/:repository/events", events.Fetch)
+	r.GET("/:owner/:repository/releases", releases.Fetch)
 	r.GET("/:owner/:repository/pullreqs", pullreqs.Fetch)
 	r.GET("/:owner/:repository/pullreqs/update", pullreqs.Update)
 	r.GET("/:owner/:repository/pullreqs/commits", prcommits.Fetch)
 	r.GET("/:owner/:repository/actions/runs", runs.Fetch)
+	r.GET("/:owner/:repository/actions/runs/update", runs.Update)
 	r.GET("/:owner/:repository/actions/jobs", jobs.Fetch)
-	r.GET("/:owner/:repository/events", events.Fetch)
+	r.GET("/:owner/:repository/actions/jobs/update", jobs.Update)
 	r.GET("/:owner/:repository/incidents", incidents.Fetch)
-	r.GET("/:owner/:repository/releases", releases.Fetch)
 }
 
 func Incidents(g *gin.Engine) {
