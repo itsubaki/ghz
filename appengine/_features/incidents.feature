@@ -6,23 +6,23 @@ Feature:
     Scenario: should get failure_rate and MTTR via pullrequest
         Given the following incidents exist:
             | owner    | repository | description                     | sha                                      | resolved_at             |
-            | itsubaki | q          | [TEST] Incident via PullRequest | 7b2619e89065d96e683d70a72512e2883c1a2cf6 | 2021-07-30 13:04:37 UTC |
+            | itsubaki | ghz        | [TEST] Incident via PullRequest | aa0d19452f820c2088cbbe63d2fe2e18b67d3e4d | 2021-12-08 10:41:12 UTC |
         When I execute query with:
             """
-            SELECT * FROM `$PROJECT_ID.itsubaki_q._incidents_via_pullreqs` WHERE date = "2021-07-30" LIMIT 1
+            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pullreqs` WHERE date = "2021-12-08" LIMIT 1
             """
         Then I get the following result:
             | owner    | repository | date       | merged | failure | failure_rate | MTTR |
-            | itsubaki | q          | 2021-07-30 | 1      | 1       | 1.0          | 60.0 |
+            | itsubaki | ghz        | 2021-12-08 | 1      | 1       | 1.0          | 60.0 |
 
     Scenario: should get failure_rate and MTTR via commit
         Given the following incidents exist:
             | owner    | repository | description                | sha                                      | resolved_at             |
-            | itsubaki | q          | [TEST] Incident via Commit | ad79208ce9ad1fce87b298ae28c6c518dc2a0486 | 2021-12-26 15:31:05 UTC |
+            | itsubaki | ghz        | [TEST] Incident via Commit | 6f5dc2fc9b933ef6fd5f075924a5fec114405a25 | 2021-12-24 10:01:29 UTC |
         When I execute query with:
             """
-            SELECT * FROM `$PROJECT_ID.itsubaki_q._incidents_via_commits` WHERE date = "2021-12-26" LIMIT 1
+            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_commits` WHERE date = "2021-12-24" LIMIT 1
             """
         Then I get the following result:
-            | owner    | repository | date       | commits | failure | failure_rate | MTTR |
-            | itsubaki | q          | 2021-12-26 | 2       | 1       | 0.5          | 60.0 |
+            | owner    | repository | date       | commits | failure | failure_rate       | MTTR |
+            | itsubaki | ghz        | 2021-12-24 | 3       | 1       | 0.3333333333333333 | 60.0 |
