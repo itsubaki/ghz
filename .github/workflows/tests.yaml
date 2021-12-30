@@ -42,12 +42,6 @@ jobs:
         with:
           credentials_json: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
 
-      - name: Create secrets.yaml
-        env:
-          PAT: ${{ secrets.PAT }}
-        run: |
-          echo "env_variables:\n  PAT: ${PAT}" > secrets.yaml
-
       - name: "Deploy to App Engine"
         uses: "google-github-actions/deploy-appengine@v0"
         with:
