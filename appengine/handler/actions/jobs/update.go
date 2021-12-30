@@ -3,6 +3,7 @@ package jobs
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -59,17 +60,21 @@ func Update(c *gin.Context) {
 				Path:    c.Request.URL.Path,
 				Message: fmt.Sprintf("get job(%v): %v", j.JobID, err),
 			})
-			return
+			continue
 		}
 
 		if err := UpdateJob(ctx, id, dsn, job); err != nil {
-			c.JSON(http.StatusInternalServerError, UpdateResponse{
+			log.Printf("%v", UpdateResponse{
 				Path:    c.Request.URL.Path,
 				Message: fmt.Sprintf("update job(%v): %v", j.JobID, err),
 			})
-			return
+			continue
 		}
 	}
+
+	c.JSON(http.StatusOK, UpdateResponse{
+		Path: c.Request.URL.Path,
+	})
 }
 
 func ListJobs(ctx context.Context, projectID, datasetName string) ([]dataset.WorkflowJob, error) {
@@ -101,7 +106,7 @@ func UpdateJob(ctx context.Context, projectID, datasetName string, j *github.Wor
 		return nil
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowRunsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowJobsMeta.Name)
 	query := fmt.Sprintf("update %v set status = \"%v\", conclusion = \"%v\", completed_at = \"%v\" where job_id = %v",
 		table,
 		j.GetStatus(),

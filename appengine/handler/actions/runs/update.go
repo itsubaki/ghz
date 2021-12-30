@@ -3,6 +3,7 @@ package runs
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 
@@ -68,13 +69,17 @@ func Update(c *gin.Context) {
 		}
 
 		if err := UpdateRun(ctx, id, dsn, run); err != nil {
-			c.JSON(http.StatusInternalServerError, UpdateResponse{
+			log.Printf("%v", UpdateResponse{
 				Path:    c.Request.URL.Path,
 				Message: fmt.Sprintf("update run(%v): %v", r.RunID, err),
 			})
-			return
+			continue
 		}
 	}
+
+	c.JSON(http.StatusOK, UpdateResponse{
+		Path: c.Request.URL.Path,
+	})
 }
 
 func ListRuns(ctx context.Context, projectID, datasetName string) ([]dataset.WorkflowRun, error) {
