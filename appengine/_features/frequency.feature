@@ -32,7 +32,7 @@ Feature:
             """
         Then I get the following result:
             | owner    | repository | workflow_id | workflow_name | date       | runs | duration_avg       |
-            | itsubaki | ghz        | 16163576    | tests         | 2021-12-25 | 7    | 0.5714285714285715 |
+            | itsubaki | ghz        | 16163576    | tests         | 2021-12-25 | 7    | 0.5714285714285714 |
 
     Scenario: should fetch actions jobs
         Given I set "X-Appengine-Cron" header with "true"
