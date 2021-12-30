@@ -14,14 +14,14 @@ func LeadTimeWorkflowsMeta(projectID, datasetName string) bigquery.TableMetadata
 			`
 			WITH A AS (
 				SELECT
-					B.title,
-					B.merge_commit_sha,
 					A.id,
 					A.number,
 					A.login,
+					B.title,
 					A.message,
+					B.merge_commit_sha,
 					A.sha,
-					A.date,
+					A.date
 				FROM %v as A
 				INNER JOIN %v as B
 				ON A.id = B.id

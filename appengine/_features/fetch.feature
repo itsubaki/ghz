@@ -27,6 +27,16 @@ Feature:
             }
             """
 
+    Scenario: should fetch pullreqs/update
+        When I send "GET" request to "/_fetch/itsubaki/ghz/pullreqs/update"
+        Then the response code should be 200
+        Then the response should match json:
+            """
+            {
+                "path": "/_fetch/itsubaki/ghz/pullreqs/update"
+            }
+            """
+
     Scenario: should fetch pullreqs/commits
         When I send "GET" request to "/_fetch/itsubaki/ghz/pullreqs/commits"
         Then the response code should be 200
