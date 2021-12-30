@@ -69,7 +69,7 @@ func Update(c *gin.Context) {
 		}
 
 		if err := UpdateRun(ctx, id, dsn, run); err != nil {
-			log.Printf("%v", UpdateResponse{
+			log.Printf("%#v", UpdateResponse{
 				Path:    c.Request.URL.Path,
 				Message: fmt.Sprintf("update run(%v)", r.RunID),
 			})
