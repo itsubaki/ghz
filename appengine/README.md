@@ -9,7 +9,7 @@
 - Google BigQuery
 - Google Cloud Scheduler
 
-## Configuration and Deploy
+## Configuration and Deployment
 
 - `cron.yaml`
 - create `secrets.yaml`
@@ -21,7 +21,7 @@ env_variables:
 ```
 
 ```shell
-$ gcloud beta app deploy app.yaml cron.yaml
+$ gcloud app deploy app.yaml cron.yaml
 ```
 
 ## Integration Test
