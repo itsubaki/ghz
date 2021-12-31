@@ -5,6 +5,10 @@
 
 - One of the indicators of productivity
 - [DORA's Four Keys](https://github.com/GoogleCloudPlatform/fourkeys)
+  - Deployment Frequency: The number of times it has been deployed.
+  - Lead Time for Changes: The difference between the commit creation time and the deployment completion time.
+  - Time to Restore Services: The difference between the commit creation time that caused the failure and the resolution time.
+  - Change Failure Rate: The Ratio of the number of deployments to the number of failures.
 
 ## Install
 
