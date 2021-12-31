@@ -28,7 +28,7 @@ func Fetch(c *gin.Context) {
 		view.IncidentsCommitsMeta(id, dsn),
 		view.IncidentsPullReqsMeta(id, dsn),
 	}); err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
+		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("create if not exists: %v", err),
 		})

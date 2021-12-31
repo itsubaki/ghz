@@ -34,7 +34,7 @@ func Create(c *gin.Context) {
 	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
 		dataset.IncidentsMeta,
 	}); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.Error(err).SetMeta(gin.H{
 			"message": fmt.Sprintf("create if not exists: %v", err),
 		})
 		return
@@ -44,7 +44,7 @@ func Create(c *gin.Context) {
 	items = append(items, in)
 
 	if err := dataset.Insert(ctx, dsn, dataset.IncidentsMeta.Name, items); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		c.Error(err).SetMeta(gin.H{
 			"message": fmt.Sprintf("insert items: %v", err),
 		})
 		return

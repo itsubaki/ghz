@@ -15,9 +15,8 @@ import (
 )
 
 type Response struct {
-	Path      string `json:"path"`
-	NextToken string `json:"next_token"`
-	Message   string `json:"message,omitempty"`
+	Path    string `json:"path"`
+	Message string `json:"message,omitempty"`
 }
 
 var regexpnl = regexp.MustCompile(`\r\n|\r|\n`)
@@ -33,7 +32,7 @@ func Fetch(c *gin.Context) {
 		dataset.EventsPushMeta,
 		dataset.EventsMeta,
 	}); err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
+		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("create if not exists: %v", err),
 		})
@@ -42,7 +41,7 @@ func Fetch(c *gin.Context) {
 
 	token, err := NextToken(ctx, id, dsn)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
+		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("next token: %v", err),
 		})
@@ -113,7 +112,7 @@ func Fetch(c *gin.Context) {
 			return nil
 		},
 	); err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
+		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("fetch: %v", err),
 		})
@@ -121,8 +120,7 @@ func Fetch(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, Response{
-		Path:      c.Request.URL.Path,
-		NextToken: token,
+		Path: c.Request.URL.Path,
 	})
 }
 

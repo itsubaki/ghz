@@ -15,11 +15,6 @@ import (
 	"github.com/itsubaki/ghz/pkg/actions/jobs"
 )
 
-type UpdateResponse struct {
-	Path    string `json:"path"`
-	Message string `json:"message,omitempty"`
-}
-
 func Update(c *gin.Context) {
 	ctx := context.Background()
 
@@ -32,7 +27,7 @@ func Update(c *gin.Context) {
 		dataset.WorkflowJobsMeta,
 		view.WorkflowJobsMeta(id, dsn),
 	}); err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
+		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("create if not exists: %v", err),
 		})
@@ -41,7 +36,7 @@ func Update(c *gin.Context) {
 
 	list, err := ListJobs(ctx, id, dsn)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, UpdateResponse{
+		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("list jobs: %v", err),
 		})
@@ -56,7 +51,7 @@ func Update(c *gin.Context) {
 			JobID:      j.JobID,
 		})
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, UpdateResponse{
+			c.Error(err).SetMeta(Response{
 				Path:    c.Request.URL.Path,
 				Message: fmt.Sprintf("get job(%v): %v", j.JobID, err),
 			})
@@ -64,15 +59,12 @@ func Update(c *gin.Context) {
 		}
 
 		if err := UpdateJob(ctx, id, dsn, job); err != nil {
-			log.Printf("%#v", UpdateResponse{
-				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("update job(%v): %v", j.JobID, err),
-			})
+			log.Printf("path=%v, update job(%v): %v", c.Request.URL.Path, j.JobID, err)
 			continue
 		}
 	}
 
-	c.JSON(http.StatusOK, UpdateResponse{
+	c.JSON(http.StatusOK, Response{
 		Path: c.Request.URL.Path,
 	})
 }

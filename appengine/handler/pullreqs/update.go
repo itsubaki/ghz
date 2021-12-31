@@ -14,11 +14,6 @@ import (
 	"github.com/itsubaki/ghz/pkg/pullreqs"
 )
 
-type UpdateResponse struct {
-	Path    string `json:"path"`
-	Message string `json:"message,omitempty"`
-}
-
 func Update(c *gin.Context) {
 	ctx := context.Background()
 
@@ -29,8 +24,7 @@ func Update(c *gin.Context) {
 	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
 		dataset.PullReqsMeta,
 	}); err != nil {
-		log.Printf(fmt.Sprintf("create if not exists: %v", err))
-		c.JSON(http.StatusInternalServerError, UpdateResponse{
+		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("create if not exists: %v", err),
 		})
@@ -39,8 +33,7 @@ func Update(c *gin.Context) {
 
 	open, err := ListPullReqs(ctx, id, dsn, "open")
 	if err != nil {
-		log.Printf(fmt.Sprintf("list pullreqs: %v", err))
-		c.JSON(http.StatusInternalServerError, UpdateResponse{
+		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("list pullreqs: %v", err),
 		})
@@ -55,8 +48,7 @@ func Update(c *gin.Context) {
 			Number:     int(r.Number),
 		})
 		if err != nil {
-			log.Printf(fmt.Sprintf("get pullreq: %v", err))
-			c.JSON(http.StatusInternalServerError, UpdateResponse{
+			c.Error(err).SetMeta(Response{
 				Path:    c.Request.URL.Path,
 				Message: fmt.Sprintf("get pullreq: %v", err),
 			})
@@ -64,23 +56,17 @@ func Update(c *gin.Context) {
 		}
 
 		if err := UpdatePullReq(ctx, id, dsn, pr); err != nil {
-			log.Printf("%#v", UpdateResponse{
-				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("update pullreq(%v): %v", r.Number, err),
-			})
+			log.Printf("path=%v, update pullreq(%v): %v", c.Request.URL.Path, r.Number, err)
 			continue
 		}
 
 		if err := UpdatePullReqCommits(ctx, id, dsn, pr); err != nil {
-			log.Printf("%#v", UpdateResponse{
-				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("update commits(%v): %v", r.Number, err),
-			})
+			log.Printf("path=%v, update commits(%v): %v", c.Request.URL.Path, r.Number, err)
 			continue
 		}
 	}
 
-	c.JSON(http.StatusOK, UpdateResponse{
+	c.JSON(http.StatusOK, Response{
 		Path: c.Request.URL.Path,
 	})
 }

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,20 @@ func New() *gin.Engine {
 	if gin.IsDebugging() {
 		g.Use(gin.Logger())
 	}
+
+	g.Use(func(c *gin.Context) {
+		c.Next()
+
+		if len(c.Errors) == 0 {
+			return
+		}
+
+		log.Printf("%#v", c.Errors)
+		c.AbortWithStatusJSON(
+			http.StatusInternalServerError,
+			c.Errors.Last().Meta,
+		)
+	})
 
 	Root(g)
 	Status(g)

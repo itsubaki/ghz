@@ -9,8 +9,7 @@ Feature:
         Then the response should match json:
             """
             {
-                "path": "/_fetch/itsubaki/ghz/actions/runs",
-                "next_token": "@number@"
+                "path": "/_fetch/itsubaki/ghz/actions/runs"
             }
             """
 
@@ -41,8 +40,7 @@ Feature:
         Then the response should match json:
             """
             {
-                "path": "/_fetch/itsubaki/ghz/actions/jobs",
-                "next_token": "@number@"
+                "path": "/_fetch/itsubaki/ghz/actions/jobs"
             }
             """
 
@@ -73,8 +71,7 @@ Feature:
         Then the response should match json:
             """
             {
-                "path": "/_fetch/itsubaki/ghz/releases",
-                "next_token": "@number@"
+                "path": "/_fetch/itsubaki/ghz/releases"
             }
             """
 

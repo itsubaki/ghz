@@ -14,9 +14,8 @@ import (
 )
 
 type Response struct {
-	Path      string `json:"path"`
-	NextToken int64  `json:"next_token"`
-	Message   string `json:"message,omitempty"`
+	Path    string `json:"path"`
+	Message string `json:"message,omitempty"`
 }
 
 func Fetch(c *gin.Context) {
@@ -31,7 +30,7 @@ func Fetch(c *gin.Context) {
 		dataset.WorkflowJobsMeta,
 		view.WorkflowJobsMeta(id, dsn),
 	}); err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
+		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("create if not exists: %v", err),
 		})
@@ -40,7 +39,7 @@ func Fetch(c *gin.Context) {
 
 	token, _, err := NextToken(ctx, id, dsn)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
+		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("next token: %v", err),
 		})
@@ -49,10 +48,9 @@ func Fetch(c *gin.Context) {
 
 	runs, err := ListRuns(ctx, id, dsn, token)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
-			Path:      c.Request.URL.Path,
-			NextToken: token,
-			Message:   fmt.Sprintf("list runs: %v", err),
+		c.Error(err).SetMeta(Response{
+			Path:    c.Request.URL.Path,
+			Message: fmt.Sprintf("list runs: %v", err),
 		})
 		return
 	}
@@ -69,10 +67,9 @@ func Fetch(c *gin.Context) {
 			r.RunID,
 		)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, Response{
-				Path:      c.Request.URL.Path,
-				NextToken: token,
-				Message:   fmt.Sprintf("fetch: %v", err),
+			c.Error(err).SetMeta(Response{
+				Path:    c.Request.URL.Path,
+				Message: fmt.Sprintf("fetch: %v", err),
 			})
 			return
 		}
@@ -96,18 +93,16 @@ func Fetch(c *gin.Context) {
 		}
 
 		if err := dataset.Insert(ctx, dsn, dataset.WorkflowJobsMeta.Name, items); err != nil {
-			c.JSON(http.StatusInternalServerError, Response{
-				Path:      c.Request.URL.Path,
-				NextToken: token,
-				Message:   fmt.Sprintf("insert items: %v", err),
+			c.Error(err).SetMeta(Response{
+				Path:    c.Request.URL.Path,
+				Message: fmt.Sprintf("insert items: %v", err),
 			})
 			return
 		}
 	}
 
 	c.JSON(http.StatusOK, Response{
-		Path:      c.Request.URL.Path,
-		NextToken: token,
+		Path: c.Request.URL.Path,
 	})
 }
 

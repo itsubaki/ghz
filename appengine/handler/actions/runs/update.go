@@ -15,11 +15,6 @@ import (
 	"github.com/itsubaki/ghz/pkg/actions/runs"
 )
 
-type UpdateResponse struct {
-	Path    string `json:"path"`
-	Message string `json:"message,omitempty"`
-}
-
 func Update(c *gin.Context) {
 	ctx := context.Background()
 
@@ -37,7 +32,7 @@ func Update(c *gin.Context) {
 		view.LeadTimeWorkflowsMeta(id, dsn),
 		view.LeadTimeCommitsMeta(id, dsn),
 	}); err != nil {
-		c.JSON(http.StatusInternalServerError, Response{
+		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("create if not exists: %v", err),
 		})
@@ -46,7 +41,7 @@ func Update(c *gin.Context) {
 
 	list, err := ListRuns(ctx, id, dsn)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, UpdateResponse{
+		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("list jobs: %v", err),
 		})
@@ -61,7 +56,7 @@ func Update(c *gin.Context) {
 			RunID:      r.RunID,
 		})
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, UpdateResponse{
+			c.Error(err).SetMeta(Response{
 				Path:    c.Request.URL.Path,
 				Message: fmt.Sprintf("get run(%v): %v", r.RunID, err),
 			})
@@ -69,15 +64,12 @@ func Update(c *gin.Context) {
 		}
 
 		if err := UpdateRun(ctx, id, dsn, run); err != nil {
-			log.Printf("%#v", UpdateResponse{
-				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("update run(%v): %v", r.RunID, err),
-			})
+			log.Printf("path=%v, update run(%v): %v", c.Request.URL.Path, r.RunID, err)
 			continue
 		}
 	}
 
-	c.JSON(http.StatusOK, UpdateResponse{
+	c.JSON(http.StatusOK, Response{
 		Path: c.Request.URL.Path,
 	})
 }
