@@ -28,8 +28,8 @@ $ gcloud beta app deploy app.yaml cron.yaml
 
 ## Integration Test
 
-- create google cloud service account.
-- put `credentials.json` to root directory.
+- Create google cloud service account.
+- Put `credentials.json` to root directory.
 
 ```shell
 $ make test
@@ -56,3 +56,7 @@ PASS
 coverage: 15.1% of statements in ./...
 ok      github.com/itsubaki/ghz/appengine       4.459s  coverage: 15.1% of statements in ./... [no tests to run]
 ```
+
+## GitHub Actions
+
+- Set Secrets `GOOGLE_APPLICATION_CREDENTIALS` and `PAT`

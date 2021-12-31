@@ -41,7 +41,8 @@ jobs:
         env:
           PAT: ${{ secrets.PAT }}
         run: |
-          echo "env_variables:\n  PAT: ${PAT}\n" > ./secrets.yaml
+          echo "env_variables:" > ./secrets.yaml
+          echo "  PAT: ${PAT}" >> ./secrets.yaml
 
       - name: Auth Google Cloud
         uses: "google-github-actions/auth@v0"
