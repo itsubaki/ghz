@@ -9,7 +9,7 @@
 - Google BigQuery
 - Google Cloud Scheduler
 
-## Configuration
+## Configuration and Deploy
 
 - `cron.yaml`
 - create `secrets.yaml`
@@ -19,8 +19,6 @@ $ cat secrets.yaml
 env_variables:
   PAT: YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
 ```
-
-## Deploy
 
 ```shell
 $ gcloud beta app deploy app.yaml cron.yaml
@@ -59,4 +57,4 @@ ok      github.com/itsubaki/ghz/appengine       4.459s  coverage: 15.1% of state
 
 ## GitHub Actions
 
-- Set Secrets `GOOGLE_APPLICATION_CREDENTIALS` and `PAT`
+- Set repository secrets `GOOGLE_APPLICATION_CREDENTIALS` and `PAT`
