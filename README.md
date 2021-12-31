@@ -7,7 +7,7 @@
 - [DORA's Four Keys](https://github.com/GoogleCloudPlatform/fourkeys)
   - Deployment Frequency: The number of deployments to production per day.
   - Lead Time for Changes: The difference between the commit creation time and the deployment completion time.
-  - Time to Restore Services: The difference between the commit creation time that caused the failure and the resolution time.
+  - Time to Restore Services: The difference between the deployment completion time that caused the failure and the resolution time.
   - Change Failure Rate: The Ratio of the number of deployments and the number of failures.
 
 ## Install
