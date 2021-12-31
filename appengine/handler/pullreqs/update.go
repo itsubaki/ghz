@@ -29,6 +29,7 @@ func Update(c *gin.Context) {
 	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
 		dataset.PullReqsMeta,
 	}); err != nil {
+		log.Printf(fmt.Sprintf("create if not exists: %v", err))
 		c.JSON(http.StatusInternalServerError, UpdateResponse{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("create if not exists: %v", err),
@@ -38,6 +39,7 @@ func Update(c *gin.Context) {
 
 	open, err := ListPullReqs(ctx, id, dsn, "open")
 	if err != nil {
+		log.Printf(fmt.Sprintf("list pullreqs: %v", err))
 		c.JSON(http.StatusInternalServerError, UpdateResponse{
 			Path:    c.Request.URL.Path,
 			Message: fmt.Sprintf("list pullreqs: %v", err),
@@ -53,6 +55,7 @@ func Update(c *gin.Context) {
 			Number:     int(r.Number),
 		})
 		if err != nil {
+			log.Printf(fmt.Sprintf("get pullreq: %v", err))
 			c.JSON(http.StatusInternalServerError, UpdateResponse{
 				Path:    c.Request.URL.Path,
 				Message: fmt.Sprintf("get pullreq: %v", err),
@@ -63,7 +66,7 @@ func Update(c *gin.Context) {
 		if err := UpdatePullReq(ctx, id, dsn, pr); err != nil {
 			log.Printf("%#v", UpdateResponse{
 				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("update pullreq(%v)", r.Number),
+				Message: fmt.Sprintf("update pullreq(%v): %v", r.Number, err),
 			})
 			continue
 		}
@@ -71,7 +74,7 @@ func Update(c *gin.Context) {
 		if err := UpdatePullReqCommits(ctx, id, dsn, pr); err != nil {
 			log.Printf("%#v", UpdateResponse{
 				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("update commits(%v)", r.Number),
+				Message: fmt.Sprintf("update commits(%v): %v", r.Number, err),
 			})
 			continue
 		}
