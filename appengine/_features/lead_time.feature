@@ -39,7 +39,9 @@ Feature:
     Scenario: should get lead time via commits
         When I execute query with:
             """
-            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._leadtime_via_commits` WHERE sha = "25fd40317d3df7cafb770c3319fb122068724f25" LIMIT 1
+            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._leadtime_via_commits`
+            WHERE sha = "25fd40317d3df7cafb770c3319fb122068724f25"
+            LIMIT 1
             """
         Then I get the following result:
             | owner    | repository | workflow_id | workflow_name | login    | message           | head_sha                                 | sha                                      | committed_at            | completed_at            | lead_time |
@@ -70,7 +72,9 @@ Feature:
     Scenario: should get lead time via pullrequests
         When I execute query with:
             """
-            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._leadtime_via_pullreqs` WHERE sha = "d80f4a0921f36da81b2d27a8d27d4328ada988c8" LIMIT 1
+            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._leadtime_via_pullreqs`
+            WHERE sha = "d80f4a0921f36da81b2d27a8d27d4328ada988c8"
+            LIMIT 1
             """
         Then I get the following result:
             | owner    | repository | workflow_id | workflow_name | pullreq_id | pullreq_number | login    | title                     | message                   | merge_commit_sha                         | sha                                      | committed_at            | completed_at            | lead_time |

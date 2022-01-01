@@ -1,6 +1,7 @@
 package main_test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -90,6 +91,12 @@ func (a *apiFeature) ResponseShouldMatchJSON(body *godog.DocString) error {
 
 func (a *apiFeature) SetHeader(k, v string) error {
 	a.header.Add(k, v)
+	return nil
+}
+
+func (a *apiFeature) SetRequestBody(body *godog.DocString) error {
+	r := a.replace(body.Content)
+	a.body = bytes.NewBuffer([]byte(r))
 	return nil
 }
 
@@ -199,6 +206,7 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.BeforeScenario(api.reset)
 
 	ctx.Step(`^I set "([^"]*)" header with "([^"]*)"$`, api.SetHeader)
+	ctx.Step(`^I set request body:$`, api.SetRequestBody)
 	ctx.Step(`^I send "([^"]*)" request to "([^"]*)"$`, api.Request)
 	ctx.Step(`^the response code should be (\d+)$`, api.ResponseCodeShouldBe)
 	ctx.Step(`^the response should match json:$`, api.ResponseShouldMatchJSON)
