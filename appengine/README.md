@@ -6,9 +6,9 @@
 ## DORA's Four Keys
 
 - Deployment Frequency: The number of deployments to production per day.
-- Lead Time for Changes: The difference between the commit creation time and the deployment completion time.
-- Time to Restore Services: The difference between the deployment completion time that caused the failure and the resolution time.
-- Change Failure Rate: The Ratio of the number of deployments and the number of failures.
+- Lead Time for Changes: The amount of time for a commit to be deployed into production.
+- Time to Restore Services: The median amount of time between the deployment which caused the failure and the remediation.
+- Change Failure Rate: The number of failures per the number of deployments.
 
 ## Required
 

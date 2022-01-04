@@ -34,11 +34,25 @@ func IncidentsPullReqsMeta(projectID, datasetName string) bigquery.TableMetadata
 				SELECT
 					Date(B.merged_at) as date,
 					COUNT(B.merged_at) as failure,
-					AVG(TIMESTAMP_DIFF(A.resolved_at, B.merged_at, MINUTE)) as MTTR
 				FROM %v as A
 				INNER JOIN B
 				ON A.sha = B.sha
 				GROUP BY date
+			), D AS (
+				SELECT
+					Date(B.merged_at) as date,
+                	PERCENTILE_CONT(TIMESTAMP_DIFF(A.resolved_at, B.merged_at, MINUTE),0.5) OVER(partition by Date(B.merged_at)) as MTTR
+				FROM %v as A
+				INNER JOIN B
+				ON A.sha = B.sha
+			), E AS (
+				SELECT
+					C.date,
+					C.failure,
+					D.MTTR,
+				FROM C
+				INNER JOIN D
+				ON C.date = D.date
 			)
 			SELECT
 				owner,
@@ -49,13 +63,14 @@ func IncidentsPullReqsMeta(projectID, datasetName string) bigquery.TableMetadata
 				IFNULL(failure, 0) / merged as failure_rate,
 				IFNULL(MTTR, 0) as MTTR
 			FROM A
-			LEFT JOIN C
-			ON A.date = C.date
+			LEFT JOIN E
+			ON A.date = E.date
 			ORDER BY date DESC
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqCommitsMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.IncidentsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.IncidentsMeta.Name),
 		),
 	}

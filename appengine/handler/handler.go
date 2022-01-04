@@ -30,7 +30,7 @@ func New() *gin.Engine {
 			return
 		}
 
-		log.Printf("%#v", c.Errors)
+		log.Printf("%#v", c.Errors.Errors())
 		c.AbortWithStatusJSON(
 			http.StatusInternalServerError,
 			c.Errors.Last().Meta,

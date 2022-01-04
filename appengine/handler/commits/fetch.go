@@ -33,7 +33,7 @@ func Fetch(c *gin.Context) {
 		dataset.CommitsMeta,
 		dataset.IncidentsMeta,
 		dataset.PullReqsMeta,
-		view.IncidentsCommitsMeta(id, dsn),
+		view.IncidentsPushedMeta(id, dsn),
 		view.IncidentsPullReqsMeta(id, dsn),
 	}); err != nil {
 		c.Error(err).SetMeta(Response{

@@ -7,9 +7,9 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset"
 )
 
-func LeadTimeCommitsMeta(projectID, datasetName string) bigquery.TableMetadata {
+func LeadTimePushedMeta(projectID, datasetName string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
-		Name: "_leadtime_via_commits",
+		Name: "_leadtime_via_pushed",
 		ViewQuery: fmt.Sprintf(
 			`
 			WITH A AS (

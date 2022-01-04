@@ -36,10 +36,10 @@ Feature:
             }
             """
 
-    Scenario: should get lead time via commits
+    Scenario: should get lead time via pushed
         When I execute query with:
             """
-            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._leadtime_via_commits`
+            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._leadtime_via_pushed`
             WHERE sha = "25fd40317d3df7cafb770c3319fb122068724f25"
             LIMIT 1
             """

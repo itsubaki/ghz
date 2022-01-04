@@ -30,7 +30,7 @@ func Update(c *gin.Context) {
 		dataset.WorkflowRunsMeta,
 		view.WorkflowRunsMeta(id, dsn),
 		view.LeadTimeWorkflowsMeta(id, dsn),
-		view.LeadTimeCommitsMeta(id, dsn),
+		view.LeadTimePushedMeta(id, dsn),
 	}); err != nil {
 		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,

@@ -24,13 +24,13 @@ Feature:
             }
             """
 
-    Scenario: should get failure_rate and MTTR via commits
+    Scenario: should get failure_rate and MTTR via pushed
         Given the following incidents exist:
             | owner    | repository | description                | sha                                      | resolved_at             |
             | itsubaki | ghz        | [TEST] Incident via Commit | 6f5dc2fc9b933ef6fd5f075924a5fec114405a25 | 2021-12-24 10:01:29 UTC |
         When I execute query with:
             """
-            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_commits`
+            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pushed`
             WHERE date = "2021-12-24"
             LIMIT 1
             """
