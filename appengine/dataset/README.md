@@ -3,7 +3,7 @@
 ## Insert
 
 ```sql
-INSERT INTO `PROJECT_ID.itsubaki_q.incidents` (
+INSERT INTO `$PROJECT_ID.itsubaki_q.incidents` (
   owner,
   repository,
   id,
@@ -22,7 +22,7 @@ VALUES (
 ```
 
 ```sql
-INSERT INTO `PROJECT_ID.itsubaki_q.incidents` (
+INSERT INTO `$PROJECT_ID.itsubaki_q.incidents` (
   owner,
   repository,
   id,
@@ -51,27 +51,27 @@ LANGUAGE js AS """
 
 WITH A AS (
 SELECT
-    owner,
-    repository,
-    id,
-    login,
-    type,
-    created_at,
-    JSON_EXTRACT_SCALAR(raw_payload,'$.head') as head_sha,
-    JSON2ARRAY(JSON_EXTRACT(raw_payload,'$.commits')) as commits
-FROM `PROJECT_ID.itsubaki_q.events`
+  owner,
+  repository,
+  id,
+  login,
+  type,
+  created_at,
+  JSON_EXTRACT_SCALAR(raw_payload,'$.head') as head_sha,
+  JSON2ARRAY(JSON_EXTRACT(raw_payload,'$.commits')) as commits
+FROM `$PROJECT_ID.itsubaki_q.events`
 WHERE type = "PushEvent"
 )
 
 SELECT
-    owner,
-    repository,
-    id,
-    login,
-    type,
-    created_at,
-    head_sha,
-    JSON_EXTRACT_SCALAR(commit,'$.sha') as sha
+  owner,
+  repository,
+  id,
+  login,
+  type,
+  created_at,
+  head_sha,
+  JSON_EXTRACT_SCALAR(commit,'$.sha') as sha
 FROM A, UNNEST(commits) AS commit
 ```
 
@@ -124,9 +124,9 @@ FROM A, UNNEST(commits) AS commit
 
 ```sql
 SELECT
-    DATE_ADD(DATE(date), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(date), INTERVAL -0 DAY)) +1 DAY) as week,
-    count(merged) as merged
-FROM `PROJECT_ID.itsubaki_q._pullreqs`
+  DATE_ADD(DATE(date), INTERVAL - EXTRACT(DAYOFWEEK FROM DATE_ADD(DATE(date), INTERVAL -0 DAY)) +1 DAY) as week,
+  COUNT(merged) as merged
+FROM `$PROJECT_ID.itsubaki_q._pullreqs`
 GROUP BY week
 ```
 
@@ -139,6 +139,32 @@ GROUP BY week
   {
     "week": "2018-07-29",
     "merged": "1"
+  }
+]
+```
+
+## Median
+
+```sql
+SELECT
+  DISTINCT(Date(completed_at)) as date,
+  PERCENTILE_CONT(lead_time, 0.5) OVER(partition by Date(completed_at)) as lead_time
+FROM `$PROJECT_ID.vercel_next_js._leadtime_via_pullreqs`
+```
+
+```json
+[
+  {
+    "date": "2022-01-03",
+    "lead_time": "178.0"
+  },
+  {
+    "date": "2022-01-02",
+    "lead_time": "1572.5"
+  },
+  {
+    "date": "2022-01-01",
+    "lead_time": "80845.5"
   }
 ]
 ```
