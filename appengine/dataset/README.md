@@ -152,6 +152,20 @@ SELECT
 FROM `$PROJECT_ID.vercel_next_js._leadtime_via_pullreqs`
 ```
 
+```sql
+WITH A AS (SELECT
+  Date(completed_at) as date,
+  PERCENTILE_CONT(lead_time, 0.5) OVER(partition by Date(completed_at)) as lead_time
+FROM `$PROJECT_ID.vercel_next_js._leadtime_via_pullreqs`
+)
+SELECT
+  date,
+  MAX(lead_time) as lead_time
+FROM A
+GROUP BY date
+ORDER BY date DESC
+```
+
 ```json
 [
   {
