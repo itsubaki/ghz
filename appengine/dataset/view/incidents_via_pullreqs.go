@@ -41,7 +41,7 @@ func IncidentsPullReqsMeta(projectID, datasetName string) bigquery.TableMetadata
 			), D AS (
 				SELECT
 					Date(B.merged_at) as date,
-                	PERCENTILE_CONT(TIMESTAMP_DIFF(A.resolved_at, B.merged_at, MINUTE),0.5) OVER(partition by Date(B.merged_at)) as MTTR
+					PERCENTILE_CONT(TIMESTAMP_DIFF(A.resolved_at, B.merged_at, MINUTE),0.5) OVER(partition by Date(B.merged_at)) as MTTR
 				FROM %v as A
 				INNER JOIN B
 				ON A.sha = B.sha
