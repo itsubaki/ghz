@@ -1,15 +1,16 @@
 # Query Example
 
-## Median
+## Lead Time
 
 ```sql
-WITH A AS (SELECT
-  owner,
-  repository,
-  workflow_name,
-  Date(completed_at) as date,
-  PERCENTILE_CONT(lead_time, 0.5) OVER(partition by Date(completed_at)) as lead_time
-FROM `$PROJECT_ID.vercel_next_js._leadtime_via_pullreqs`
+WITH A AS (
+  SELECT
+    owner,
+    repository,
+    workflow_name,
+    DATE(completed_at) as date,
+    PERCENTILE_CONT(lead_time, 0.5) OVER(partition by Date(completed_at)) as lead_time
+  FROM `$PROJECT_ID.vercel_next_js._leadtime_via_pullreqs`
 )
 SELECT
     owner,
@@ -41,7 +42,86 @@ ORDER BY date DESC
 ]
 ```
 
-## Insert
+## MTTR
+
+```sql
+WITH A AS (
+  SELECT
+    owner,
+    repository,
+    DATE(merged_at) as date,
+    PERCENTILE_CONT(TTR, 0.5) OVER(partition by DATE(merged_at)) as MTTR
+  FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pullreqs`
+)
+SELECT
+  owner,
+  repository,
+  date,
+  MAX(MTTR) as MTTR
+FROM A
+GROUP BY owner, repository, date
+ORDER BY date DESC
+```
+
+```json
+[
+  {
+    "owner": "itsubaki",
+    "repository": "ghz",
+    "date": "2021-12-08",
+    "MTTR": "60.0"
+  }
+]
+```
+
+## Failure Rate
+
+```sql
+WITH A AS (
+  SELECT
+    owner,
+    repository,
+    DATE(pushed_at) as date,
+    COUNT(*) as failure
+  FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pushed`
+  GROUP BY date, owner, repository
+), B AS (
+  SELECT
+    DATE(created_at) as date,
+    COUNT(*) as pushed
+  FROM `$PROJECT_ID.itsubaki_ghz.events_push`
+  GROUP BY date
+)
+SELECT
+  A.owner,
+  A.repository,
+  A.date,
+  B.pushed,
+  A.failure,
+  A.failure / B.pushed as failure_rate
+FROM A
+INNER JOIN B
+ON A.date = B.date
+```
+
+```json
+[
+  {
+    "date": "2021-12-08",
+    "pushed": "13",
+    "failure": "1",
+    "failure_rate": "0.07692307692307693"
+  },
+  {
+    "date": "2021-12-24",
+    "pushed": "3",
+    "failure": "1",
+    "failure_rate": "0.3333333333333333"
+  }
+]
+```
+
+## Insert Incident
 
 ```sql
 INSERT INTO `$PROJECT_ID.itsubaki_q.incidents` (

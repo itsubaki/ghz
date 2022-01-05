@@ -24,19 +24,19 @@ Feature:
             }
             """
 
-    Scenario: should get failure_rate and MTTR via pushed
+    Scenario: should get failure_rate and TTR via pushed
         Given the following incidents exist:
             | owner    | repository | description                | sha                                      | resolved_at             |
-            | itsubaki | ghz        | [TEST] Incident via Commit | 6f5dc2fc9b933ef6fd5f075924a5fec114405a25 | 2021-12-24 10:01:29 UTC |
+            | itsubaki | ghz        | [TEST] Incident via Pushed | 6f5dc2fc9b933ef6fd5f075924a5fec114405a25 | 2021-12-24 10:01:29 UTC |
         When I execute query with:
             """
-            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pushed`
-            WHERE date = "2021-12-24"
+            SELECT owner, repository, pushed_at, resolved_at, TTR FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pushed`
+            WHERE sha = "6f5dc2fc9b933ef6fd5f075924a5fec114405a25"
             LIMIT 1
             """
         Then I get the following result:
-            | owner    | repository | date       | pushed | failure | failure_rate | MTTR |
-            | itsubaki | ghz        | 2021-12-24 | 2      | 1       | 0.5          | 60.0 |
+            | owner    | repository | pushed_at               | resolved_at             | TTR |
+            | itsubaki | ghz        | 2021-12-24 09:01:29 UTC | 2021-12-24 10:01:29 UTC | 60  |
 
     Scenario: should fetch pullreqs
         Given I set "X-Appengine-Cron" header with "true"
@@ -66,13 +66,13 @@ Feature:
             | itsubaki | ghz        | [TEST] Incident via PullRequest | aa0d19452f820c2088cbbe63d2fe2e18b67d3e4d | 2021-12-08 10:41:12 UTC |
         When I execute query with:
             """
-            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pullreqs`
-            WHERE date = "2021-12-08"
+            SELECT owner, repository, merged_at, resolved_at, TTR FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pullreqs`
+            WHERE sha = "aa0d19452f820c2088cbbe63d2fe2e18b67d3e4d"
             LIMIT 1
             """
         Then I get the following result:
-            | owner    | repository | date       | merged | failure | failure_rate | MTTR |
-            | itsubaki | ghz        | 2021-12-08 | 1      | 1       | 1.0          | 60.0 |
+            | owner    | repository | merged_at               | resolved_at             | TTR |
+            | itsubaki | ghz        | 2021-12-08 09:41:12 UTC | 2021-12-08 10:41:12 UTC | 60  |
 
     Scenario: should create incident
         Given I set "Content-Type" header with "application/json"

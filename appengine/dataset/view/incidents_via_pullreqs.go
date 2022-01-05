@@ -35,14 +35,13 @@ func IncidentsPullReqsMeta(projectID, datasetName string) bigquery.TableMetadata
 				B.description,
 				A.merge_commit_sha,
 				A.sha,
-				A.committed_at,
 				A.merged_at,
 				B.resolved_at,
 				TIMESTAMP_DIFF(B.resolved_at, A.merged_at, MINUTE) as TTR
 			FROM %v as B
 			INNER JOIN A
 			ON A.sha = B.sha
-			ORDER BY B.committed_at DESC
+			ORDER BY A.merged_at DESC
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqCommitsMeta.Name),
