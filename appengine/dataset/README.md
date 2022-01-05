@@ -9,7 +9,7 @@ WITH A AS (
     repository,
     workflow_name,
     DATE(completed_at) as date,
-    PERCENTILE_CONT(lead_time, 0.5) OVER(partition by Date(completed_at)) as lead_time
+    PERCENTILE_CONT(lead_time, 0.5) OVER(partition by DATE(completed_at)) as lead_time
   FROM `$PROJECT_ID.vercel_next_js._leadtime_via_pullreqs`
 )
 SELECT
