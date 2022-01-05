@@ -1,5 +1,46 @@
 # Query Example
 
+## Median
+
+```sql
+WITH A AS (SELECT
+  owner,
+  repository,
+  workflow_name,
+  Date(completed_at) as date,
+  PERCENTILE_CONT(lead_time, 0.5) OVER(partition by Date(completed_at)) as lead_time
+FROM `$PROJECT_ID.vercel_next_js._leadtime_via_pullreqs`
+)
+SELECT
+    owner,
+    repository,
+    workflow_name,
+    date,
+    MAX(lead_time) as lead_time
+FROM A
+GROUP BY owner, repository, workflow_name, date
+ORDER BY date DESC
+```
+
+```json
+[
+  {
+    "owner": "vercel",
+    "repository": "next.js",
+    "workflow_name": "Build, test, and deploy",
+    "date": "2022-01-04",
+    "lead_time": "79.0"
+  },
+  {
+    "owner": "vercel",
+    "repository": "next.js",
+    "workflow_name": "Build, test, and deploy",
+    "date": "2022-01-03",
+    "lead_time": "16808.5"
+  }
+]
+```
+
 ## Insert
 
 ```sql
@@ -139,46 +180,6 @@ GROUP BY week
   {
     "week": "2018-07-29",
     "merged": "1"
-  }
-]
-```
-
-## Median
-
-```sql
-SELECT
-  DISTINCT(Date(completed_at)) as date,
-  PERCENTILE_CONT(lead_time, 0.5) OVER(partition by Date(completed_at)) as lead_time
-FROM `$PROJECT_ID.vercel_next_js._leadtime_via_pullreqs`
-```
-
-```sql
-WITH A AS (SELECT
-  Date(completed_at) as date,
-  PERCENTILE_CONT(lead_time, 0.5) OVER(partition by Date(completed_at)) as lead_time
-FROM `$PROJECT_ID.vercel_next_js._leadtime_via_pullreqs`
-)
-SELECT
-  date,
-  MAX(lead_time) as lead_time
-FROM A
-GROUP BY date
-ORDER BY date DESC
-```
-
-```json
-[
-  {
-    "date": "2022-01-03",
-    "lead_time": "178.0"
-  },
-  {
-    "date": "2022-01-02",
-    "lead_time": "1572.5"
-  },
-  {
-    "date": "2022-01-01",
-    "lead_time": "80845.5"
   }
 ]
 ```

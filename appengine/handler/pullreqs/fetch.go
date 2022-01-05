@@ -32,7 +32,6 @@ func Fetch(c *gin.Context) {
 	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
 		dataset.PullReqsMeta,
 		dataset.PullReqCommitsMeta,
-		view.PullReqsMeta(id, dsn),
 		view.LeadTimePullReqsMeta(id, dsn),
 	}); err != nil {
 		c.Error(err).SetMeta(Response{
