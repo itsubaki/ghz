@@ -1,4 +1,4 @@
-package incidents
+package handler
 
 import (
 	"context"
@@ -16,7 +16,7 @@ type Response struct {
 	Message string `json:"message,omitempty"`
 }
 
-func Fetch(c *gin.Context) {
+func Init(c *gin.Context) {
 	ctx := context.Background()
 
 	owner := c.Param("owner")
@@ -24,9 +24,21 @@ func Fetch(c *gin.Context) {
 	id, dsn := dataset.Name(owner, repository)
 
 	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
+		dataset.CommitsMeta,
+		dataset.PullReqsMeta,
+		dataset.PullReqCommitsMeta,
+		dataset.WorkflowRunsMeta,
+		dataset.WorkflowJobsMeta,
+		dataset.EventsMeta,
+		dataset.EventsPushMeta,
+		dataset.ReleasesMeta,
 		dataset.IncidentsMeta,
-		view.IncidentsPushedMeta(id, dsn),
 		view.IncidentsPullReqsMeta(id, dsn),
+		view.IncidentsPushedMeta(id, dsn),
+		view.LeadTimePullReqsMeta(id, dsn),
+		view.LeadTimePushedMeta(id, dsn),
+		view.WorkflowRunsMeta(id, dsn),
+		view.WorkflowJobsMeta(id, dsn),
 	}); err != nil {
 		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,

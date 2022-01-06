@@ -6,10 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghz/appengine/dataset"
-	"github.com/itsubaki/ghz/appengine/dataset/view"
 )
 
 type Incident struct {
@@ -32,18 +30,7 @@ func Create(c *gin.Context) {
 	in.Repository = c.Param("repository")
 
 	ctx := context.Background()
-	id, dsn := dataset.Name(in.Owner, in.Repository)
-
-	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
-		dataset.IncidentsMeta,
-		view.IncidentsPushedMeta(id, dsn),
-		view.IncidentsPullReqsMeta(id, dsn),
-	}); err != nil {
-		c.Error(err).SetMeta(gin.H{
-			"message": fmt.Sprintf("create if not exists: %v", err),
-		})
-		return
-	}
+	_, dsn := dataset.Name(in.Owner, in.Repository)
 
 	resolvedAt, err := time.Parse("2006-01-02 15:04:05 UTC", in.ResolvedAt)
 	if err != nil {

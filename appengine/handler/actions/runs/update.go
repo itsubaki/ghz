@@ -11,7 +11,6 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghz/appengine/dataset"
-	"github.com/itsubaki/ghz/appengine/dataset/view"
 	"github.com/itsubaki/ghz/pkg/actions/runs"
 )
 
@@ -21,23 +20,6 @@ func Update(c *gin.Context) {
 	owner := c.Param("owner")
 	repository := c.Param("repository")
 	id, dsn := dataset.Name(owner, repository)
-
-	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
-		dataset.CommitsMeta,
-		dataset.EventsPushMeta,
-		dataset.PullReqsMeta,
-		dataset.PullReqCommitsMeta,
-		dataset.WorkflowRunsMeta,
-		view.WorkflowRunsMeta(id, dsn),
-		view.LeadTimeWorkflowsMeta(id, dsn),
-		view.LeadTimePushedMeta(id, dsn),
-	}); err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("create if not exists: %v", err),
-		})
-		return
-	}
 
 	list, err := ListRuns(ctx, id, dsn)
 	if err != nil {

@@ -21,16 +21,6 @@ func Update(c *gin.Context) {
 	repository := c.Param("repository")
 	id, dsn := dataset.Name(owner, repository)
 
-	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
-		dataset.PullReqsMeta,
-	}); err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("create if not exists: %v", err),
-		})
-		return
-	}
-
 	open, err := ListPullReqs(ctx, id, dsn, "open")
 	if err != nil {
 		c.Error(err).SetMeta(Response{

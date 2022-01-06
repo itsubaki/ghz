@@ -2,6 +2,16 @@ Feature:
     In order to get indicators of "Lead Time for Changes"
     As a DevOps practitioner
 
+    Scenario: should create dataset
+        Given I set "X-Appengine-Cron" header with "true"
+        When I send "GET" request to "/_fetch/itsubaki/ghz/_init"
+        Then the response code should be 200
+        Then the response should match json:
+            """
+            {
+                "path": "/_fetch/itsubaki/ghz/_init"
+            }
+            """
 
     Scenario: should fetch actions runs
         Given I set "X-Appengine-Cron" header with "true"
@@ -73,7 +83,6 @@ Feature:
         Then I get the following result:
             | owner    | repository | workflow_name | date       | lead_time |
             | itsubaki | ghz        | tests         | 2021-12-30 | 1.0       |
-
 
     Scenario: should fetch pullreqs
         Given I set "X-Appengine-Cron" header with "true"

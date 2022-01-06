@@ -9,7 +9,6 @@ import (
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghz/appengine/dataset"
-	"github.com/itsubaki/ghz/appengine/dataset/view"
 	"github.com/itsubaki/ghz/pkg/actions/jobs"
 )
 
@@ -24,18 +23,6 @@ func Fetch(c *gin.Context) {
 	owner := c.Param("owner")
 	repository := c.Param("repository")
 	id, dsn := dataset.Name(owner, repository)
-
-	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
-		dataset.WorkflowRunsMeta,
-		dataset.WorkflowJobsMeta,
-		view.WorkflowJobsMeta(id, dsn),
-	}); err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("create if not exists: %v", err),
-		})
-		return
-	}
 
 	token, _, err := NextToken(ctx, id, dsn)
 	if err != nil {

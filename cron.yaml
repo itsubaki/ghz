@@ -1,194 +1,244 @@
 cron:
   # gin-gonic/gin
   - description: "gin-gonic/gin"
-    url: /_fetch/gin-gonic/gin/commits
+    url: /_fetch/gin-gonic/gin/_init
     schedule: every day 00:00
+    timezone: Asia/Tokyo
+
+  - description: "gin-gonic/gin"
+    url: /_fetch/gin-gonic/gin/commits
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/releases
-    schedule: every day 00:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/incidents
-    schedule: every day 00:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/pullreqs
-    schedule: every day 00:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/actions/runs
-    schedule: every day 00:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
-    url: /_fetch/gin-gonic/gin/pullreqs/commits
-    schedule: every day 01:00
+    url: /_fetch/gin-gonic/gin/actions/runs/update
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/pullreqs/update
-    schedule: every day 01:00
+    schedule: every day 02:00
+    timezone: Asia/Tokyo
+
+  - description: "gin-gonic/gin"
+    url: /_fetch/gin-gonic/gin/pullreqs/commits
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/actions/jobs
-    schedule: every day 01:00
+    schedule: every day 02:00
+    timezone: Asia/Tokyo
+
+  - description: "gin-gonic/gin"
+    url: /_fetch/gin-gonic/gin/actions/jobs/update
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/events
-    schedule: every day 00:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   # vercel/next.js
   - description: "vercel/next.js"
-    url: /_fetch/vercel/next.js/commits
+    url: /_fetch/vercel/next.js/_init
     schedule: every day 00:00
+    timezone: Asia/Tokyo
+
+  - description: "vercel/next.js"
+    url: /_fetch/vercel/next.js/commits
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/releases
-    schedule: every day 00:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/incidents
-    schedule: every day 00:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/pullreqs
-    schedule: every day 00:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/actions/runs
-    schedule: every day 00:00
+    schedule: every day 01:00
+    timezone: Asia/Tokyo
+
+  - description: "vercel/next.js"
+    url: /_fetch/vercel/next.js/actions/runs/update
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/pullreqs/update
-    schedule: every day 01:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/pullreqs/commits
-    schedule: every day 01:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/actions/jobs
-    schedule: every day 01:00
+    schedule: every day 02:00
+    timezone: Asia/Tokyo
+
+  - description: "vercel/next.js"
+    url: /_fetch/vercel/next.js/actions/jobs/update
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/events
-    schedule: every day 01:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   # itsubaki/q
   - description: "itsubaki/q"
+    url: /_fetch/itsubaki/q/_init
+    schedule: every day 00:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/commits
-    schedule: every day 05:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/releases
-    schedule: every day 05:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/incidents
-    schedule: every day 05:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/pullreqs
-    schedule: every day 05:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/actions/runs
-    schedule: every day 05:00
+    schedule: every day 01:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/q"
+    url: /_fetch/itsubaki/q/actions/runs/update
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/pullreqs/update
-    schedule: every day 06:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/pullreqs/commits
-    schedule: every day 06:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/actions/jobs
-    schedule: every day 06:00
+    schedule: every day 02:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/q"
+    url: /_fetch/itsubaki/q/actions/jobs/update
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/events
-    schedule: every day 06:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   # itsubaki/ghz
   - description: "itsubaki/ghz"
+    url: /_fetch/itsubaki/ghz/_init
+    schedule: every day 00:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/ghz"
     url: /_fetch/itsubaki/ghz/commits
-    schedule: every day 05:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/ghz"
     url: /_fetch/itsubaki/ghz/releases
-    schedule: every day 05:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/ghz"
     url: /_fetch/itsubaki/ghz/incidents
-    schedule: every day 05:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/ghz"
     url: /_fetch/itsubaki/ghz/pullreqs
-    schedule: every day 05:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/ghz"
     url: /_fetch/itsubaki/ghz/actions/runs
-    schedule: every day 05:00
-    timezone: Asia/Tokyo
-
-  - description: "itsubaki/ghz"
-    url: /_fetch/itsubaki/ghz/pullreqs/update
-    schedule: every day 06:00
-    timezone: Asia/Tokyo
-
-  - description: "itsubaki/ghz"
-    url: /_fetch/itsubaki/ghz/pullreqs/commits
-    schedule: every day 06:00
+    schedule: every day 01:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/ghz"
     url: /_fetch/itsubaki/ghz/actions/runs/update
-    schedule: every day 06:00
+    schedule: every day 02:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/ghz"
+    url: /_fetch/itsubaki/ghz/pullreqs/update
+    schedule: every day 02:00
+    timezone: Asia/Tokyo
+
+  - description: "itsubaki/ghz"
+    url: /_fetch/itsubaki/ghz/pullreqs/commits
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/ghz"
     url: /_fetch/itsubaki/ghz/actions/jobs
-    schedule: every day 06:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/ghz"
     url: /_fetch/itsubaki/ghz/actions/jobs/update
-    schedule: every day 06:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo
 
   - description: "itsubaki/ghz"
     url: /_fetch/itsubaki/ghz/events
-    schedule: every day 06:00
+    schedule: every day 02:00
     timezone: Asia/Tokyo

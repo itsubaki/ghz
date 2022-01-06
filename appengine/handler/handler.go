@@ -61,6 +61,7 @@ func Fetch(g *gin.Engine) {
 	r := g.Group("/_fetch")
 	r.Use(XAppEngineCron)
 
+	r.GET("/:owner/:repository/_init", Init)
 	r.GET("/:owner/:repository/commits", commits.Fetch)
 	r.GET("/:owner/:repository/events", events.Fetch)
 	r.GET("/:owner/:repository/releases", releases.Fetch)
@@ -71,7 +72,6 @@ func Fetch(g *gin.Engine) {
 	r.GET("/:owner/:repository/actions/runs/update", runs.Update)
 	r.GET("/:owner/:repository/actions/jobs", jobs.Fetch)
 	r.GET("/:owner/:repository/actions/jobs/update", jobs.Update)
-	r.GET("/:owner/:repository/incidents", incidents.Fetch)
 }
 
 func Incidents(g *gin.Engine) {

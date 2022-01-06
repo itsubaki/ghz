@@ -26,16 +26,6 @@ func Fetch(c *gin.Context) {
 	repository := c.Param("repository")
 	id, dsn := dataset.Name(owner, repository)
 
-	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
-		dataset.ReleasesMeta,
-	}); err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("create if not exists: %v", err),
-		})
-		return
-	}
-
 	token, err := NextToken(ctx, id, dsn)
 	if err != nil {
 		c.Error(err).SetMeta(Response{

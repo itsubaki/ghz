@@ -7,7 +7,7 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset"
 )
 
-func LeadTimeWorkflowsMeta(projectID, datasetName string) bigquery.TableMetadata {
+func LeadTimePullReqsMeta(projectID, datasetName string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
 		Name: "_leadtime_via_pullreqs",
 		ViewQuery: fmt.Sprintf(
