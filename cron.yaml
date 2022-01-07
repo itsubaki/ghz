@@ -16,11 +16,6 @@ cron:
     timezone: Asia/Tokyo
 
   - description: "gin-gonic/gin"
-    url: /_fetch/gin-gonic/gin/incidents
-    schedule: every day 01:00
-    timezone: Asia/Tokyo
-
-  - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/pullreqs
     schedule: every day 01:00
     timezone: Asia/Tokyo
@@ -73,11 +68,6 @@ cron:
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/releases
-    schedule: every day 01:00
-    timezone: Asia/Tokyo
-
-  - description: "vercel/next.js"
-    url: /_fetch/vercel/next.js/incidents
     schedule: every day 01:00
     timezone: Asia/Tokyo
 
@@ -138,11 +128,6 @@ cron:
     timezone: Asia/Tokyo
 
   - description: "itsubaki/q"
-    url: /_fetch/itsubaki/q/incidents
-    schedule: every day 01:00
-    timezone: Asia/Tokyo
-
-  - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/pullreqs
     schedule: every day 01:00
     timezone: Asia/Tokyo
@@ -195,11 +180,6 @@ cron:
 
   - description: "itsubaki/ghz"
     url: /_fetch/itsubaki/ghz/releases
-    schedule: every day 01:00
-    timezone: Asia/Tokyo
-
-  - description: "itsubaki/ghz"
-    url: /_fetch/itsubaki/ghz/incidents
     schedule: every day 01:00
     timezone: Asia/Tokyo
 
