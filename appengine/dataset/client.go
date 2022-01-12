@@ -80,14 +80,15 @@ func (c *Client) Create(ctx context.Context, datasetName string, meta []bigquery
 	return nil
 }
 
-func (c *Client) DeleteWithContents(ctx context.Context, datasetName string) error {
+func (c *Client) Delete(ctx context.Context, datasetName string, tables []bigquery.TableMetadata) error {
 	if _, err := c.client.Dataset(datasetName).Metadata(ctx); err != nil {
-		// not found. nothing to do.
-		return nil
+		return fmt.Errorf("dataset(%v): %v", datasetName, err)
 	}
 
-	if err := c.client.Dataset(datasetName).DeleteWithContents(ctx); err != nil {
-		return fmt.Errorf("delete with contents: %v", err)
+	for _, t := range tables {
+		if err := c.client.Dataset(datasetName).Table(t.Name).Delete(ctx); err != nil {
+			return fmt.Errorf("delete table=%v: %v", t.Name, err)
+		}
 	}
 
 	return nil
@@ -135,14 +136,14 @@ func (c *Client) Raw() *bigquery.Client {
 	return c.client
 }
 
-func DeleteWithContents(ctx context.Context, datasetName string) error {
+func Delete(ctx context.Context, datasetName string, tables []bigquery.TableMetadata) error {
 	c, err := New(ctx)
 	if err != nil {
 		return fmt.Errorf("new client: %v", err)
 	}
 	defer c.Close()
 
-	return c.DeleteWithContents(ctx, datasetName)
+	return c.Delete(ctx, datasetName, tables)
 }
 
 func Create(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {

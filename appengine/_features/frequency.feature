@@ -4,7 +4,7 @@ Feature:
 
     Scenario: should create dataset
         Given I set "X-Appengine-Cron" header with "true"
-        When I send "GET" request to "/_fetch/itsubaki/ghz/_init"
+        When I send "GET" request to "/_fetch/itsubaki/ghz/_init?renew=true"
         Then the response code should be 200
         Then the response should match json:
             """
