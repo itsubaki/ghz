@@ -38,7 +38,7 @@ Feature:
     Scenario: should get deployment frequency via runs
         When I execute query with:
             """
-            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._workflow_runs`
+            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._frequency_runs`
             WHERE date = "2021-12-25"
             LIMIT 1
             """
@@ -71,7 +71,7 @@ Feature:
     Scenario: should get deployment frequency via jobs
         When I execute query with:
             """
-            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._workflow_jobs`
+            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._frequency_jobs`
             WHERE date = "2021-12-15"
             LIMIT 1
             """

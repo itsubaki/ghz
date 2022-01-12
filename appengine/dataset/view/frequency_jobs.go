@@ -7,9 +7,9 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset"
 )
 
-func WorkflowJobsMeta(projectID, datasetName string) bigquery.TableMetadata {
+func FrequencyJobsMeta(projectID, datasetName string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
-		Name: "_workflow_jobs",
+		Name: "_frequency_jobs",
 		ViewQuery: fmt.Sprintf(
 			`
 			SELECT
@@ -24,7 +24,6 @@ func WorkflowJobsMeta(projectID, datasetName string) bigquery.TableMetadata {
 			FROM %v
 			WHERE conclusion = "success"
 			GROUP BY owner, repository, workflow_id, workflow_name, job_name, date
-			ORDER BY date DESC
 			`,
 			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.WorkflowJobsMeta.Name),
 		),
