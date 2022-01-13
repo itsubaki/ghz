@@ -3,11 +3,14 @@ package dataset
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"regexp"
 
 	"cloud.google.com/go/bigquery"
 	"golang.org/x/oauth2/google"
+	"golang.org/x/xerrors"
+	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 )
 
@@ -86,7 +89,19 @@ func (c *Client) Delete(ctx context.Context, datasetName string, tables []bigque
 	}
 
 	for _, t := range tables {
-		if err := c.client.Dataset(datasetName).Table(t.Name).Delete(ctx); err != nil {
+		ref := c.client.Dataset(datasetName).Table(t.Name)
+		if _, err := ref.Metadata(ctx); err != nil {
+			// https://pkg.go.dev/cloud.google.com/go/bigquery#hdr-Errors
+			var e *googleapi.Error
+			if ok := xerrors.As(err, &e); ok && e.Code == http.StatusNotFound {
+				// already deleted
+				return nil
+			}
+
+			return fmt.Errorf("table(%v): %v", t.Name, err)
+		}
+
+		if err := ref.Delete(ctx); err != nil {
 			return fmt.Errorf("delete table=%v: %v", t.Name, err)
 		}
 	}

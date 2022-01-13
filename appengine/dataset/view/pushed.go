@@ -21,7 +21,8 @@ func PushedMeta(projectID, datasetName string) bigquery.TableMetadata {
 				A.head_sha,
 				B.sha,
 				B.date as committed_at,
-				A.created_at as pushed_at
+				A.created_at as pushed_at,
+				TIMESTAMP_DIFF(A.created_at, B.date, MINUTE) as duration
 			FROM %v as A
 			INNER JOIN %v as B
 			ON A.sha = B.sha

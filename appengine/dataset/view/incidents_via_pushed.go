@@ -21,7 +21,7 @@ func IncidentsPushedMeta(projectID, datasetName string) bigquery.TableMetadata {
 				B.sha,
 				B.created_at as pushed_at,
 				A.resolved_at,
-			TIMESTAMP_DIFF(A.resolved_at, B.created_at, MINUTE) as TTR
+				TIMESTAMP_DIFF(A.resolved_at, B.created_at, MINUTE) as TTR
 			FROM %v as A
 			INNER JOIN %v as B
 			ON A.sha = B.sha
