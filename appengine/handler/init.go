@@ -31,14 +31,20 @@ var Table = []bigquery.TableMetadata{
 
 func View(id, dsn string) []bigquery.TableMetadata {
 	return []bigquery.TableMetadata{
-		view.PullReqsMeta(id, dsn),
-		view.PushedMeta(id, dsn),
 		view.FrequencyRunsMeta(id, dsn),
 		view.FrequencyJobsMeta(id, dsn),
-		view.LeadTimePullReqsMeta(id, dsn),
-		view.LeadTimePushedMeta(id, dsn),
-		view.IncidentsPullReqsMeta(id, dsn),
-		view.IncidentsPushedMeta(id, dsn),
+		view.PullReqsMeta(id, dsn),
+		view.PullReqsLeadTimeMeta(id, dsn),
+		view.PullReqsLeadTimeMedianMeta(id, dsn),
+		view.PullReqsIncidentsMeta(id, dsn),
+		view.PullReqsMTTRMeta(id, dsn),
+		view.PullReqsFailureRate(id, dsn),
+		view.PushedMeta(id, dsn),
+		view.PushedLeadTimeMeta(id, dsn),
+		view.PushedLeadTimeMedianMeta(id, dsn),
+		view.PushedIncidentsMeta(id, dsn),
+		view.PushedMTTRMeta(id, dsn),
+		view.PushedFailureRate(id, dsn),
 	}
 }
 

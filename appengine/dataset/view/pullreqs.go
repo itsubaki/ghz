@@ -7,7 +7,7 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset"
 )
 
-func PullReqsMeta(projectID, datasetName string) bigquery.TableMetadata {
+func PullReqsMeta(id, dsn string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
 		Name: "_pullreqs",
 		ViewQuery: fmt.Sprintf(
@@ -30,8 +30,8 @@ func PullReqsMeta(projectID, datasetName string) bigquery.TableMetadata {
 			ON A.id = B.id
 			WHERE A.state = "closed" AND A.merged_at != "0001-01-01 00:00:00 UTC"
 			`,
-			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqsMeta.Name),
-			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.PullReqCommitsMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", id, dsn, dataset.PullReqsMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", id, dsn, dataset.PullReqCommitsMeta.Name),
 		),
 	}
 }

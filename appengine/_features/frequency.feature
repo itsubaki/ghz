@@ -40,7 +40,6 @@ Feature:
             """
             SELECT * FROM `$PROJECT_ID.itsubaki_ghz._frequency_runs`
             WHERE date = "2021-12-25"
-            LIMIT 1
             """
         Then I get the following result:
             | owner    | repository | workflow_id | workflow_name | date       | runs | duration_avg       |
@@ -73,7 +72,6 @@ Feature:
             """
             SELECT * FROM `$PROJECT_ID.itsubaki_ghz._frequency_jobs`
             WHERE date = "2021-12-15"
-            LIMIT 1
             """
         Then I get the following result:
             | owner    | repository | workflow_id | workflow_name | job_name             | date       | runs | duration_avg |
@@ -93,8 +91,7 @@ Feature:
     Scenario: should get deployment frequency via releases
         When I execute query with:
             """
-            SELECT
-            owner, repository, Date(published_at) as date, count(name) as releases
+            SELECT owner, repository, Date(published_at) as date, count(name) as releases
             FROM `$PROJECT_ID.itsubaki_ghz.releases`
             GROUP BY owner, repository, date
             ORDER BY date

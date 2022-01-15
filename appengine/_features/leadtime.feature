@@ -49,9 +49,8 @@ Feature:
     Scenario: should get lead time via pushed
         When I execute query with:
             """
-            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._leadtime_via_pushed`
+            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._pushed_leadtime`
             WHERE sha = "25fd40317d3df7cafb770c3319fb122068724f25"
-            LIMIT 1
             """
         Then I get the following result:
             | owner    | repository | workflow_id | workflow_name | login    | message           | head_sha                                 | sha                                      | committed_at            | completed_at            | lead_time |
@@ -60,25 +59,9 @@ Feature:
     Scenario: should get the median amount of lead time via pushed
         When I execute query with:
             """
-            WITH A AS (
-            SELECT
-            owner,
-            repository,
-            workflow_name,
-            DATE(completed_at) as date,
-            PERCENTILE_CONT(lead_time, 0.5) OVER(partition by DATE(completed_at)) as lead_time
-            FROM `$PROJECT_ID.itsubaki_ghz._leadtime_via_pushed`
-            )
-            SELECT
-            owner,
-            repository,
-            workflow_name,
-            date,
-            MAX(lead_time) as lead_time
-            FROM A
+            SELECT owner, repository, workflow_name, date, lead_time
+            FROM `$PROJECT_ID.itsubaki_ghz._pushed_leadtime_median`
             WHERE date = "2021-12-30"
-            GROUP BY owner, repository, workflow_name, date
-            ORDER BY date DESC
             """
         Then I get the following result:
             | owner    | repository | workflow_name | date       | lead_time |
@@ -109,9 +92,8 @@ Feature:
     Scenario: should get lead time via pullrequests
         When I execute query with:
             """
-            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._leadtime_via_pullreqs`
+            SELECT * FROM `$PROJECT_ID.itsubaki_ghz._pullreqs_leadtime`
             WHERE sha = "d80f4a0921f36da81b2d27a8d27d4328ada988c8"
-            LIMIT 1
             """
         Then I get the following result:
             | owner    | repository | workflow_id | workflow_name | pullreq_id | pullreq_number | login    | title                     | message                   | merge_commit_sha                         | sha                                      | committed_at            | completed_at            | lead_time |
@@ -120,25 +102,9 @@ Feature:
     Scenario: should get the median amount of lead time via pullrequests
         When I execute query with:
             """
-            WITH A AS (
-            SELECT
-            owner,
-            repository,
-            workflow_name,
-            DATE(completed_at) as date,
-            PERCENTILE_CONT(lead_time, 0.5) OVER(partition by DATE(completed_at)) as lead_time
-            FROM `$PROJECT_ID.itsubaki_ghz._leadtime_via_pullreqs`
-            )
-            SELECT
-            owner,
-            repository,
-            workflow_name,
-            date,
-            MAX(lead_time) as lead_time
-            FROM A
+            SELECT owner, repository, workflow_name, date, lead_time
+            FROM `$PROJECT_ID.itsubaki_ghz._pullreqs_leadtime_median`
             WHERE date = "2021-12-30"
-            GROUP BY owner, repository, workflow_name, date
-            ORDER BY date DESC
             """
         Then I get the following result:
             | owner    | repository | workflow_name | date       | lead_time |

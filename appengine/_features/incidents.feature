@@ -55,9 +55,9 @@ Feature:
             | itsubaki | ghz        | [TEST] Incident via Pushed | 6f5dc2fc9b933ef6fd5f075924a5fec114405a25 | 2021-12-24 10:01:29 UTC |
         When I execute query with:
             """
-            SELECT owner, repository, pushed_at, resolved_at, TTR FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pushed`
+            SELECT owner, repository, pushed_at, resolved_at, TTR
+            FROM `$PROJECT_ID.itsubaki_ghz._pushed_incidents`
             WHERE sha = "6f5dc2fc9b933ef6fd5f075924a5fec114405a25"
-            LIMIT 1
             """
         Then I get the following result:
             | owner    | repository | pushed_at               | resolved_at             | TTR |
@@ -69,22 +69,9 @@ Feature:
             | itsubaki | ghz        | [TEST] Incident via Pushed | 6f5dc2fc9b933ef6fd5f075924a5fec114405a25 | 2021-12-24 10:01:29 UTC |
         When I execute query with:
             """
-            WITH A AS(
-            SELECT
-            owner,
-            repository,
-            DATE(pushed_at) as date,
-            PERCENTILE_CONT(TTR, 0.5) OVER(partition by DATE(pushed_at)) as MTTR
-            FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pushed`
-            )
-            SELECT
-            owner,
-            repository,
-            date,
-            MAX(MTTR) as MTTR
-            FROM A
+            SELECT owner, repository, date, MTTR
+            FROM `$PROJECT_ID.itsubaki_ghz._pushed_mttr`
             WHERE date = "2021-12-24"
-            GROUP BY owner, repository, date
             """
         Then I get the following result:
             | owner    | repository | date       | MTTR |
@@ -96,32 +83,9 @@ Feature:
             | itsubaki | ghz        | [TEST] Incident via Pushed | 6f5dc2fc9b933ef6fd5f075924a5fec114405a25 | 2021-12-24 10:01:29 UTC |
         When I execute query with:
             """
-            WITH A AS (
-            SELECT
-            owner,
-            repository,
-            DATE(pushed_at) as date,
-            COUNT(*) as failure
-            FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pushed`
-            GROUP BY date, owner, repository
-            ), B AS (
-            SELECT
-            DATE(created_at) as date,
-            COUNT(*) as pushed
-            FROM `$PROJECT_ID.itsubaki_ghz.events_push`
-            GROUP BY date
-            )
-            SELECT
-            A.owner,
-            A.repository,
-            A.date,
-            B.pushed,
-            A.failure,
-            A.failure / B.pushed as failure_rate
-            FROM A
-            INNER JOIN B
-            ON A.date = B.date
-            WHERE A.date = "2021-12-24"
+            SELECT owner, repository, date, pushed, failure, failure_rate
+            FROM `$PROJECT_ID.itsubaki_ghz._pushed_failure_rate`
+            WHERE date = "2021-12-24"
             """
         Then I get the following result:
             | owner    | repository | date       | pushed | failure | failure_rate       |
@@ -155,9 +119,9 @@ Feature:
             | itsubaki | ghz        | [TEST] Incident via PullRequest | aa0d19452f820c2088cbbe63d2fe2e18b67d3e4d | 2021-12-08 10:41:12 UTC |
         When I execute query with:
             """
-            SELECT owner, repository, merged_at, resolved_at, TTR FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pullreqs`
+            SELECT owner, repository, merged_at, resolved_at, TTR
+            FROM `$PROJECT_ID.itsubaki_ghz._pullreqs_incidents`
             WHERE sha = "aa0d19452f820c2088cbbe63d2fe2e18b67d3e4d"
-            LIMIT 1
             """
         Then I get the following result:
             | owner    | repository | merged_at               | resolved_at             | TTR |
@@ -169,22 +133,9 @@ Feature:
             | itsubaki | ghz        | [TEST] Incident via PullRequest | aa0d19452f820c2088cbbe63d2fe2e18b67d3e4d | 2021-12-08 10:41:12 UTC |
         When I execute query with:
             """
-            WITH A AS(
-            SELECT
-            owner,
-            repository,
-            DATE(merged_at) as date,
-            PERCENTILE_CONT(TTR, 0.5) OVER(partition by DATE(merged_at)) as MTTR
-            FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pullreqs`
-            )
-            SELECT
-            owner,
-            repository,
-            date,
-            MAX(MTTR) as MTTR
-            FROM A
+            SELECT owner, repository, date, MTTR
+            FROM `$PROJECT_ID.itsubaki_ghz._pullreqs_mttr`
             WHERE date = "2021-12-08"
-            GROUP BY owner, repository, date
             """
         Then I get the following result:
             | owner    | repository | date       | MTTR |
@@ -196,33 +147,9 @@ Feature:
             | itsubaki | ghz        | [TEST] Incident via PullRequest | aa0d19452f820c2088cbbe63d2fe2e18b67d3e4d | 2021-12-08 10:41:12 UTC |
         When I execute query with:
             """
-            WITH A AS (
-            SELECT
-            owner,
-            repository,
-            DATE(merged_at) as date,
-            COUNT(*) as failure
-            FROM `$PROJECT_ID.itsubaki_ghz._incidents_via_pullreqs`
-            GROUP BY date, owner, repository
-            ), B AS (
-            SELECT
-            DATE(merged_at) as date,
-            COUNT(*) as merged
-            FROM `$PROJECT_ID.itsubaki_ghz.pullreqs`
-            WHERE state = "closed" AND merged_at != "0001-01-01 00:00:00 UTC"
-            GROUP BY date
-            )
-            SELECT
-            A.owner,
-            A.repository,
-            A.date,
-            B.merged,
-            A.failure,
-            A.failure / B.merged as failure_rate
-            FROM A
-            INNER JOIN B
-            ON A.date = B.date
-            WHERE A.date = "2021-12-08"
+            SELECT owner, repository, date, merged, failure, failure_rate
+            FROM `$PROJECT_ID.itsubaki_ghz._pullreqs_failure_rate`
+            WHERE date = "2021-12-08"
             """
         Then I get the following result:
             | owner    | repository | date       | merged | failure | failure_rate |
