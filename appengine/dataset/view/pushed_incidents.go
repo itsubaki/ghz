@@ -7,7 +7,7 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset"
 )
 
-func PushedIncidentsMeta(projectID, datasetName string) bigquery.TableMetadata {
+func PushedIncidentsMeta(id, dsn string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
 		Name: "_pushed_incidents",
 		ViewQuery: fmt.Sprintf(
@@ -26,13 +26,13 @@ func PushedIncidentsMeta(projectID, datasetName string) bigquery.TableMetadata {
 			INNER JOIN %v as B
 			ON A.sha = B.sha
 			`,
-			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.IncidentsMeta.Name),
-			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.EventsPushMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", id, dsn, dataset.IncidentsMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", id, dsn, dataset.EventsPushMeta.Name),
 		),
 	}
 }
 
-func PushedMTTRMeta(projectID, datasetName string) bigquery.TableMetadata {
+func PushedMTTRMeta(id, dsn string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
 		Name: "_pushed_mttr",
 		ViewQuery: fmt.Sprintf(
@@ -53,12 +53,12 @@ func PushedMTTRMeta(projectID, datasetName string) bigquery.TableMetadata {
 			FROM A
 			GROUP BY owner, repository, date
 			`,
-			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, PushedIncidentsMeta(projectID, datasetName).Name),
+			fmt.Sprintf("`%v.%v.%v`", id, dsn, PushedIncidentsMeta(id, dsn).Name),
 		),
 	}
 }
 
-func PushedFailureRate(projectID, datasetName string) bigquery.TableMetadata {
+func PushedFailureRate(id, dsn string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
 		Name: "_pushed_failure_rate",
 		ViewQuery: fmt.Sprintf(
@@ -89,8 +89,8 @@ func PushedFailureRate(projectID, datasetName string) bigquery.TableMetadata {
 			INNER JOIN B
 			ON A.date = B.date
 			`,
-			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, PushedIncidentsMeta(projectID, datasetName).Name),
-			fmt.Sprintf("`%v.%v.%v`", projectID, datasetName, dataset.EventsPushMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", id, dsn, PushedIncidentsMeta(id, dsn).Name),
+			fmt.Sprintf("`%v.%v.%v`", id, dsn, dataset.EventsPushMeta.Name),
 		),
 	}
 }
