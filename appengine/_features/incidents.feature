@@ -56,7 +56,7 @@ Feature:
         When I execute query with:
             """
             SELECT owner, repository, pushed_at, resolved_at, TTR
-            FROM `$PROJECT_ID.itsubaki_ghz._pushed_incidents`
+            FROM `$PROJECT_ID.itsubaki_ghz._pushed_ttr`
             WHERE sha = "6f5dc2fc9b933ef6fd5f075924a5fec114405a25"
             """
         Then I get the following result:
@@ -70,7 +70,7 @@ Feature:
         When I execute query with:
             """
             SELECT owner, repository, date, MTTR
-            FROM `$PROJECT_ID.itsubaki_ghz._pushed_mttr`
+            FROM `$PROJECT_ID.itsubaki_ghz._pushed_ttr_median`
             WHERE date = "2021-12-24"
             """
         Then I get the following result:
@@ -120,7 +120,7 @@ Feature:
         When I execute query with:
             """
             SELECT owner, repository, merged_at, resolved_at, TTR
-            FROM `$PROJECT_ID.itsubaki_ghz._pullreqs_incidents`
+            FROM `$PROJECT_ID.itsubaki_ghz._pullreqs_ttr`
             WHERE sha = "aa0d19452f820c2088cbbe63d2fe2e18b67d3e4d"
             """
         Then I get the following result:
@@ -134,7 +134,7 @@ Feature:
         When I execute query with:
             """
             SELECT owner, repository, date, MTTR
-            FROM `$PROJECT_ID.itsubaki_ghz._pullreqs_mttr`
+            FROM `$PROJECT_ID.itsubaki_ghz._pullreqs_ttr_median`
             WHERE date = "2021-12-08"
             """
         Then I get the following result:

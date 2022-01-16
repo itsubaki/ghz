@@ -36,14 +36,14 @@ func View(id, dsn string) []bigquery.TableMetadata {
 		view.PullReqsMeta(id, dsn),
 		view.PullReqsLeadTimeMeta(id, dsn),
 		view.PullReqsLeadTimeMedianMeta(id, dsn),
-		view.PullReqsIncidentsMeta(id, dsn),
-		view.PullReqsMTTRMeta(id, dsn),
+		view.PullReqsTTRMeta(id, dsn),
+		view.PullReqsTTRMedianMeta(id, dsn),
 		view.PullReqsFailureRate(id, dsn),
 		view.PushedMeta(id, dsn),
 		view.PushedLeadTimeMeta(id, dsn),
 		view.PushedLeadTimeMedianMeta(id, dsn),
-		view.PushedIncidentsMeta(id, dsn),
-		view.PushedMTTRMeta(id, dsn),
+		view.PushedTTRMeta(id, dsn),
+		view.PushedTTRMedianMeta(id, dsn),
 		view.PushedFailureRate(id, dsn),
 	}
 }

@@ -7,9 +7,9 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset"
 )
 
-func PushedIncidentsMeta(id, dsn string) bigquery.TableMetadata {
+func PushedTTRMeta(id, dsn string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
-		Name: "_pushed_incidents",
+		Name: "_pushed_ttr",
 		ViewQuery: fmt.Sprintf(
 			`
 			SELECT
@@ -32,9 +32,9 @@ func PushedIncidentsMeta(id, dsn string) bigquery.TableMetadata {
 	}
 }
 
-func PushedMTTRMeta(id, dsn string) bigquery.TableMetadata {
+func PushedTTRMedianMeta(id, dsn string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
-		Name: "_pushed_mttr",
+		Name: "_pushed_ttr_median",
 		ViewQuery: fmt.Sprintf(
 			`
 			WITH A AS(
@@ -53,7 +53,7 @@ func PushedMTTRMeta(id, dsn string) bigquery.TableMetadata {
 			FROM A
 			GROUP BY owner, repository, date
 			`,
-			fmt.Sprintf("`%v.%v.%v`", id, dsn, PushedIncidentsMeta(id, dsn).Name),
+			fmt.Sprintf("`%v.%v.%v`", id, dsn, PushedTTRMeta(id, dsn).Name),
 		),
 	}
 }
@@ -89,7 +89,7 @@ func PushedFailureRate(id, dsn string) bigquery.TableMetadata {
 			INNER JOIN B
 			ON A.date = B.date
 			`,
-			fmt.Sprintf("`%v.%v.%v`", id, dsn, PushedIncidentsMeta(id, dsn).Name),
+			fmt.Sprintf("`%v.%v.%v`", id, dsn, PushedTTRMeta(id, dsn).Name),
 			fmt.Sprintf("`%v.%v.%v`", id, dsn, dataset.EventsPushMeta.Name),
 		),
 	}
