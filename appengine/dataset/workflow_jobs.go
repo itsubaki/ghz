@@ -23,6 +23,10 @@ type WorkflowJob struct {
 
 var WorkflowJobsMeta = bigquery.TableMetadata{
 	Name: "workflow_jobs",
+	TimePartitioning: &bigquery.TimePartitioning{
+		Type:  bigquery.MonthPartitioningType,
+		Field: "started_at",
+	},
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},

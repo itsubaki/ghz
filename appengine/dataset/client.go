@@ -58,38 +58,38 @@ func New(ctx context.Context) (*Client, error) {
 	}, nil
 }
 
-func (c *Client) Create(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
-	if _, err := c.client.Dataset(datasetName).Metadata(ctx); err != nil {
+func (c *Client) Create(ctx context.Context, dsn string, meta []bigquery.TableMetadata) error {
+	if _, err := c.client.Dataset(dsn).Metadata(ctx); err != nil {
 		// not found then create dataset
-		if err := c.client.Dataset(datasetName).Create(ctx, &bigquery.DatasetMetadata{
+		if err := c.client.Dataset(dsn).Create(ctx, &bigquery.DatasetMetadata{
 			Location: c.location,
 		}); err != nil {
-			return fmt.Errorf("create %v: %v", datasetName, err)
+			return fmt.Errorf("create %v: %v", dsn, err)
 		}
 	}
 
 	for _, m := range meta {
-		ref := c.client.Dataset(datasetName).Table(m.Name)
+		ref := c.client.Dataset(dsn).Table(m.Name)
 		if _, err := ref.Metadata(ctx); err == nil {
 			// already exists
 			continue
 		}
 
 		if err := ref.Create(ctx, &m); err != nil {
-			return fmt.Errorf("create %v/%v: %v", datasetName, m.Name, err)
+			return fmt.Errorf("create %v/%v: %v", dsn, m.Name, err)
 		}
 	}
 
 	return nil
 }
 
-func (c *Client) Delete(ctx context.Context, datasetName string, tables []bigquery.TableMetadata) error {
-	if _, err := c.client.Dataset(datasetName).Metadata(ctx); err != nil {
-		return fmt.Errorf("dataset(%v): %v", datasetName, err)
+func (c *Client) Delete(ctx context.Context, dsn string, tables []bigquery.TableMetadata) error {
+	if _, err := c.client.Dataset(dsn).Metadata(ctx); err != nil {
+		return fmt.Errorf("dataset(%v): %v", dsn, err)
 	}
 
 	for _, t := range tables {
-		ref := c.client.Dataset(datasetName).Table(t.Name)
+		ref := c.client.Dataset(dsn).Table(t.Name)
 		if _, err := ref.Metadata(ctx); err != nil {
 			// https://pkg.go.dev/cloud.google.com/go/bigquery#hdr-Errors
 			var e *googleapi.Error
@@ -109,9 +109,39 @@ func (c *Client) Delete(ctx context.Context, datasetName string, tables []bigque
 	return nil
 }
 
-func (c *Client) Insert(ctx context.Context, datasetName, tableName string, items []interface{}) error {
-	if err := c.client.Dataset(datasetName).Table(tableName).Inserter().Put(ctx, items); err != nil {
-		return fmt.Errorf("insert %v.%v.%v: %v", ProjectID, datasetName, tableName, err)
+func (c *Client) DeleteAllView(ctx context.Context, dsn string) error {
+	if _, err := c.client.Dataset(dsn).Metadata(ctx); err != nil {
+		return fmt.Errorf("dataset(%v): %v", dsn, err)
+	}
+
+	it := c.client.Dataset(dsn).Tables(ctx)
+	for {
+		t, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return fmt.Errorf("table: %v", err)
+		}
+		m, err := t.Metadata(ctx)
+		if err != nil {
+			return fmt.Errorf("table metadata: %v", err)
+		}
+		if m.Type != bigquery.ViewTable {
+			continue
+		}
+
+		if err := c.Delete(ctx, dsn, []bigquery.TableMetadata{*m}); err != nil {
+			return fmt.Errorf("delete view: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func (c *Client) Insert(ctx context.Context, dsn, table string, items []interface{}) error {
+	if err := c.client.Dataset(dsn).Table(table).Inserter().Put(ctx, items); err != nil {
+		return fmt.Errorf("insert %v.%v.%v: %v", ProjectID, dsn, table, err)
 	}
 
 	return nil
@@ -151,34 +181,44 @@ func (c *Client) Raw() *bigquery.Client {
 	return c.client
 }
 
-func Delete(ctx context.Context, datasetName string, tables []bigquery.TableMetadata) error {
+func Create(ctx context.Context, dsn string, meta []bigquery.TableMetadata) error {
 	c, err := New(ctx)
 	if err != nil {
 		return fmt.Errorf("new client: %v", err)
 	}
 	defer c.Close()
 
-	return c.Delete(ctx, datasetName, tables)
+	return c.Create(ctx, dsn, meta)
 }
 
-func Create(ctx context.Context, datasetName string, meta []bigquery.TableMetadata) error {
+func Delete(ctx context.Context, dsn string, tables []bigquery.TableMetadata) error {
 	c, err := New(ctx)
 	if err != nil {
 		return fmt.Errorf("new client: %v", err)
 	}
 	defer c.Close()
 
-	return c.Create(ctx, datasetName, meta)
+	return c.Delete(ctx, dsn, tables)
 }
 
-func Insert(ctx context.Context, datasetName, tableName string, items []interface{}) error {
+func DeleteAllView(ctx context.Context, dsn string) error {
 	c, err := New(ctx)
 	if err != nil {
 		return fmt.Errorf("new client: %v", err)
 	}
 	defer c.Close()
 
-	return c.Insert(ctx, datasetName, tableName, items)
+	return c.DeleteAllView(ctx, dsn)
+}
+
+func Insert(ctx context.Context, dsn, table string, items []interface{}) error {
+	c, err := New(ctx)
+	if err != nil {
+		return fmt.Errorf("new client: %v", err)
+	}
+	defer c.Close()
+
+	return c.Insert(ctx, dsn, table, items)
 }
 
 func Query(ctx context.Context, query string, fn func(values []bigquery.Value)) error {

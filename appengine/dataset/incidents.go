@@ -16,6 +16,10 @@ type Incident struct {
 
 var IncidentsMeta = bigquery.TableMetadata{
 	Name: "incidents",
+	TimePartitioning: &bigquery.TimePartitioning{
+		Type:  bigquery.MonthPartitioningType,
+		Field: "resolved_at",
+	},
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},

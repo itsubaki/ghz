@@ -93,9 +93,8 @@ Feature:
             """
             SELECT owner, repository, Date(published_at) as date, count(name) as releases
             FROM `$PROJECT_ID.itsubaki_ghz.releases`
+            WHERE Date(published_at) = "2021-12-30"
             GROUP BY owner, repository, date
-            ORDER BY date
-            LIMIT 1
             """
         Then I get the following result:
             | owner    | repository | date       | releases |

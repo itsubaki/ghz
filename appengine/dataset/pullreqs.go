@@ -23,6 +23,10 @@ type PullReq struct {
 
 var PullReqsMeta = bigquery.TableMetadata{
 	Name: "pullreqs",
+	TimePartitioning: &bigquery.TimePartitioning{
+		Type:  bigquery.MonthPartitioningType,
+		Field: "created_at",
+	},
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},

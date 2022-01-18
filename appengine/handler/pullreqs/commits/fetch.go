@@ -102,8 +102,8 @@ type PullReq struct {
 	Number int64
 }
 
-func ListPullReqs(ctx context.Context, projectID, datasetName string, nextToken int64) ([]PullReq, error) {
-	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqsMeta.Name)
+func ListPullReqs(ctx context.Context, id, dsn string, nextToken int64) ([]PullReq, error) {
+	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where id > %v", table, nextToken)
 
 	prs := make([]PullReq, 0)
@@ -119,11 +119,11 @@ func ListPullReqs(ctx context.Context, projectID, datasetName string, nextToken 
 	return prs, nil
 }
 
-func NextToken(ctx context.Context, projectID, datasetName string) (int64, int64, error) {
-	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.PullReqCommitsMeta.Name)
+func NextToken(ctx context.Context, id, dsn string) (int64, int64, error) {
+	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.PullReqCommitsMeta.Name)
 	query := fmt.Sprintf("select max(id), max(number) from `%v` limit 1", table)
 
-	var id, num int64
+	var pid, num int64
 	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 2 {
 			return
@@ -133,11 +133,11 @@ func NextToken(ctx context.Context, projectID, datasetName string) (int64, int64
 			return
 		}
 
-		id = values[0].(int64)
+		pid = values[0].(int64)
 		num = values[1].(int64)
 	}); err != nil {
 		return -1, -1, fmt.Errorf("query(%v): %v", query, err)
 	}
 
-	return id, num, nil
+	return pid, num, nil
 }

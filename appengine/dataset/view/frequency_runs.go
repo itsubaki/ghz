@@ -17,7 +17,7 @@ func FrequencyRunsMeta(id, dsn string) bigquery.TableMetadata {
 				repository,
 				workflow_id,
 				workflow_name,
-				DATE(created_at) as date,
+				DATE(updated_at) as date,
 				COUNT(workflow_name) as runs,
 				AVG(TIMESTAMP_DIFF(updated_at, created_at, MINUTE)) as duration_avg
 			FROM %v

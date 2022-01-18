@@ -22,6 +22,10 @@ type WorkflowRun struct {
 
 var WorkflowRunsMeta = bigquery.TableMetadata{
 	Name: "workflow_runs",
+	TimePartitioning: &bigquery.TimePartitioning{
+		Type:  bigquery.MonthPartitioningType,
+		Field: "created_at",
+	},
 	Schema: bigquery.Schema{
 		{Name: "owner", Type: bigquery.StringFieldType, Required: true},
 		{Name: "repository", Type: bigquery.StringFieldType, Required: true},

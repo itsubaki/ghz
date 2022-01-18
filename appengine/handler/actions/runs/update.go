@@ -56,8 +56,8 @@ func Update(c *gin.Context) {
 	})
 }
 
-func ListRuns(ctx context.Context, projectID, datasetName string) ([]dataset.WorkflowRun, error) {
-	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowRunsMeta.Name)
+func ListRuns(ctx context.Context, id, dsn string) ([]dataset.WorkflowRun, error) {
+	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("select run_id from `%v` where status != \"completed\"", table)
 
 	out := make([]dataset.WorkflowRun, 0)
@@ -80,12 +80,12 @@ func ListRuns(ctx context.Context, projectID, datasetName string) ([]dataset.Wor
 	return out, nil
 }
 
-func UpdateRun(ctx context.Context, projectID, datasetName string, r *github.WorkflowRun) error {
+func UpdateRun(ctx context.Context, id, dsn string, r *github.WorkflowRun) error {
 	if r.GetStatus() != "completed" {
 		return nil
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowRunsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("update %v set status = \"%v\", conclusion = \"%v\", updated_at = \"%v\" where run_id = %v",
 		table,
 		r.GetStatus(),

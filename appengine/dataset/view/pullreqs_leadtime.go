@@ -30,7 +30,7 @@ func PullReqsLeadTimeMeta(id, dsn string) bigquery.TableMetadata {
 			FROM %v as A
 			INNER JOIN %v as B
 			ON A.head_sha = B.merge_commit_sha
-			WHERE A.conclusion = "success"
+			AND A.conclusion = "success"
 			`,
 			fmt.Sprintf("`%v.%v.%v`", id, dsn, dataset.WorkflowRunsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", id, dsn, PullReqsMeta(id, dsn).Name),

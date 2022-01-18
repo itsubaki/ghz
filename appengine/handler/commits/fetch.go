@@ -82,8 +82,8 @@ func Fetch(c *gin.Context) {
 	})
 }
 
-func NextToken(ctx context.Context, projectID, datasetName string) (string, error) {
-	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.CommitsMeta.Name)
+func NextToken(ctx context.Context, id, dsn string) (string, error) {
+	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.CommitsMeta.Name)
 	query := fmt.Sprintf("select sha from `%v` where date = (select max(date) from `%v` limit 1)", table, table)
 
 	var sha string

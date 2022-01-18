@@ -56,8 +56,8 @@ func Update(c *gin.Context) {
 	})
 }
 
-func ListJobs(ctx context.Context, projectID, datasetName string) ([]dataset.WorkflowJob, error) {
-	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowJobsMeta.Name)
+func ListJobs(ctx context.Context, id, dsn string) ([]dataset.WorkflowJob, error) {
+	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.WorkflowJobsMeta.Name)
 	query := fmt.Sprintf("select job_id from `%v` where status != \"completed\"", table)
 
 	out := make([]dataset.WorkflowJob, 0)
@@ -80,12 +80,12 @@ func ListJobs(ctx context.Context, projectID, datasetName string) ([]dataset.Wor
 	return out, nil
 }
 
-func UpdateJob(ctx context.Context, projectID, datasetName string, j *github.WorkflowJob) error {
+func UpdateJob(ctx context.Context, id, dsn string, j *github.WorkflowJob) error {
 	if j.GetStatus() != "completed" {
 		return nil
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.WorkflowJobsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.WorkflowJobsMeta.Name)
 	query := fmt.Sprintf("update %v set status = \"%v\", conclusion = \"%v\", completed_at = \"%v\" where job_id = %v",
 		table,
 		j.GetStatus(),

@@ -28,7 +28,8 @@ func PullReqsMeta(id, dsn string) bigquery.TableMetadata {
 			FROM %v as A
 			INNER JOIN %v as B
 			ON A.id = B.id
-			WHERE A.state = "closed" AND A.merged_at != "0001-01-01 00:00:00 UTC"
+			AND A.state = "closed"
+			AND A.merged_at != "0001-01-01 00:00:00 UTC"
 			`,
 			fmt.Sprintf("`%v.%v.%v`", id, dsn, dataset.PullReqsMeta.Name),
 			fmt.Sprintf("`%v.%v.%v`", id, dsn, dataset.PullReqCommitsMeta.Name),

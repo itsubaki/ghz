@@ -113,11 +113,11 @@ func Fetch(c *gin.Context) {
 	})
 }
 
-func NextToken(ctx context.Context, projectID, datasetName string) (string, error) {
-	table := fmt.Sprintf("%v.%v.%v", projectID, datasetName, dataset.EventsMeta.Name)
+func NextToken(ctx context.Context, id, dsn string) (string, error) {
+	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.EventsMeta.Name)
 	query := fmt.Sprintf("select max(id) from `%v`", table)
 
-	var id string
+	var eid string
 	if err := dataset.Query(ctx, query, func(values []bigquery.Value) {
 		if len(values) != 1 {
 			return
@@ -127,10 +127,10 @@ func NextToken(ctx context.Context, projectID, datasetName string) (string, erro
 			return
 		}
 
-		id = values[0].(string)
+		eid = values[0].(string)
 	}); err != nil {
 		return "", fmt.Errorf("query(%v): %v", query, err)
 	}
 
-	return id, nil
+	return eid, nil
 }
