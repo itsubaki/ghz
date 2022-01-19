@@ -56,3 +56,8 @@ jobs:
         uses: "google-github-actions/deploy-appengine@v0"
         with:
           deliverables: "app.yaml cron.yaml"
+
+      - name: Remove Old Versions
+        run: |
+          NOTRAFIC_VERSIONS=$(gcloud app versions list --format="value(id)" --sort-by="~lastDeployedTime" --filter="traffic_split=0")
+          echo ${NOTRAFIC_VERSIONS}
