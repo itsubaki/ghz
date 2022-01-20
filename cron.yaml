@@ -24,11 +24,17 @@ cron:
     url: /_fetch/gin-gonic/gin/actions/runs
     schedule: every day 01:00
     timezone: Asia/Tokyo
+    retry_parameters:
+      min_backoff_seconds: 60
+      max_doublings: 5
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/actions/runs/update
     schedule: every day 02:00
     timezone: Asia/Tokyo
+    retry_parameters:
+      min_backoff_seconds: 60
+      max_doublings: 5
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/pullreqs/update
@@ -44,11 +50,17 @@ cron:
     url: /_fetch/gin-gonic/gin/actions/jobs
     schedule: every day 02:00
     timezone: Asia/Tokyo
+    retry_parameters:
+      min_backoff_seconds: 60
+      max_doublings: 5
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/actions/jobs/update
     schedule: every day 02:00
     timezone: Asia/Tokyo
+    retry_parameters:
+      min_backoff_seconds: 60
+      max_doublings: 5
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/events
@@ -80,11 +92,17 @@ cron:
     url: /_fetch/vercel/next.js/actions/runs
     schedule: every day 01:00
     timezone: Asia/Tokyo
+    retry_parameters:
+      min_backoff_seconds: 60
+      max_doublings: 5
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/actions/runs/update
     schedule: every day 02:00
     timezone: Asia/Tokyo
+    retry_parameters:
+      min_backoff_seconds: 60
+      max_doublings: 5
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/pullreqs/update
@@ -100,11 +118,17 @@ cron:
     url: /_fetch/vercel/next.js/actions/jobs
     schedule: every day 02:00
     timezone: Asia/Tokyo
+    retry_parameters:
+      min_backoff_seconds: 60
+      max_doublings: 5
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/actions/jobs/update
     schedule: every day 02:00
     timezone: Asia/Tokyo
+    retry_parameters:
+      min_backoff_seconds: 60
+      max_doublings: 5
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/events
