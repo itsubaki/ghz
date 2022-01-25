@@ -22,7 +22,7 @@ cron:
 
   - description: "gin-gonic/gin"
     url: /_fetch/gin-gonic/gin/actions/runs
-    schedule: every day 01:00
+    schedule: every day 01:30
     timezone: Asia/Tokyo
     retry_parameters:
       min_backoff_seconds: 60
@@ -90,7 +90,7 @@ cron:
 
   - description: "vercel/next.js"
     url: /_fetch/vercel/next.js/actions/runs
-    schedule: every day 01:00
+    schedule: every day 01:30
     timezone: Asia/Tokyo
     retry_parameters:
       min_backoff_seconds: 60
@@ -158,7 +158,7 @@ cron:
 
   - description: "itsubaki/q"
     url: /_fetch/itsubaki/q/actions/runs
-    schedule: every day 01:00
+    schedule: every day 01:30
     timezone: Asia/Tokyo
 
   - description: "itsubaki/q"
@@ -214,7 +214,7 @@ cron:
 
   - description: "itsubaki/ghz"
     url: /_fetch/itsubaki/ghz/actions/runs
-    schedule: every day 01:00
+    schedule: every day 01:30
     timezone: Asia/Tokyo
 
   - description: "itsubaki/ghz"
