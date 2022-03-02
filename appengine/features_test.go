@@ -109,7 +109,11 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 	for i := 1; i < len(incidents.Rows); i++ {
 		var count int64
 		if err := dataset.Query(context.Background(),
-			fmt.Sprintf("SELECT count(*) FROM `%v.%v.%v` WHERE sha = \"%v\"", id, dsn, dataset.IncidentsMeta.Name, incidents.Rows[i].Cells[3].Value),
+			fmt.Sprintf(
+				"SELECT count(*) FROM `%v.%v.%v` WHERE sha = \"%v\"",
+				id, dsn, dataset.IncidentsMeta.Name,
+				incidents.Rows[i].Cells[3].Value,
+			),
 			func(values []bigquery.Value) {
 				count = values[0].(int64)
 			},

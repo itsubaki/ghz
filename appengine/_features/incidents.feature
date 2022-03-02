@@ -49,7 +49,7 @@ Feature:
             }
             """
 
-    Scenario: should get approximated TTR via pushed
+    Scenario: should get TTR(resolved_at - pushed_at) via pushed
         Given the following incidents exist:
             | owner    | repository | description                | sha                                      | resolved_at             |
             | itsubaki | ghz        | [TEST] Incident via Pushed | 6f5dc2fc9b933ef6fd5f075924a5fec114405a25 | 2021-12-24 10:01:29 UTC |
@@ -63,7 +63,7 @@ Feature:
             | owner    | repository | pushed_at               | resolved_at             | TTR |
             | itsubaki | ghz        | 2021-12-24 09:01:29 UTC | 2021-12-24 10:01:29 UTC | 60  |
 
-    Scenario: should get approximated MTTR via pushed
+    Scenario: should get MTTR(resolved_at - pushed_at) via pushed
         Given the following incidents exist:
             | owner    | repository | description                | sha                                      | resolved_at             |
             | itsubaki | ghz        | [TEST] Incident via Pushed | 6f5dc2fc9b933ef6fd5f075924a5fec114405a25 | 2021-12-24 10:01:29 UTC |
@@ -77,7 +77,7 @@ Feature:
             | owner    | repository | date       | MTTR |
             | itsubaki | ghz        | 2021-12-24 | 60   |
 
-    Scenario: should get TTR via pushed
+    Scenario: should get TTR(resolved_at - changed_at) via pushed
         Given the following incidents exist:
             | owner    | repository | description                | sha                                      | resolved_at             |
             | itsubaki | ghz        | [TEST] Incident via Pushed | 6f5dc2fc9b933ef6fd5f075924a5fec114405a25 | 2021-12-24 10:01:29 UTC |
@@ -135,7 +135,7 @@ Feature:
             }
             """
 
-    Scenario: should get approximated TTR via pullrequests
+    Scenario: should get TTR(resolved_at - merged_at) via pullrequests
         Given the following incidents exist:
             | owner    | repository | description                     | sha                                      | resolved_at             |
             | itsubaki | ghz        | [TEST] Incident via PullRequest | aa0d19452f820c2088cbbe63d2fe2e18b67d3e4d | 2021-12-08 10:41:12 UTC |
@@ -149,7 +149,7 @@ Feature:
             | owner    | repository | merged_at               | resolved_at             | TTR |
             | itsubaki | ghz        | 2021-12-08 09:41:12 UTC | 2021-12-08 10:41:12 UTC | 60  |
 
-    Scenario: should get approximated MTTR via pullrequests
+    Scenario: should get MTTR(resolved_at - merged_at) via pullrequests
         Given the following incidents exist:
             | owner    | repository | description                     | sha                                      | resolved_at             |
             | itsubaki | ghz        | [TEST] Incident via PullRequest | aa0d19452f820c2088cbbe63d2fe2e18b67d3e4d | 2021-12-08 10:41:12 UTC |
