@@ -9,7 +9,6 @@ install:
 	go mod tidy
 	go install -ldflags "${LDFLAGS}"
 
-.PHONY: test
 test:
 	GOOGLE_APPLICATION_CREDENTIALS=../credentials.json DATASET_LOCATION=asia-northeast1 go test ./appengine --godog.format=pretty -v -coverprofile=coverage.out -covermode=atomic -coverpkg ./...
 
