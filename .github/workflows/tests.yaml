@@ -34,6 +34,7 @@ jobs:
           make testpkg
 
       - name: Integration Tests
+        concurrency: integration_tests
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
         run: |
