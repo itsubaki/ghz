@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"os"
 	"time"
-
-	"cloud.google.com/go/logging"
 )
 
 type LogEntry struct {
@@ -42,17 +40,37 @@ func (l *Logger) Log(severity, message string) {
 }
 
 func (l *Logger) Default(message string) {
-	l.Log(logging.Default.String(), message)
+	l.Log("Default", message)
 }
 
 func (l *Logger) Debug(message string) {
-	l.Log(logging.Debug.String(), message)
+	l.Log("Debug", message)
 }
 
 func (l *Logger) Info(message string) {
-	l.Log(logging.Info.String(), message)
+	l.Log("Info", message)
+}
+
+func (l *Logger) Notice(message string) {
+	l.Log("Notice", message)
+}
+
+func (l *Logger) Warning(message string) {
+	l.Log("Warning", message)
 }
 
 func (l *Logger) Error(message string) {
-	l.Log(logging.Error.String(), message)
+	l.Log("Error", message)
+}
+
+func (l *Logger) Critical(message string) {
+	l.Log("Critical", message)
+}
+
+func (l *Logger) Alert(message string) {
+	l.Log("Alert", message)
+}
+
+func (l *Logger) Emergency(message string) {
+	l.Log("Emergency", message)
 }
