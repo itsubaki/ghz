@@ -101,12 +101,13 @@ func SetProjectID(c *gin.Context) {
 }
 
 func SetTraceID(c *gin.Context) {
-	v := c.GetHeader("X-Cloud-Trace-Context")
-	traceID := "localhost"
-	if v != "" {
-		traceID = strings.Split(v, "/")[0]
+	trace := c.GetHeader("X-Cloud-Trace-Context")
+	if trace == "" {
+		c.Next()
+		return
 	}
 
+	traceID := strings.Split(trace, "/")[0]
 	c.Set("trace_id", traceID)
 	c.Next()
 }

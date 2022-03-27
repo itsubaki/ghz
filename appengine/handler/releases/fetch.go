@@ -93,7 +93,9 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	c.Status(http.StatusOK)
+	c.JSON(http.StatusOK, gin.H{
+		"path": c.Request.URL.Path,
+	})
 }
 
 func NextToken(ctx context.Context, projectID, dsn string) (int64, error) {
