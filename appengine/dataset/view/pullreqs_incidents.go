@@ -62,7 +62,7 @@ func PullReqsTTRMedianMeta(id, dsn string) bigquery.TableMetadata {
 	}
 }
 
-func PullReqsFailureRate(id, dsn string) bigquery.TableMetadata {
+func PullReqsFailureRate(projectID, dsn string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
 		Name: "_pullreqs_failure_rate",
 		ViewQuery: fmt.Sprintf(
@@ -94,8 +94,8 @@ func PullReqsFailureRate(id, dsn string) bigquery.TableMetadata {
 			INNER JOIN B
 			ON A.date = B.date
 			`,
-			fmt.Sprintf("`%v.%v.%v`", id, dsn, PullReqsTTRMeta(id, dsn).Name),
-			fmt.Sprintf("`%v.%v.%v`", id, dsn, dataset.PullReqsMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", projectID, dsn, PullReqsTTRMeta(projectID, dsn).Name),
+			fmt.Sprintf("`%v.%v.%v`", projectID, dsn, dataset.PullReqsMeta.Name),
 		),
 	}
 }

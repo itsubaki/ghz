@@ -22,9 +22,10 @@ func Fetch(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	id, dsn := dataset.Name(owner, repository)
+	projectID := c.GetString("project_id")
+	dsn := dataset.Name(owner, repository)
 
-	token, _, err := NextToken(ctx, id, dsn)
+	token, _, err := NextToken(ctx, projectID, dsn)
 	if err != nil {
 		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
@@ -33,7 +34,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	runs, err := ListRuns(ctx, id, dsn, token)
+	runs, err := ListRuns(ctx, projectID, dsn, token)
 	if err != nil {
 		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
@@ -93,8 +94,8 @@ func Fetch(c *gin.Context) {
 	})
 }
 
-func ListRuns(ctx context.Context, id, dsn string, nextToken int64) ([]dataset.WorkflowRun, error) {
-	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.WorkflowRunsMeta.Name)
+func ListRuns(ctx context.Context, projectID, dsn string, nextToken int64) ([]dataset.WorkflowRun, error) {
+	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("select workflow_id, workflow_name, run_id, run_number from `%v` where run_id > %v", table, nextToken)
 
 	runs := make([]dataset.WorkflowRun, 0)
@@ -112,8 +113,8 @@ func ListRuns(ctx context.Context, id, dsn string, nextToken int64) ([]dataset.W
 	return runs, nil
 }
 
-func NextToken(ctx context.Context, id, dsn string) (int64, int64, error) {
-	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.WorkflowJobsMeta.Name)
+func NextToken(ctx context.Context, projectID, dsn string) (int64, int64, error) {
+	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.WorkflowJobsMeta.Name)
 	query := fmt.Sprintf("select max(run_id), max(run_number) from `%v` limit 1", table)
 
 	var rid, num int64

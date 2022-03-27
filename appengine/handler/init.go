@@ -22,7 +22,8 @@ func Init(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	id, dsn := dataset.Name(owner, repository)
+	projectID := c.GetString("project_id")
+	dsn := dataset.Name(owner, repository)
 
 	if strings.ToLower(c.Query("renew")) == "true" {
 		if err := dataset.DeleteAllView(ctx, dsn); err != nil {
@@ -44,20 +45,20 @@ func Init(c *gin.Context) {
 		dataset.WorkflowRunsMeta,
 		dataset.WorkflowJobsMeta,
 		dataset.IncidentsMeta,
-		view.FrequencyRunsMeta(id, dsn),
-		view.FrequencyJobsMeta(id, dsn),
-		view.PullReqsMeta(id, dsn),
-		view.PullReqsLeadTimeMeta(id, dsn),
-		view.PullReqsLeadTimeMedianMeta(id, dsn),
-		view.PullReqsTTRMeta(id, dsn),
-		view.PullReqsTTRMedianMeta(id, dsn),
-		view.PullReqsFailureRate(id, dsn),
-		view.PushedMeta(id, dsn),
-		view.PushedLeadTimeMeta(id, dsn),
-		view.PushedLeadTimeMedianMeta(id, dsn),
-		view.PushedTTRMeta(id, dsn),
-		view.PushedTTRMedianMeta(id, dsn),
-		view.PushedFailureRate(id, dsn),
+		view.FrequencyRunsMeta(projectID, dsn),
+		view.FrequencyJobsMeta(projectID, dsn),
+		view.PullReqsMeta(projectID, dsn),
+		view.PullReqsLeadTimeMeta(projectID, dsn),
+		view.PullReqsLeadTimeMedianMeta(projectID, dsn),
+		view.PullReqsTTRMeta(projectID, dsn),
+		view.PullReqsTTRMedianMeta(projectID, dsn),
+		view.PullReqsFailureRate(projectID, dsn),
+		view.PushedMeta(projectID, dsn),
+		view.PushedLeadTimeMeta(projectID, dsn),
+		view.PushedLeadTimeMedianMeta(projectID, dsn),
+		view.PushedTTRMeta(projectID, dsn),
+		view.PushedTTRMedianMeta(projectID, dsn),
+		view.PushedFailureRate(projectID, dsn),
 	}); err != nil {
 		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,

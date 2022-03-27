@@ -19,9 +19,10 @@ func Update(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	id, dsn := dataset.Name(owner, repository)
+	projectID := c.GetString("project_id")
+	dsn := dataset.Name(owner, repository)
 
-	list, err := ListRuns(ctx, id, dsn)
+	list, err := ListRuns(ctx, projectID, dsn)
 	if err != nil {
 		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
@@ -45,7 +46,7 @@ func Update(c *gin.Context) {
 			return
 		}
 
-		if err := UpdateRun(ctx, id, dsn, run); err != nil {
+		if err := UpdateRun(ctx, projectID, dsn, run); err != nil {
 			log.Printf("path=%v, update run(%v): %v", c.Request.URL.Path, r.RunID, err)
 			continue
 		}
@@ -56,8 +57,8 @@ func Update(c *gin.Context) {
 	})
 }
 
-func ListRuns(ctx context.Context, id, dsn string) ([]dataset.WorkflowRun, error) {
-	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.WorkflowRunsMeta.Name)
+func ListRuns(ctx context.Context, projectID, dsn string) ([]dataset.WorkflowRun, error) {
+	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("select run_id from `%v` where status != \"completed\"", table)
 
 	out := make([]dataset.WorkflowRun, 0)
@@ -80,12 +81,12 @@ func ListRuns(ctx context.Context, id, dsn string) ([]dataset.WorkflowRun, error
 	return out, nil
 }
 
-func UpdateRun(ctx context.Context, id, dsn string, r *github.WorkflowRun) error {
+func UpdateRun(ctx context.Context, projectID, dsn string, r *github.WorkflowRun) error {
 	if r.GetStatus() != "completed" {
 		return nil
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.WorkflowRunsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.WorkflowRunsMeta.Name)
 	query := fmt.Sprintf("update %v set status = \"%v\", conclusion = \"%v\", updated_at = \"%v\" where run_id = %v",
 		table,
 		r.GetStatus(),

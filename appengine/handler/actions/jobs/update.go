@@ -19,9 +19,10 @@ func Update(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	id, dsn := dataset.Name(owner, repository)
+	projectID := c.GetString("project_id")
+	dsn := dataset.Name(owner, repository)
 
-	list, err := ListJobs(ctx, id, dsn)
+	list, err := ListJobs(ctx, projectID, dsn)
 	if err != nil {
 		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
@@ -45,7 +46,7 @@ func Update(c *gin.Context) {
 			continue
 		}
 
-		if err := UpdateJob(ctx, id, dsn, job); err != nil {
+		if err := UpdateJob(ctx, projectID, dsn, job); err != nil {
 			log.Printf("path=%v, update job(%v): %v", c.Request.URL.Path, j.JobID, err)
 			continue
 		}
@@ -56,8 +57,8 @@ func Update(c *gin.Context) {
 	})
 }
 
-func ListJobs(ctx context.Context, id, dsn string) ([]dataset.WorkflowJob, error) {
-	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.WorkflowJobsMeta.Name)
+func ListJobs(ctx context.Context, projectID, dsn string) ([]dataset.WorkflowJob, error) {
+	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.WorkflowJobsMeta.Name)
 	query := fmt.Sprintf("select job_id from `%v` where status != \"completed\"", table)
 
 	out := make([]dataset.WorkflowJob, 0)
@@ -80,12 +81,12 @@ func ListJobs(ctx context.Context, id, dsn string) ([]dataset.WorkflowJob, error
 	return out, nil
 }
 
-func UpdateJob(ctx context.Context, id, dsn string, j *github.WorkflowJob) error {
+func UpdateJob(ctx context.Context, projectID, dsn string, j *github.WorkflowJob) error {
 	if j.GetStatus() != "completed" {
 		return nil
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.WorkflowJobsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.WorkflowJobsMeta.Name)
 	query := fmt.Sprintf("update %v set status = \"%v\", conclusion = \"%v\", completed_at = \"%v\" where job_id = %v",
 		table,
 		j.GetStatus(),

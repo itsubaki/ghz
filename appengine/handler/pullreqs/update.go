@@ -19,9 +19,10 @@ func Update(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	id, dsn := dataset.Name(owner, repository)
+	projectID := c.GetString("project_id")
+	dsn := dataset.Name(owner, repository)
 
-	open, err := ListPullReqs(ctx, id, dsn, "open")
+	open, err := ListPullReqs(ctx, projectID, dsn, "open")
 	if err != nil {
 		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
@@ -45,12 +46,12 @@ func Update(c *gin.Context) {
 			return
 		}
 
-		if err := UpdatePullReq(ctx, id, dsn, pr); err != nil {
+		if err := UpdatePullReq(ctx, projectID, dsn, pr); err != nil {
 			log.Printf("path=%v, update pullreq(%v): %v", c.Request.URL.Path, r.Number, err)
 			continue
 		}
 
-		if err := UpdatePullReqCommits(ctx, id, dsn, pr); err != nil {
+		if err := UpdatePullReqCommits(ctx, projectID, dsn, pr); err != nil {
 			log.Printf("path=%v, update commits(%v): %v", c.Request.URL.Path, r.Number, err)
 			continue
 		}
@@ -61,8 +62,8 @@ func Update(c *gin.Context) {
 	})
 }
 
-func ListPullReqs(ctx context.Context, id, dsn, state string) ([]dataset.PullReq, error) {
-	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.PullReqsMeta.Name)
+func ListPullReqs(ctx context.Context, projectID, dsn, state string) ([]dataset.PullReq, error) {
+	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where state = \"%v\"", table, state)
 
 	out := make([]dataset.PullReq, 0)
@@ -87,12 +88,12 @@ func ListPullReqs(ctx context.Context, id, dsn, state string) ([]dataset.PullReq
 	return out, nil
 }
 
-func UpdatePullReq(ctx context.Context, id, dsn string, r *github.PullRequest) error {
+func UpdatePullReq(ctx context.Context, projectID, dsn string, r *github.PullRequest) error {
 	if r.ClosedAt == nil {
 		return nil
 	}
 
-	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.PullReqsMeta.Name)
+	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("update %v set state = \"%v\", updated_at = \"%v\", merged_at = \"%v\", closed_at = \"%v\", merge_commit_sha = \"%v\" where id = %v",
 		table,
 		r.GetState(),
@@ -112,6 +113,6 @@ func UpdatePullReq(ctx context.Context, id, dsn string, r *github.PullRequest) e
 	return nil
 }
 
-func UpdatePullReqCommits(ctx context.Context, id, dsn string, r *github.PullRequest) error {
+func UpdatePullReqCommits(ctx context.Context, projectID, dsn string, r *github.PullRequest) error {
 	return nil
 }

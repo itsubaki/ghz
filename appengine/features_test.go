@@ -103,7 +103,7 @@ func (a *apiFeature) SetRequestBody(body *godog.DocString) error {
 func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 	owner := incidents.Rows[1].Cells[0].Value
 	repository := incidents.Rows[1].Cells[1].Value
-	id, dsn := dataset.Name(owner, repository)
+	dsn := dataset.Name(owner, repository)
 
 	items := make([]interface{}, 0)
 	for i := 1; i < len(incidents.Rows); i++ {
@@ -111,7 +111,7 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 		if err := dataset.Query(context.Background(),
 			fmt.Sprintf(
 				"SELECT count(*) FROM `%v.%v.%v` WHERE sha = \"%v\"",
-				id, dsn, dataset.IncidentsMeta.Name,
+				handler.ProjectID, dsn, dataset.IncidentsMeta.Name,
 				incidents.Rows[i].Cells[3].Value,
 			),
 			func(values []bigquery.Value) {
@@ -148,7 +148,7 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 }
 
 func (a *apiFeature) ExecuteQuery(query string) error {
-	q := strings.ReplaceAll(query, "$PROJECT_ID", dataset.ProjectID)
+	q := strings.ReplaceAll(query, "$PROJECT_ID", handler.ProjectID)
 	if err := dataset.Query(context.Background(), q, func(values []bigquery.Value) {
 		a.result = append(a.result, values)
 	}); err != nil {

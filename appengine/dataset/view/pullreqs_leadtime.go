@@ -38,7 +38,7 @@ func PullReqsLeadTimeMeta(id, dsn string) bigquery.TableMetadata {
 	}
 }
 
-func PullReqsLeadTimeMedianMeta(id, dsn string) bigquery.TableMetadata {
+func PullReqsLeadTimeMedianMeta(projectID, dsn string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
 		Name: "_pullreqs_leadtime_median",
 		ViewQuery: fmt.Sprintf(
@@ -61,7 +61,7 @@ func PullReqsLeadTimeMedianMeta(id, dsn string) bigquery.TableMetadata {
 			FROM A
 			GROUP BY owner, repository, workflow_name, date
 			`,
-			fmt.Sprintf("`%v.%v.%v`", id, dsn, PullReqsLeadTimeMeta(id, dsn).Name),
+			fmt.Sprintf("`%v.%v.%v`", projectID, dsn, PullReqsLeadTimeMeta(projectID, dsn).Name),
 		),
 	}
 }

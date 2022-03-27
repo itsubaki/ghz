@@ -34,7 +34,7 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Reposi
 	for {
 		tags, resp, err := client.Repositories.ListTags(ctx, in.Owner, in.Repository, &opts)
 		if err != nil {
-			return nil, fmt.Errorf("list pullreqs: %v", err)
+			return nil, fmt.Errorf("list tags: %v", err)
 		}
 
 		for i, f := range fn {

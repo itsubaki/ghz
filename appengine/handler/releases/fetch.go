@@ -10,30 +10,29 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghz/appengine/dataset"
+	"github.com/itsubaki/ghz/appengine/logger"
 	"github.com/itsubaki/ghz/pkg/releases"
 	"github.com/itsubaki/ghz/pkg/tags"
 )
-
-type Response struct {
-	Path    string `json:"path"`
-	Message string `json:"message,omitempty"`
-}
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	id, dsn := dataset.Name(owner, repository)
+	projectID := c.GetString("project_id")
+	traceID := c.GetString("trace_id")
 
-	token, err := NextToken(ctx, id, dsn)
+	dsn := dataset.Name(owner, repository)
+	log := logger.New(projectID, traceID)
+
+	token, err := NextToken(ctx, projectID, dsn)
 	if err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("next token: %v", err),
-		})
+		log.Error(fmt.Sprintf("next token: %v", err))
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	log.Debug(fmt.Sprintf("next token=%v", token))
 
 	t, err := tags.Fetch(ctx,
 		&tags.FetchInput{
@@ -45,12 +44,11 @@ func Fetch(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("fetch tags: %v", err),
-		})
+		log.Error(fmt.Sprintf("fetch tags: %v", err))
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	log.Debug(fmt.Sprintf("tags=%v", t))
 
 	tags := make(map[string]*github.RepositoryTag)
 	for i := range t {
@@ -90,20 +88,16 @@ func Fetch(c *gin.Context) {
 			return nil
 		},
 	); err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("fetch: %v", err),
-		})
+		log.Error(fmt.Sprintf("fetch: %v", err))
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	c.JSON(http.StatusOK, Response{
-		Path: c.Request.URL.Path,
-	})
+	c.Status(http.StatusOK)
 }
 
-func NextToken(ctx context.Context, id, dsn string) (int64, error) {
-	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.ReleasesMeta.Name)
+func NextToken(ctx context.Context, projectID, dsn string) (int64, error) {
+	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.ReleasesMeta.Name)
 	query := fmt.Sprintf("select max(id) from `%v`", table)
 
 	var rid int64

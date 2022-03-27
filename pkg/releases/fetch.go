@@ -35,7 +35,7 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Reposi
 	for {
 		rels, resp, err := client.Repositories.ListReleases(ctx, in.Owner, in.Repository, &opts)
 		if err != nil {
-			return nil, fmt.Errorf("list pullreqs: %v", err)
+			return nil, fmt.Errorf("list releases: %v", err)
 		}
 
 		buf := make([]*github.RepositoryRelease, 0)

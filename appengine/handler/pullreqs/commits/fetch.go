@@ -25,9 +25,10 @@ func Fetch(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	id, dsn := dataset.Name(owner, repository)
+	projectID := c.GetString("project_id")
+	dsn := dataset.Name(owner, repository)
 
-	token, _, err := NextToken(ctx, id, dsn)
+	token, _, err := NextToken(ctx, projectID, dsn)
 	if err != nil {
 		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
@@ -36,7 +37,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	prs, err := ListPullReqs(ctx, id, dsn, token)
+	prs, err := ListPullReqs(ctx, projectID, dsn, token)
 	if err != nil {
 		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
@@ -102,8 +103,8 @@ type PullReq struct {
 	Number int64
 }
 
-func ListPullReqs(ctx context.Context, id, dsn string, nextToken int64) ([]PullReq, error) {
-	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.PullReqsMeta.Name)
+func ListPullReqs(ctx context.Context, projectID, dsn string, nextToken int64) ([]PullReq, error) {
+	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select id, number from `%v` where id > %v", table, nextToken)
 
 	prs := make([]PullReq, 0)
@@ -119,8 +120,8 @@ func ListPullReqs(ctx context.Context, id, dsn string, nextToken int64) ([]PullR
 	return prs, nil
 }
 
-func NextToken(ctx context.Context, id, dsn string) (int64, int64, error) {
-	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.PullReqCommitsMeta.Name)
+func NextToken(ctx context.Context, projectID, dsn string) (int64, int64, error) {
+	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.PullReqCommitsMeta.Name)
 	query := fmt.Sprintf("select max(id), max(number) from `%v` limit 1", table)
 
 	var pid, num int64

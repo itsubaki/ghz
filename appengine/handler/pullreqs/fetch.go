@@ -26,9 +26,10 @@ func Fetch(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	id, dsn := dataset.Name(owner, repository)
+	projectID := c.GetString("project_id")
+	dsn := dataset.Name(owner, repository)
 
-	token, err := NextToken(ctx, id, dsn)
+	token, err := NextToken(ctx, projectID, dsn)
 	if err != nil {
 		c.Error(err).SetMeta(Response{
 			Path:    c.Request.URL.Path,
@@ -89,8 +90,8 @@ func Fetch(c *gin.Context) {
 	})
 }
 
-func NextToken(ctx context.Context, id, dsn string) (int64, error) {
-	table := fmt.Sprintf("%v.%v.%v", id, dsn, dataset.PullReqsMeta.Name)
+func NextToken(ctx context.Context, projectID, dsn string) (int64, error) {
+	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select max(id) from `%v` limit 1", table)
 
 	var pid int64

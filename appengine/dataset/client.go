@@ -14,21 +14,12 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-var ProjectID = func() string {
-	creds, err := google.FindDefaultCredentials(context.Background())
-	if err != nil {
-		panic(fmt.Sprintf("find default credentials: %v", err))
-	}
-
-	return creds.ProjectID
-}()
-
 var invalid = regexp.MustCompile(`[!?"'#$%&@\+\-\*/=~^;:,.|()\[\]{}<>]`)
 
-func Name(owner, repository string) (string, string) {
+func Name(owner, repository string) string {
 	own := invalid.ReplaceAllString(owner, "_")
 	rep := invalid.ReplaceAllString(repository, "_")
-	return ProjectID, fmt.Sprintf("%v_%v", own, rep)
+	return fmt.Sprintf("%v_%v", own, rep)
 }
 
 type Client struct {
@@ -141,7 +132,7 @@ func (c *Client) DeleteAllView(ctx context.Context, dsn string) error {
 
 func (c *Client) Insert(ctx context.Context, dsn, table string, items []interface{}) error {
 	if err := c.client.Dataset(dsn).Table(table).Inserter().Put(ctx, items); err != nil {
-		return fmt.Errorf("insert %v.%v.%v: %v", ProjectID, dsn, table, err)
+		return fmt.Errorf("insert %v.%v.%v: %v", c.client.Project(), dsn, table, err)
 	}
 
 	return nil

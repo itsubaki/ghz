@@ -30,7 +30,7 @@ func Create(c *gin.Context) {
 	in.Repository = c.Param("repository")
 
 	ctx := context.Background()
-	_, dsn := dataset.Name(in.Owner, in.Repository)
+	dsn := dataset.Name(in.Owner, in.Repository)
 
 	resolvedAt, err := time.Parse("2006-01-02 15:04:05 UTC", in.ResolvedAt)
 	if err != nil {

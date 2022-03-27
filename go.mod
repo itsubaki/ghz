@@ -5,6 +5,7 @@ go 1.17
 require (
 	cloud.google.com/go v0.99.0
 	cloud.google.com/go/bigquery v1.25.0
+	cloud.google.com/go/logging v1.4.2
 	github.com/cucumber/godog v0.12.2
 	github.com/gin-gonic/gin v1.7.7
 	github.com/google/go-github/v40 v40.0.0
@@ -51,6 +52,7 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3 // indirect
 	golang.org/x/net v0.0.0-20211216030914-fe4d6282115f // indirect
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20211216021012-1d35b9e2eb4e // indirect
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
