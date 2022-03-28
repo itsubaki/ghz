@@ -3,33 +3,36 @@ package runs
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghz/appengine/dataset"
+	"github.com/itsubaki/ghz/appengine/logger"
 	"github.com/itsubaki/ghz/pkg/actions/runs"
 )
 
 func Update(c *gin.Context) {
 	ctx := context.Background()
+	projectID := dataset.ProjectID
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	projectID := c.GetString("project_id")
+	traceID := c.GetString("trace_id")
+
 	dsn := dataset.Name(owner, repository)
+	log := logger.New(projectID, traceID)
 
 	list, err := ListRuns(ctx, projectID, dsn)
 	if err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("list jobs: %v", err),
-		})
+		log.Error("list jobs: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	log.Debug("runs=%v", list)
 
 	for _, r := range list {
 		run, err := runs.Get(ctx, &runs.GetInput{
@@ -39,21 +42,20 @@ func Update(c *gin.Context) {
 			RunID:      r.RunID,
 		})
 		if err != nil {
-			c.Error(err).SetMeta(Response{
-				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("get run(%v): %v", r.RunID, err),
-			})
+			log.Error("get run(%v): %v", r.RunID, err)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 
 		if err := UpdateRun(ctx, projectID, dsn, run); err != nil {
-			log.Printf("path=%v, update run(%v): %v", c.Request.URL.Path, r.RunID, err)
+			msg := strings.ReplaceAll(err.Error(), projectID, "$PROJECT_ID")
+			log.Info("update run(%v): %v", r.RunID, msg)
 			continue
 		}
 	}
 
-	c.JSON(http.StatusOK, Response{
-		Path: c.Request.URL.Path,
+	c.JSON(http.StatusOK, gin.H{
+		"path": c.Request.URL.Path,
 	})
 }
 

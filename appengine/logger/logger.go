@@ -7,6 +7,18 @@ import (
 	"time"
 )
 
+const (
+	DEFAULT   = "Default"
+	DEBUG     = "Debug"
+	INFO      = "Info"
+	NOTICE    = "Notice"
+	WARNING   = "Warning"
+	ERROR     = "Error"
+	CRITICAL  = "Critical"
+	ALERT     = "Alert"
+	EMERGENCY = "Emergency"
+)
+
 type LogEntry struct {
 	Severity string    `json:"severity"`
 	Message  string    `json:"message"`
@@ -28,49 +40,53 @@ func New(projectID, traceID string) *Logger {
 	}
 }
 
-func (l *Logger) Log(severity, message string) {
+func (l *Logger) Log(severity, format string, a ...interface{}) {
+	if l.TraceID == "" {
+		return
+	}
+
 	if err := json.NewEncoder(os.Stdout).Encode(&LogEntry{
 		Time:     time.Now(),
 		Trace:    l.Trace,
 		Severity: severity,
-		Message:  message,
+		Message:  fmt.Sprintf(format, a...),
 	}); err != nil {
 		panic(err)
 	}
 }
 
-func (l *Logger) Default(message string) {
-	l.Log("Default", message)
+func (l *Logger) Default(format string, a ...interface{}) {
+	l.Log(DEFAULT, format, a...)
 }
 
-func (l *Logger) Debug(message string) {
-	l.Log("Debug", message)
+func (l *Logger) Debug(format string, a ...interface{}) {
+	l.Log(DEBUG, format, a...)
 }
 
-func (l *Logger) Info(message string) {
-	l.Log("Info", message)
+func (l *Logger) Info(format string, a ...interface{}) {
+	l.Log(INFO, format, a...)
 }
 
-func (l *Logger) Notice(message string) {
-	l.Log("Notice", message)
+func (l *Logger) Notice(format string, a ...interface{}) {
+	l.Log(NOTICE, format, a...)
 }
 
-func (l *Logger) Warning(message string) {
-	l.Log("Warning", message)
+func (l *Logger) Warning(format string, a ...interface{}) {
+	l.Log(WARNING, format, a...)
 }
 
-func (l *Logger) Error(message string) {
-	l.Log("Error", message)
+func (l *Logger) Error(format string, a ...interface{}) {
+	l.Log(ERROR, format, a...)
 }
 
-func (l *Logger) Critical(message string) {
-	l.Log("Critical", message)
+func (l *Logger) Critical(format string, a ...interface{}) {
+	l.Log(CRITICAL, format, a...)
 }
 
-func (l *Logger) Alert(message string) {
-	l.Log("Alert", message)
+func (l *Logger) Alert(format string, a ...interface{}) {
+	l.Log(ALERT, format, a...)
 }
 
-func (l *Logger) Emergency(message string) {
-	l.Log("Emergency", message)
+func (l *Logger) Emergency(format string, a ...interface{}) {
+	l.Log(EMERGENCY, format, a...)
 }

@@ -2,7 +2,6 @@ package handler
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -10,27 +9,24 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghz/appengine/dataset"
 	"github.com/itsubaki/ghz/appengine/dataset/view"
+	"github.com/itsubaki/ghz/appengine/logger"
 )
-
-type Response struct {
-	Path    string `json:"path"`
-	Message string `json:"message,omitempty"`
-}
 
 func Init(c *gin.Context) {
 	ctx := context.Background()
+	projectID := dataset.ProjectID
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	projectID := c.GetString("project_id")
+	traceID := c.GetString("trace_id")
+
 	dsn := dataset.Name(owner, repository)
+	log := logger.New(projectID, traceID)
 
 	if strings.ToLower(c.Query("renew")) == "true" {
 		if err := dataset.DeleteAllView(ctx, dsn); err != nil {
-			c.Error(err).SetMeta(Response{
-				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("delete all view: %v", err),
-			})
+			log.Error("delete all view: %v", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}
@@ -60,14 +56,12 @@ func Init(c *gin.Context) {
 		view.PushedTTRMedianMeta(projectID, dsn),
 		view.PushedFailureRate(projectID, dsn),
 	}); err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("create if not exists: %v", err),
-		})
+		log.Error("create if not exists: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	c.JSON(http.StatusOK, Response{
-		Path: c.Request.URL.Path,
+	c.JSON(http.StatusOK, gin.H{
+		"path": c.Request.URL.Path,
 	})
 }

@@ -16,6 +16,15 @@ import (
 
 var invalid = regexp.MustCompile(`[!?"'#$%&@\+\-\*/=~^;:,.|()\[\]{}<>]`)
 
+var ProjectID = func() string {
+	creds, err := google.FindDefaultCredentials(context.Background())
+	if err != nil {
+		panic(fmt.Sprintf("find default credentials: %v", err))
+	}
+
+	return creds.ProjectID
+}()
+
 func Name(owner, repository string) string {
 	own := invalid.ReplaceAllString(owner, "_")
 	rep := invalid.ReplaceAllString(repository, "_")
@@ -28,12 +37,7 @@ type Client struct {
 }
 
 func New(ctx context.Context) (*Client, error) {
-	creds, err := google.FindDefaultCredentials(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("find default credentials: %v", err)
-	}
-
-	client, err := bigquery.NewClient(ctx, creds.ProjectID)
+	client, err := bigquery.NewClient(ctx, ProjectID)
 	if err != nil {
 		return nil, fmt.Errorf("new bigquery client: %v", err)
 	}
@@ -132,7 +136,7 @@ func (c *Client) DeleteAllView(ctx context.Context, dsn string) error {
 
 func (c *Client) Insert(ctx context.Context, dsn, table string, items []interface{}) error {
 	if err := c.client.Dataset(dsn).Table(table).Inserter().Put(ctx, items); err != nil {
-		return fmt.Errorf("insert %v.%v.%v: %v", c.client.Project(), dsn, table, err)
+		return fmt.Errorf("insert %v.%v.%v: %v", ProjectID, dsn, table, err)
 	}
 
 	return nil

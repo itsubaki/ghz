@@ -9,39 +9,36 @@ import (
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghz/appengine/dataset"
+	"github.com/itsubaki/ghz/appengine/logger"
 	"github.com/itsubaki/ghz/pkg/actions/jobs"
 )
 
-type Response struct {
-	Path    string `json:"path"`
-	Message string `json:"message,omitempty"`
-}
-
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
+	projectID := dataset.ProjectID
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	projectID := c.GetString("project_id")
+	traceID := c.GetString("trace_id")
+
 	dsn := dataset.Name(owner, repository)
+	log := logger.New(projectID, traceID)
 
 	token, _, err := NextToken(ctx, projectID, dsn)
 	if err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("next token: %v", err),
-		})
+		log.Error("next token: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	log.Debug("next token=%v", token)
 
 	runs, err := ListRuns(ctx, projectID, dsn, token)
 	if err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("list runs: %v", err),
-		})
+		log.Error("list runs: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	log.Debug("runs=%v", runs)
 
 	for _, r := range runs {
 		jobs, err := jobs.Fetch(ctx,
@@ -55,10 +52,8 @@ func Fetch(c *gin.Context) {
 			r.RunID,
 		)
 		if err != nil {
-			c.Error(err).SetMeta(Response{
-				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("fetch: %v", err),
-			})
+			log.Error("fetch: %v", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 
@@ -81,16 +76,14 @@ func Fetch(c *gin.Context) {
 		}
 
 		if err := dataset.Insert(ctx, dsn, dataset.WorkflowJobsMeta.Name, items); err != nil {
-			c.Error(err).SetMeta(Response{
-				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("insert items: %v", err),
-			})
+			log.Error("insert items: %v", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 	}
 
-	c.JSON(http.StatusOK, Response{
-		Path: c.Request.URL.Path,
+	c.JSON(http.StatusOK, gin.H{
+		"path": c.Request.URL.Path,
 	})
 }
 

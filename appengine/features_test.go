@@ -111,7 +111,7 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 		if err := dataset.Query(context.Background(),
 			fmt.Sprintf(
 				"SELECT count(*) FROM `%v.%v.%v` WHERE sha = \"%v\"",
-				handler.ProjectID, dsn, dataset.IncidentsMeta.Name,
+				dataset.ProjectID, dsn, dataset.IncidentsMeta.Name,
 				incidents.Rows[i].Cells[3].Value,
 			),
 			func(values []bigquery.Value) {
@@ -148,7 +148,7 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 }
 
 func (a *apiFeature) ExecuteQuery(query string) error {
-	q := strings.ReplaceAll(query, "$PROJECT_ID", handler.ProjectID)
+	q := strings.ReplaceAll(query, "$PROJECT_ID", dataset.ProjectID)
 	if err := dataset.Query(context.Background(), q, func(values []bigquery.Value) {
 		a.result = append(a.result, values)
 	}); err != nil {

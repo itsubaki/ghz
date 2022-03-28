@@ -3,33 +3,36 @@ package jobs
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghz/appengine/dataset"
+	"github.com/itsubaki/ghz/appengine/logger"
 	"github.com/itsubaki/ghz/pkg/actions/jobs"
 )
 
 func Update(c *gin.Context) {
 	ctx := context.Background()
+	projectID := dataset.ProjectID
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	projectID := c.GetString("project_id")
+	traceID := c.GetString("trace_id")
+
 	dsn := dataset.Name(owner, repository)
+	log := logger.New(projectID, traceID)
 
 	list, err := ListJobs(ctx, projectID, dsn)
 	if err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("list jobs: %v", err),
-		})
+		log.Error("list jobs: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	log.Debug("jobs=%v", list)
 
 	for _, j := range list {
 		job, err := jobs.Get(ctx, &jobs.GetInput{
@@ -39,21 +42,20 @@ func Update(c *gin.Context) {
 			JobID:      j.JobID,
 		})
 		if err != nil {
-			c.Error(err).SetMeta(Response{
-				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("get job(%v): %v", j.JobID, err),
-			})
+			log.Error("get job(%v): %v", j.JobID, err)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			continue
 		}
 
 		if err := UpdateJob(ctx, projectID, dsn, job); err != nil {
-			log.Printf("path=%v, update job(%v): %v", c.Request.URL.Path, j.JobID, err)
+			msg := strings.ReplaceAll(err.Error(), projectID, "$PROJECT_ID")
+			log.Info("update job(%v): %v", j.JobID, msg)
 			continue
 		}
 	}
 
-	c.JSON(http.StatusOK, Response{
-		Path: c.Request.URL.Path,
+	c.JSON(http.StatusOK, gin.H{
+		"path": c.Request.URL.Path,
 	})
 }
 

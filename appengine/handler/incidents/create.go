@@ -8,6 +8,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghz/appengine/dataset"
+	"github.com/itsubaki/ghz/appengine/logger"
 )
 
 type Incident struct {
@@ -26,17 +27,21 @@ func Create(c *gin.Context) {
 		})
 		return
 	}
-	in.Owner = c.Param("owner")
-	in.Repository = c.Param("repository")
 
 	ctx := context.Background()
+	projectID := dataset.ProjectID
+
+	in.Owner = c.Param("owner")
+	in.Repository = c.Param("repository")
+	traceID := c.GetString("trace_id")
+
 	dsn := dataset.Name(in.Owner, in.Repository)
+	log := logger.New(projectID, traceID)
 
 	resolvedAt, err := time.Parse("2006-01-02 15:04:05 UTC", in.ResolvedAt)
 	if err != nil {
-		c.Error(err).SetMeta(gin.H{
-			"message": fmt.Sprintf("parse time: %v", err),
-		})
+		log.Error("parse time: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
@@ -50,9 +55,8 @@ func Create(c *gin.Context) {
 	})
 
 	if err := dataset.Insert(ctx, dsn, dataset.IncidentsMeta.Name, items); err != nil {
-		c.Error(err).SetMeta(gin.H{
-			"message": fmt.Sprintf("insert items: %v", err),
-		})
+		log.Error("insert items: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 

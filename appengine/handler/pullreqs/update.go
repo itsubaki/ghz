@@ -3,33 +3,36 @@ package pullreqs
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
+	"strings"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghz/appengine/dataset"
+	"github.com/itsubaki/ghz/appengine/logger"
 	"github.com/itsubaki/ghz/pkg/pullreqs"
 )
 
 func Update(c *gin.Context) {
 	ctx := context.Background()
+	projectID := dataset.ProjectID
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	projectID := c.GetString("project_id")
+	traceID := c.GetString("trace_id")
+
 	dsn := dataset.Name(owner, repository)
+	log := logger.New(projectID, traceID)
 
 	open, err := ListPullReqs(ctx, projectID, dsn, "open")
 	if err != nil {
-		c.Error(err).SetMeta(Response{
-			Path:    c.Request.URL.Path,
-			Message: fmt.Sprintf("list pullreqs: %v", err),
-		})
+		log.Error("list pullreqs: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	log.Debug("pullreqs=%v", open)
 
 	for _, r := range open {
 		pr, err := pullreqs.Get(ctx, &pullreqs.GetInput{
@@ -39,26 +42,26 @@ func Update(c *gin.Context) {
 			Number:     int(r.Number),
 		})
 		if err != nil {
-			c.Error(err).SetMeta(Response{
-				Path:    c.Request.URL.Path,
-				Message: fmt.Sprintf("get pullreq: %v", err),
-			})
+			log.Error("fetch pullreq: %v", err)
+			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
 
 		if err := UpdatePullReq(ctx, projectID, dsn, pr); err != nil {
-			log.Printf("path=%v, update pullreq(%v): %v", c.Request.URL.Path, r.Number, err)
+			msg := strings.ReplaceAll(err.Error(), projectID, "$PROJECT_ID")
+			log.Info("update pullreq(%v): %v", r.Number, msg)
 			continue
 		}
 
 		if err := UpdatePullReqCommits(ctx, projectID, dsn, pr); err != nil {
-			log.Printf("path=%v, update commits(%v): %v", c.Request.URL.Path, r.Number, err)
+			msg := strings.ReplaceAll(err.Error(), projectID, "$PROJECT_ID")
+			log.Info("update commits(%v): %v", r.Number, msg)
 			continue
 		}
 	}
 
-	c.JSON(http.StatusOK, Response{
-		Path: c.Request.URL.Path,
+	c.JSON(http.StatusOK, gin.H{
+		"path": c.Request.URL.Path,
 	})
 }
 

@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"log"
 	"net/http"
 	"strings"
 
@@ -19,27 +18,12 @@ import (
 func New() *gin.Engine {
 	g := gin.New()
 
-	g.Use(SetProjectID)
 	g.Use(SetTraceID)
 
 	g.Use(gin.Recovery())
 	if gin.IsDebugging() {
 		g.Use(gin.Logger())
 	}
-
-	g.Use(func(c *gin.Context) {
-		c.Next()
-
-		if len(c.Errors) == 0 {
-			return
-		}
-
-		log.Printf("%#v", c.Errors.Errors())
-		c.AbortWithStatusJSON(
-			http.StatusInternalServerError,
-			c.Errors.Last().Meta,
-		)
-	})
 
 	Root(g)
 	Status(g)
@@ -92,11 +76,6 @@ func XAppEngineCron(c *gin.Context) {
 		return
 	}
 
-	c.Next()
-}
-
-func SetProjectID(c *gin.Context) {
-	c.Set("project_id", ProjectID)
 	c.Next()
 }
 

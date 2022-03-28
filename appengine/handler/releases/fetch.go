@@ -17,10 +17,10 @@ import (
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
+	projectID := dataset.ProjectID
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
-	projectID := c.GetString("project_id")
 	traceID := c.GetString("trace_id")
 
 	dsn := dataset.Name(owner, repository)
@@ -28,11 +28,11 @@ func Fetch(c *gin.Context) {
 
 	token, err := NextToken(ctx, projectID, dsn)
 	if err != nil {
-		log.Error(fmt.Sprintf("next token: %v", err))
+		log.Error("next token: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	log.Debug(fmt.Sprintf("next token=%v", token))
+	log.Debug("next token=%v", token)
 
 	t, err := tags.Fetch(ctx,
 		&tags.FetchInput{
@@ -44,11 +44,11 @@ func Fetch(c *gin.Context) {
 		},
 	)
 	if err != nil {
-		log.Error(fmt.Sprintf("fetch tags: %v", err))
+		log.Error("fetch tags: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	log.Debug(fmt.Sprintf("tags=%v", t))
+	log.Debug("tags=%v", t)
 
 	tags := make(map[string]*github.RepositoryTag)
 	for i := range t {
@@ -88,7 +88,7 @@ func Fetch(c *gin.Context) {
 			return nil
 		},
 	); err != nil {
-		log.Error(fmt.Sprintf("fetch: %v", err))
+		log.Error("fetch: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
