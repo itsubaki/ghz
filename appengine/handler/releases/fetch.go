@@ -48,12 +48,12 @@ func Fetch(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	log.Debug("tags=%v", t)
 
 	tags := make(map[string]*github.RepositoryTag)
 	for i := range t {
 		tags[t[i].GetName()] = t[i]
 	}
+	log.Debug("tags=%v", tags)
 
 	if _, err := releases.Fetch(ctx,
 		&releases.FetchInput{

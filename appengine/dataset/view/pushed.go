@@ -7,7 +7,7 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset"
 )
 
-func PushedMeta(projectID, dsn string) bigquery.TableMetadata {
+func PushedMeta(dsn string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
 		Name: "_pushed",
 		ViewQuery: fmt.Sprintf(
@@ -27,8 +27,8 @@ func PushedMeta(projectID, dsn string) bigquery.TableMetadata {
 			INNER JOIN %v as B
 			ON A.sha = B.sha
 			`,
-			fmt.Sprintf("`%v.%v.%v`", projectID, dsn, dataset.EventsPushMeta.Name),
-			fmt.Sprintf("`%v.%v.%v`", projectID, dsn, dataset.CommitsMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", dataset.ProjectID, dsn, dataset.EventsPushMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", dataset.ProjectID, dsn, dataset.CommitsMeta.Name),
 		),
 	}
 }

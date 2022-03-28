@@ -18,12 +18,13 @@ func Init(c *gin.Context) {
 
 	owner := c.Param("owner")
 	repository := c.Param("repository")
+	renew := c.Query("renew")
 	traceID := c.GetString("trace_id")
 
 	dsn := dataset.Name(owner, repository)
 	log := logger.New(projectID, traceID)
 
-	if strings.ToLower(c.Query("renew")) == "true" {
+	if strings.ToLower(renew) == "true" {
 		if err := dataset.DeleteAllView(ctx, dsn); err != nil {
 			log.Error("delete all view: %v", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
@@ -41,20 +42,20 @@ func Init(c *gin.Context) {
 		dataset.WorkflowRunsMeta,
 		dataset.WorkflowJobsMeta,
 		dataset.IncidentsMeta,
-		view.FrequencyRunsMeta(projectID, dsn),
-		view.FrequencyJobsMeta(projectID, dsn),
-		view.PullReqsMeta(projectID, dsn),
-		view.PullReqsLeadTimeMeta(projectID, dsn),
-		view.PullReqsLeadTimeMedianMeta(projectID, dsn),
-		view.PullReqsTTRMeta(projectID, dsn),
-		view.PullReqsTTRMedianMeta(projectID, dsn),
-		view.PullReqsFailureRate(projectID, dsn),
-		view.PushedMeta(projectID, dsn),
-		view.PushedLeadTimeMeta(projectID, dsn),
-		view.PushedLeadTimeMedianMeta(projectID, dsn),
-		view.PushedTTRMeta(projectID, dsn),
-		view.PushedTTRMedianMeta(projectID, dsn),
-		view.PushedFailureRate(projectID, dsn),
+		view.FrequencyRunsMeta(dsn),
+		view.FrequencyJobsMeta(dsn),
+		view.PullReqsMeta(dsn),
+		view.PullReqsLeadTimeMeta(dsn),
+		view.PullReqsLeadTimeMedianMeta(dsn),
+		view.PullReqsTTRMeta(dsn),
+		view.PullReqsTTRMedianMeta(dsn),
+		view.PullReqsFailureRate(dsn),
+		view.PushedMeta(dsn),
+		view.PushedLeadTimeMeta(dsn),
+		view.PushedLeadTimeMedianMeta(dsn),
+		view.PushedTTRMeta(dsn),
+		view.PushedTTRMedianMeta(dsn),
+		view.PushedFailureRate(dsn),
 	}); err != nil {
 		log.Error("create if not exists: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
