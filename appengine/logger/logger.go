@@ -1,10 +1,14 @@
 package logger
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"time"
+
+	"cloud.google.com/go/errorreporting"
 )
 
 const (
@@ -27,9 +31,10 @@ type LogEntry struct {
 }
 
 type Logger struct {
-	ProjectID string
-	TraceID   string
-	Trace     string
+	ProjectID   string
+	TraceID     string
+	Trace       string
+	ErrorClient *errorreporting.Client
 }
 
 func New(projectID, traceID string) *Logger {
@@ -89,4 +94,27 @@ func (l *Logger) Alert(format string, a ...interface{}) {
 
 func (l *Logger) Emergency(format string, a ...interface{}) {
 	l.Log(EMERGENCY, format, a...)
+}
+
+func (l *Logger) NewReport(ctx context.Context) *Logger {
+	c, err := errorreporting.NewClient(ctx, l.ProjectID, errorreporting.Config{})
+	if err != nil {
+		l.Error("new error report client: %v", err)
+		return l
+	}
+
+	l.ErrorClient = c
+	return l
+}
+
+func (l *Logger) ErrorAndReport(format string, err error, req *http.Request) {
+	l.Error(format, err)
+	if l.ErrorClient == nil {
+		return
+	}
+
+	l.ErrorClient.Report(errorreporting.Entry{
+		Error: err,
+		Req:   req,
+	})
 }

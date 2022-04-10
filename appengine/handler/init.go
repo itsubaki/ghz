@@ -22,11 +22,11 @@ func Init(c *gin.Context) {
 	traceID := c.GetString("trace_id")
 
 	dsn := dataset.Name(owner, repository)
-	log := logger.New(projectID, traceID)
+	log := logger.New(projectID, traceID).NewReport(ctx)
 
 	if strings.ToLower(renew) == "true" {
 		if err := dataset.DeleteAllView(ctx, dsn); err != nil {
-			log.Error("delete all view: %v", err)
+			log.ErrorAndReport("delete all view: %v", err, c.Request)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
@@ -57,7 +57,7 @@ func Init(c *gin.Context) {
 		view.PushedTTRMedianMeta(dsn),
 		view.PushedFailureRate(dsn),
 	}); err != nil {
-		log.Error("create if not exists: %v", err)
+		log.ErrorAndReport("create if not exists: %v", err, c.Request)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

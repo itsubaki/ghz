@@ -6,6 +6,7 @@ LDFLAGS := -X 'main.date=${DATE}' -X 'main.hash=${HASH}' -X 'main.goversion=${GO
 
 install:
 	-rm ${GOPATH}/bin/ghz
+	go get -u
 	go mod tidy
 	go install -ldflags "${LDFLAGS}"
 
