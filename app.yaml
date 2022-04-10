@@ -1,5 +1,4 @@
 runtime: go116
-app_engine_apis: true
 main: ./appengine
 
 env_variables:
