@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
-	"go.opentelemetry.io/otel"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	otltrace "go.opentelemetry.io/otel/trace"
 )
@@ -20,12 +19,10 @@ func New(projectID, path string) (*Tracer, error) {
 	if err != nil {
 		return nil, fmt.Errorf("new exporter: %v", err)
 	}
-
 	provider := sdktrace.NewTracerProvider(sdktrace.WithBatcher(exporter))
-	otel.SetTracerProvider(provider)
 
 	return &Tracer{
-		t: otel.GetTracerProvider().Tracer(path),
+		t: provider.Tracer(path),
 		p: provider,
 	}, nil
 }
