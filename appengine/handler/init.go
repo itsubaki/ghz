@@ -32,8 +32,11 @@ func Init(c *gin.Context) {
 	// }
 	// defer tra.ForceFlush(ctx)
 
+	// ctx, span := tra.Start(ctx, c.Request.URL.Path)
+	// defer span.End()
+
 	// if err := func(ctx context.Context) error {
-	// 	ctx, span := tra.Start(ctx, "delete all view")
+	// 	_, span := tra.Start(ctx, "delete all view")
 	// 	defer span.End()
 
 	// 	if strings.ToLower(renew) != "true" {
