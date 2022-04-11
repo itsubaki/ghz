@@ -107,14 +107,19 @@ func (l *Logger) NewReport(ctx context.Context) *Logger {
 	return l
 }
 
-func (l *Logger) ErrorAndReport(format string, err error, req *http.Request) {
-	l.Error(format, err)
+func (l *Logger) ErrorAndReport(req *http.Request, format string, a ...interface{}) {
+	l.Error(format, a...)
 	if l.ErrorClient == nil {
 		return
 	}
 
-	l.ErrorClient.Report(errorreporting.Entry{
-		Error: err,
-		Req:   req,
-	})
+	for _, aa := range a {
+		switch err := aa.(type) {
+		case error:
+			l.ErrorClient.Report(errorreporting.Entry{
+				Error: err,
+				Req:   req,
+			})
+		}
+	}
 }

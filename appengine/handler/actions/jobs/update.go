@@ -24,11 +24,11 @@ func Update(c *gin.Context) {
 	traceID := c.GetString("trace_id")
 
 	dsn := dataset.Name(owner, repository)
-	log := logger.New(projectID, traceID)
+	log := logger.New(projectID, traceID).NewReport(ctx)
 
 	list, err := ListJobs(ctx, projectID, dsn)
 	if err != nil {
-		log.Error("list jobs: %v", err)
+		log.ErrorAndReport(c.Request, "list jobs: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -42,7 +42,7 @@ func Update(c *gin.Context) {
 			JobID:      j.JobID,
 		})
 		if err != nil {
-			log.Error("get job(%v): %v", j.JobID, err)
+			log.ErrorAndReport(c.Request, "get jobID=%v: %v", j.JobID, err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			continue
 		}
@@ -52,6 +52,7 @@ func Update(c *gin.Context) {
 			log.Info("update job(%v): %v", j.JobID, msg)
 			continue
 		}
+		log.Debug("updated. jobID=%v", j.JobID)
 	}
 
 	c.JSON(http.StatusOK, gin.H{

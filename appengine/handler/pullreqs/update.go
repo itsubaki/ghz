@@ -24,11 +24,11 @@ func Update(c *gin.Context) {
 	traceID := c.GetString("trace_id")
 
 	dsn := dataset.Name(owner, repository)
-	log := logger.New(projectID, traceID)
+	log := logger.New(projectID, traceID).NewReport(ctx)
 
 	open, err := ListPullReqs(ctx, projectID, dsn, "open")
 	if err != nil {
-		log.Error("list pullreqs: %v", err)
+		log.ErrorAndReport(c.Request, "list pullreqs: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -42,7 +42,7 @@ func Update(c *gin.Context) {
 			Number:     int(r.Number),
 		})
 		if err != nil {
-			log.Error("fetch pullreq: %v", err)
+			log.ErrorAndReport(c.Request, "fetch pullreq: %v", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
@@ -52,12 +52,15 @@ func Update(c *gin.Context) {
 			log.Info("update pullreq(%v): %v", r.Number, msg)
 			continue
 		}
+		log.Debug("updated. pr=%v", r.Number)
 
 		if err := UpdatePullReqCommits(ctx, projectID, dsn, pr); err != nil {
 			msg := strings.ReplaceAll(err.Error(), projectID, "$PROJECT_ID")
-			log.Info("update commits(%v): %v", r.Number, msg)
+			log.Info("update commits(pr=%v): %v", r.Number, msg)
 			continue
 		}
+
+		log.Debug("updated commits. (pr=%v)", r.Number)
 	}
 
 	c.JSON(http.StatusOK, gin.H{

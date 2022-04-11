@@ -25,11 +25,11 @@ func Fetch(c *gin.Context) {
 	traceID := c.GetString("trace_id")
 
 	dsn := dataset.Name(owner, repository)
-	log := logger.New(projectID, traceID)
+	log := logger.New(projectID, traceID).NewReport(ctx)
 
 	token, _, err := NextToken(ctx, projectID, dsn)
 	if err != nil {
-		log.Error("next token: %v", err)
+		log.ErrorAndReport(c.Request, "next token: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -37,10 +37,11 @@ func Fetch(c *gin.Context) {
 
 	prs, err := ListPullReqs(ctx, projectID, dsn, token)
 	if err != nil {
-		log.Error("list pullreqs: %v", err)
+		log.ErrorAndReport(c.Request, "list pullreqs: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	log.Debug("pullreqs=%v", prs)
 
 	for _, p := range prs {
 		list, err := commits.Fetch(ctx,
@@ -54,7 +55,7 @@ func Fetch(c *gin.Context) {
 			int(p.Number),
 		)
 		if err != nil {
-			log.Error("fetch: %v", err)
+			log.ErrorAndReport(c.Request, "fetch: %v", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
@@ -79,7 +80,7 @@ func Fetch(c *gin.Context) {
 		}
 
 		if err := dataset.Insert(ctx, dsn, dataset.PullReqCommitsMeta.Name, items); err != nil {
-			log.Error("insert items: %v", err)
+			log.ErrorAndReport(c.Request, "insert items: %v", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
