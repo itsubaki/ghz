@@ -15,7 +15,7 @@ type Tracer struct {
 	p *sdktrace.TracerProvider
 }
 
-func New(ctx context.Context, projectID, path string) (*Tracer, error) {
+func New(projectID, path string) (*Tracer, error) {
 	exporter, err := trace.New(trace.WithProjectID(projectID))
 	if err != nil {
 		return nil, fmt.Errorf("new exporter: %v", err)

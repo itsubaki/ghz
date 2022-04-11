@@ -24,7 +24,7 @@ func Init(c *gin.Context) {
 	dsn := dataset.Name(owner, repository)
 	log := logger.New(projectID, traceID).NewReport(ctx)
 
-	// tra, err := tracer.New(ctx, projectID, c.Request.URL.Path)
+	// tra, err := tracer.New(projectID, c.Request.URL.Path)
 	// if err != nil {
 	// 	log.ErrorAndReport(c.Request, "new tracer: %v", err)
 	// 	c.AbortWithStatus(http.StatusInternalServerError)
