@@ -56,6 +56,7 @@ func Init(c *gin.Context) {
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
+		log.Debug("delete all view")
 	}
 
 	if err := dataset.Create(ctx, dsn, []bigquery.TableMetadata{
@@ -87,6 +88,7 @@ func Init(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	log.Debug("created table/view")
 
 	c.JSON(http.StatusOK, gin.H{
 		"path": c.Request.URL.Path,
