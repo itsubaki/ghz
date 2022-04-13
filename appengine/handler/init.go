@@ -20,9 +20,11 @@ func Init(c *gin.Context) {
 	repository := c.Param("repository")
 	renew := c.Query("renew")
 	traceID := c.GetString("trace_id")
+	spanID := c.GetString("span_id")
 
 	dsn := dataset.Name(owner, repository)
 	log := logger.New(projectID, traceID).NewReport(ctx)
+	log.Debug("trace_id: %v, span_id: %v", traceID, spanID)
 
 	// tra, err := tracer.New(projectID, c.Request.URL.Path)
 	// if err != nil {
@@ -32,19 +34,24 @@ func Init(c *gin.Context) {
 	// }
 	// defer tra.ForceFlush(ctx)
 
-	// ctx, span := tra.Start(ctx, c.Request.URL.Path)
+	// pctx, span := tra.Start(ctx, c.Request.URL.Path)
 	// defer span.End()
+	// log.Debug("context: %#v, value(0): %v", pctx, pctx.Value(0))
+	// log.Debug("span: %#v", span)
 
 	// if err := func(ctx context.Context) error {
-	// 	_, span := tra.Start(ctx, "delete all view")
+	// 	cctx, span := tra.Start(ctx, "delete all view")
 	// 	defer span.End()
+
+	// 	log.Debug("child context: %#v, value(0): %v", cctx, cctx.Value(0))
+	// 	log.Debug("child span: %#v", span)
 
 	// 	if strings.ToLower(renew) != "true" {
 	// 		return nil
 	// 	}
 
 	// 	return dataset.DeleteAllView(ctx, dsn)
-	// }(ctx); err != nil {
+	// }(pctx); err != nil {
 	// 	log.ErrorAndReport(c.Request, "delete all view: %v", err)
 	// 	c.AbortWithStatus(http.StatusInternalServerError)
 	// 	return

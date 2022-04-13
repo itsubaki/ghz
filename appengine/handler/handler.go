@@ -69,6 +69,9 @@ func Incidents(g *gin.Engine) {
 }
 
 func XAppEngineCron(c *gin.Context) {
+	// https://cloud.google.com/appengine/docs/standard/go/scheduling-jobs-with-cron-yaml
+	// Requests from the Cron Service will contain the following HTTP header:
+	// X-Appengine-Cron: true
 	if c.GetHeader("X-Appengine-Cron") != "true" {
 		c.AbortWithStatusJSON(http.StatusBadGateway, gin.H{
 			"message": "X-Appengine-Cron header is not set to true",
@@ -80,13 +83,18 @@ func XAppEngineCron(c *gin.Context) {
 }
 
 func SetTraceID(c *gin.Context) {
-	trace := c.GetHeader("X-Cloud-Trace-Context")
-	if trace == "" {
+	value := c.GetHeader("X-Cloud-Trace-Context")
+	if value == "" {
 		c.Next()
 		return
 	}
 
-	traceID := strings.Split(trace, "/")[0]
-	c.Set("trace_id", traceID)
+	// https://cloud.google.com/trace/docs/setup
+	// The header specification is:
+	// "X-Cloud-Trace-Context: TRACE_ID/SPAN_ID;o=TRACE_TRUE"
+	ids := strings.Split(strings.Split(value, ";")[0], "/")
+	c.Set("trace_id", ids[0])
+	c.Set("span_id", ids[1])
+
 	c.Next()
 }
