@@ -34,3 +34,23 @@ func (t *Tracer) ForceFlush(ctx context.Context) {
 func (t *Tracer) Start(ctx context.Context, spanName string, opts ...otltrace.SpanStartOption) (context.Context, otltrace.Span) {
 	return t.t.Start(ctx, spanName, opts...)
 }
+
+func NewContext(ctx context.Context, traceID, spanID string) (context.Context, error) {
+	tID, err := otltrace.TraceIDFromHex(traceID)
+	if err != nil {
+		return nil, fmt.Errorf("traceID from hex(%v): %v", traceID, err)
+	}
+
+	// hex encoded span-id must have length equals to 16
+	sID, err := otltrace.SpanIDFromHex(spanID[:16])
+	if err != nil {
+		return nil, fmt.Errorf("spanID from hex(%v): %v", spanID, err)
+	}
+
+	return otltrace.ContextWithSpanContext(ctx, otltrace.NewSpanContext(otltrace.SpanContextConfig{
+		TraceID:    tID,
+		SpanID:     sID,
+		TraceFlags: 01,
+		Remote:     false,
+	})), nil
+}

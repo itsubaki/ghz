@@ -26,37 +26,6 @@ func Init(c *gin.Context) {
 	log := logger.New(projectID, traceID).NewReport(ctx)
 	log.Debug("trace_id: %v, span_id: %v", traceID, spanID)
 
-	// tra, err := tracer.New(projectID, c.Request.URL.Path)
-	// if err != nil {
-	// 	log.ErrorAndReport(c.Request, "new tracer: %v", err)
-	// 	c.AbortWithStatus(http.StatusInternalServerError)
-	// 	return
-	// }
-	// defer tra.ForceFlush(ctx)
-
-	// pctx, span := tra.Start(ctx, c.Request.URL.Path)
-	// defer span.End()
-	// log.Debug("context: %#v, value(0): %v", pctx, pctx.Value(0))
-	// log.Debug("span: %#v", span)
-
-	// if err := func(ctx context.Context) error {
-	// 	cctx, span := tra.Start(ctx, "delete all view")
-	// 	defer span.End()
-
-	// 	log.Debug("child context: %#v, value(0): %v", cctx, cctx.Value(0))
-	// 	log.Debug("child span: %#v", span)
-
-	// 	if strings.ToLower(renew) != "true" {
-	// 		return nil
-	// 	}
-
-	// 	return dataset.DeleteAllView(ctx, dsn)
-	// }(pctx); err != nil {
-	// 	log.ErrorAndReport(c.Request, "delete all view: %v", err)
-	// 	c.AbortWithStatus(http.StatusInternalServerError)
-	// 	return
-	// }
-
 	if strings.ToLower(renew) == "true" {
 		if err := dataset.DeleteAllView(ctx, dsn); err != nil {
 			log.ErrorAndReport(c.Request, "delete all view: %v", err)

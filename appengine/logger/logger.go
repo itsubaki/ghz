@@ -32,24 +32,23 @@ type LogEntry struct {
 
 type Logger struct {
 	ProjectID   string
-	TraceID     string
 	Trace       string
 	ErrorClient *errorreporting.Client
 }
 
-func New(projectID, traceID string) *Logger {
+func New(projectID string, traceID ...string) *Logger {
+	trace := ""
+	if len(traceID) > 0 {
+		trace = fmt.Sprintf("projects/%v/traces/%v", projectID, traceID[0])
+	}
+
 	return &Logger{
 		ProjectID: projectID,
-		TraceID:   traceID,
-		Trace:     fmt.Sprintf("projects/%v/traces/%v", projectID, traceID),
+		Trace:     trace,
 	}
 }
 
 func (l *Logger) Log(severity, format string, a ...interface{}) {
-	if l.TraceID == "" {
-		return
-	}
-
 	if err := json.NewEncoder(os.Stdout).Encode(&LogEntry{
 		Time:     time.Now(),
 		Trace:    l.Trace,
