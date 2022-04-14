@@ -24,35 +24,8 @@ func Init(c *gin.Context) {
 	projectID := dataset.ProjectID
 	dsn := dataset.Name(owner, repository)
 
-	// ctx, err := tracer.NewContext(context.Background(), traceID, spanID)
-	// if err != nil {
-	// 	c.AbortWithStatus(http.StatusInternalServerError)
-	// 	return
-	// }
-
 	log := logger.New(projectID, traceID).NewReport(ctx)
 	log.Debug("trace_id: %v, span_id: %v", traceID, spanID)
-
-	// tra, err := tracer.New(projectID, "func Init")
-	// if err != nil {
-	// 	log.ErrorAndReport(c.Request, "new tracer: %v", err)
-	// 	c.AbortWithStatus(http.StatusInternalServerError)
-	// 	return
-	// }
-
-	// func(ctx context.Context) {
-	// 	_, span := tra.Start(ctx, "Hello World")
-	// 	defer span.End()
-
-	// 	time.Sleep(3 * time.Second)
-	// }(ctx)
-
-	// func(ctx context.Context) {
-	// 	_, span := tra.Start(ctx, "FOOBAR")
-	// 	defer span.End()
-
-	// 	time.Sleep(1 * time.Second)
-	// }(ctx)
 
 	if strings.ToLower(renew) == "true" {
 		if err := dataset.DeleteAllView(ctx, dsn); err != nil {
