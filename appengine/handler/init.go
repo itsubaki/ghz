@@ -2,29 +2,53 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
+	"time"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghz/appengine/dataset"
 	"github.com/itsubaki/ghz/appengine/dataset/view"
 	"github.com/itsubaki/ghz/appengine/logger"
+	"github.com/itsubaki/ghz/appengine/tracer"
 )
 
 func Init(c *gin.Context) {
-	ctx := context.Background()
-	projectID := dataset.ProjectID
-
 	owner := c.Param("owner")
 	repository := c.Param("repository")
 	renew := c.Query("renew")
 	traceID := c.GetString("trace_id")
 	spanID := c.GetString("span_id")
 
+	projectID := dataset.ProjectID
 	dsn := dataset.Name(owner, repository)
+
+	ctx, _ := tracer.NewContext(c, traceID, spanID)
+	tra, err := tracer.New(projectID, "func Init")
+	if err != nil {
+		fmt.Printf("new tracer: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
 	log := logger.New(projectID, traceID).NewReport(ctx)
 	log.Debug("trace_id: %v, span_id: %v", traceID, spanID)
+
+	func(ctx context.Context) {
+		_, span := tra.Start(ctx, "Hello World")
+		defer span.End()
+
+		time.Sleep(3 * time.Second)
+	}(ctx)
+
+	func(ctx context.Context) {
+		_, span := tra.Start(ctx, "FOOBAR")
+		defer span.End()
+
+		time.Sleep(1 * time.Second)
+	}(ctx)
 
 	if strings.ToLower(renew) == "true" {
 		if err := dataset.DeleteAllView(ctx, dsn); err != nil {

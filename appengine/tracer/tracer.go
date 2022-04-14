@@ -14,7 +14,7 @@ type Tracer struct {
 	p *sdktrace.TracerProvider
 }
 
-func New(projectID, path string) (*Tracer, error) {
+func New(projectID, name string) (*Tracer, error) {
 	exporter, err := trace.New(trace.WithProjectID(projectID))
 	if err != nil {
 		return nil, fmt.Errorf("new exporter: %v", err)
@@ -22,7 +22,7 @@ func New(projectID, path string) (*Tracer, error) {
 	provider := sdktrace.NewTracerProvider(sdktrace.WithBatcher(exporter))
 
 	return &Tracer{
-		t: provider.Tracer(path),
+		t: provider.Tracer(name),
 		p: provider,
 	}, nil
 }
