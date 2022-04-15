@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 	"net/http/httptest"
 	"strconv"
@@ -19,6 +20,10 @@ import (
 	"github.com/itsubaki/ghz/appengine/handler"
 	"github.com/jfilipczyk/gomatch"
 )
+
+func NewXCloudTraceContext() (string, string) {
+	return "X-Cloud-Trace-Context", fmt.Sprintf("%016x%016x/%016x;", rand.Int63(), rand.Int63(), rand.Int63())
+}
 
 var api = &apiFeature{}
 
@@ -60,7 +65,7 @@ func (a *apiFeature) Request(method, endpoint string) error {
 	r := a.replace(endpoint)
 	req := httptest.NewRequest(method, r, a.body)
 	req.Header = a.header
-	req.Header.Add("X-Cloud-Trace-Context", "5f5a38f6df30898389ad6923c07c6531/11455964211050109536;")
+	req.Header.Add(NewXCloudTraceContext())
 
 	a.server.ServeHTTP(a.resp, req)
 	return nil
@@ -149,8 +154,7 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 }
 
 func (a *apiFeature) ExecuteQuery(query string) error {
-	q := strings.ReplaceAll(query, "$PROJECT_ID", dataset.ProjectID)
-	if err := dataset.Query(context.Background(), q, func(values []bigquery.Value) {
+	if err := dataset.Query(context.Background(), query, func(values []bigquery.Value) {
 		a.result = append(a.result, values)
 	}); err != nil {
 		return fmt.Errorf("execute query: %v", err)
