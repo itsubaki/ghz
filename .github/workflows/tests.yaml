@@ -31,6 +31,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Add mask
+        run: |
+          echo "::add-mask::${{ secrets.PROJECT_ID }}"
+
       - name: Unit Tests
         run: |
           make testpkg
