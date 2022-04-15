@@ -28,6 +28,7 @@ type LogEntry struct {
 	Message  string    `json:"message"`
 	Time     time.Time `json:"time"`
 	Trace    string    `json:"logging.googleapis.com/trace"`
+	SpanID   string    `json:"logging.googleapis.com/spanId,omitempty"`
 }
 
 type Logger struct {
@@ -48,10 +49,11 @@ func New(projectID string, traceID ...string) *Logger {
 	}
 }
 
-func (l *Logger) Log(severity, format string, a ...interface{}) {
+func (l *Logger) Log(spanID, severity, format string, a ...interface{}) {
 	if err := json.NewEncoder(os.Stdout).Encode(&LogEntry{
 		Time:     time.Now(),
 		Trace:    l.Trace,
+		SpanID:   spanID,
 		Severity: severity,
 		Message:  fmt.Sprintf(format, a...),
 	}); err != nil {
@@ -60,39 +62,43 @@ func (l *Logger) Log(severity, format string, a ...interface{}) {
 }
 
 func (l *Logger) Default(format string, a ...interface{}) {
-	l.Log(DEFAULT, format, a...)
+	l.Log("", DEFAULT, format, a...)
+}
+
+func (l *Logger) DebugWith(spanID, format string, a ...interface{}) {
+	l.Log(spanID, DEBUG, format, a...)
 }
 
 func (l *Logger) Debug(format string, a ...interface{}) {
-	l.Log(DEBUG, format, a...)
+	l.Log("", DEBUG, format, a...)
 }
 
 func (l *Logger) Info(format string, a ...interface{}) {
-	l.Log(INFO, format, a...)
+	l.Log("", INFO, format, a...)
 }
 
 func (l *Logger) Notice(format string, a ...interface{}) {
-	l.Log(NOTICE, format, a...)
+	l.Log("", NOTICE, format, a...)
 }
 
 func (l *Logger) Warning(format string, a ...interface{}) {
-	l.Log(WARNING, format, a...)
+	l.Log("", WARNING, format, a...)
 }
 
 func (l *Logger) Error(format string, a ...interface{}) {
-	l.Log(ERROR, format, a...)
+	l.Log("", ERROR, format, a...)
 }
 
 func (l *Logger) Critical(format string, a ...interface{}) {
-	l.Log(CRITICAL, format, a...)
+	l.Log("", CRITICAL, format, a...)
 }
 
 func (l *Logger) Alert(format string, a ...interface{}) {
-	l.Log(ALERT, format, a...)
+	l.Log("", ALERT, format, a...)
 }
 
 func (l *Logger) Emergency(format string, a ...interface{}) {
-	l.Log(EMERGENCY, format, a...)
+	l.Log("", EMERGENCY, format, a...)
 }
 
 func (l *Logger) NewReport(ctx context.Context) *Logger {

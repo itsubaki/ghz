@@ -16,7 +16,7 @@ func TestTracer(t *testing.T) {
 		t.Fatalf("new context: %v", err)
 	}
 
-	tra, err := tracer.New(dataset.ProjectID, "TestTracer")
+	tra, err := tracer.New(dataset.ProjectID)
 	if err != nil {
 		t.Fatalf("new tracer: %v", err)
 	}

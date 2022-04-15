@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
-	"go.opentelemetry.io/otel"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
 	otltrace "go.opentelemetry.io/otel/trace"
 )
@@ -15,16 +14,15 @@ type Tracer struct {
 	p *sdktrace.TracerProvider
 }
 
-func New(projectID, name string) (*Tracer, error) {
+func New(projectID string) (*Tracer, error) {
 	exporter, err := trace.New(trace.WithProjectID(projectID))
 	if err != nil {
 		return nil, fmt.Errorf("new exporter: %v", err)
 	}
 	provider := sdktrace.NewTracerProvider(sdktrace.WithBatcher(exporter))
-	otel.SetTracerProvider(provider)
 
 	return &Tracer{
-		t: provider.Tracer(name),
+		t: provider.Tracer(projectID),
 		p: provider,
 	}, nil
 }

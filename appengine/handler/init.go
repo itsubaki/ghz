@@ -4,12 +4,14 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"time"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghz/appengine/dataset"
 	"github.com/itsubaki/ghz/appengine/dataset/view"
 	"github.com/itsubaki/ghz/appengine/logger"
+	"github.com/itsubaki/ghz/appengine/tracer"
 )
 
 func Init(c *gin.Context) {
@@ -26,6 +28,40 @@ func Init(c *gin.Context) {
 
 	log := logger.New(projectID, traceID).NewReport(ctx)
 	log.Debug("trace_id: %v, span_id: %v", traceID, spanID)
+
+	tra, err := tracer.New(projectID)
+	if err != nil {
+		log.ErrorAndReport(c.Request, "new tracer: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+	defer tra.ForceFlush(ctx)
+
+	parent, err := tracer.NewContext(ctx, traceID, spanID)
+	if err != nil {
+		log.ErrorAndReport(c.Request, "new context: %v", err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	func(parent context.Context) {
+		_, span := tra.Start(parent, "hello")
+		defer span.End()
+
+		log.DebugWith(span.SpanContext().SpanID().String(), "debug log with spanID")
+		log.DebugWith(span.SpanContext().SpanID().String(), "debug log with spanID2")
+		log.Debug("debug log")
+
+		time.Sleep(1 * time.Second)
+	}(parent)
+
+	func(parent context.Context) {
+		_, span := tra.Start(parent, "world")
+		defer span.End()
+
+		span.AddEvent("something happened")
+		time.Sleep(1 * time.Second)
+	}(parent)
 
 	if strings.ToLower(renew) == "true" {
 		if err := dataset.DeleteAllView(ctx, dsn); err != nil {
