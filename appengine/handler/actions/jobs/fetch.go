@@ -22,11 +22,11 @@ func Fetch(c *gin.Context) {
 	traceID := c.GetString("trace_id")
 
 	dsn := dataset.Name(owner, repository)
-	log := logger.New(projectID, traceID).NewReport(ctx)
+	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
 
 	token, _, err := NextToken(ctx, projectID, dsn)
 	if err != nil {
-		log.ErrorAndReport(c.Request, "next token: %v", err)
+		log.ErrorAndReport("next token: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -34,7 +34,7 @@ func Fetch(c *gin.Context) {
 
 	runs, err := ListRuns(ctx, projectID, dsn, token)
 	if err != nil {
-		log.ErrorAndReport(c.Request, "list runs: %v", err)
+		log.ErrorAndReport("list runs: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -52,7 +52,7 @@ func Fetch(c *gin.Context) {
 			r.RunID,
 		)
 		if err != nil {
-			log.ErrorAndReport(c.Request, "fetch runID=%v: %v", r.RunID, err)
+			log.ErrorAndReport("fetch runID=%v: %v", r.RunID, err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
@@ -76,7 +76,7 @@ func Fetch(c *gin.Context) {
 		}
 
 		if err := dataset.Insert(ctx, dsn, dataset.WorkflowJobsMeta.Name, items); err != nil {
-			log.ErrorAndReport(c.Request, "insert items runID=%v: %v", r.RunID, err)
+			log.ErrorAndReport("insert items runID=%v: %v", r.RunID, err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}

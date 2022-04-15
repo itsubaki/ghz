@@ -24,11 +24,11 @@ func Update(c *gin.Context) {
 	traceID := c.GetString("trace_id")
 
 	dsn := dataset.Name(owner, repository)
-	log := logger.New(projectID, traceID).NewReport(ctx)
+	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
 
 	open, err := ListPullReqs(ctx, projectID, dsn, "open")
 	if err != nil {
-		log.ErrorAndReport(c.Request, "list pullreqs: %v", err)
+		log.ErrorAndReport("list pullreqs: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -42,7 +42,7 @@ func Update(c *gin.Context) {
 			Number:     int(r.Number),
 		})
 		if err != nil {
-			log.ErrorAndReport(c.Request, "fetch pullreq: %v", err)
+			log.ErrorAndReport("fetch pullreq: %v", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}

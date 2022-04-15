@@ -35,6 +35,13 @@ func (t *Tracer) Start(ctx context.Context, spanName string, opts ...otltrace.Sp
 	return t.t.Start(ctx, spanName, opts...)
 }
 
+func (t *Tracer) Span(parent context.Context, spanName string, f func(child context.Context, span otltrace.Span) error) error {
+	child, span := t.t.Start(parent, spanName)
+	defer span.End()
+
+	return f(child, span)
+}
+
 func NewContext(ctx context.Context, traceID, spanID string) (context.Context, error) {
 	tID, err := otltrace.TraceIDFromHex(traceID)
 	if err != nil {

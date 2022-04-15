@@ -36,11 +36,11 @@ func Create(c *gin.Context) {
 	traceID := c.GetString("trace_id")
 
 	dsn := dataset.Name(in.Owner, in.Repository)
-	log := logger.New(projectID, traceID).NewReport(ctx)
+	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
 
 	resolvedAt, err := time.Parse("2006-01-02 15:04:05 UTC", in.ResolvedAt)
 	if err != nil {
-		log.ErrorAndReport(c.Request, "parse time: %v", err)
+		log.ErrorAndReport("parse time: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -55,7 +55,7 @@ func Create(c *gin.Context) {
 	})
 
 	if err := dataset.Insert(ctx, dsn, dataset.IncidentsMeta.Name, items); err != nil {
-		log.ErrorAndReport(c.Request, "insert items: %v", err)
+		log.ErrorAndReport("insert items: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

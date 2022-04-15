@@ -26,11 +26,11 @@ func Fetch(c *gin.Context) {
 	traceID := c.GetString("trace_id")
 
 	dsn := dataset.Name(owner, repository)
-	log := logger.New(projectID, traceID).NewReport(ctx)
+	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
 
 	token, err := NextToken(ctx, projectID, dsn)
 	if err != nil {
-		log.ErrorAndReport(c.Request, "next token: %v", err)
+		log.ErrorAndReport("next token: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -77,7 +77,7 @@ func Fetch(c *gin.Context) {
 			return nil
 		},
 	); err != nil {
-		log.ErrorAndReport(c.Request, "fetch: %v", err)
+		log.ErrorAndReport("fetch: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

@@ -35,6 +35,7 @@ type Logger struct {
 	ProjectID   string
 	Trace       string
 	ErrorClient *errorreporting.Client
+	Request     *http.Request
 }
 
 func New(projectID string, traceID ...string) *Logger {
@@ -101,7 +102,7 @@ func (l *Logger) Emergency(format string, a ...interface{}) {
 	l.Log("", EMERGENCY, format, a...)
 }
 
-func (l *Logger) NewReport(ctx context.Context) *Logger {
+func (l *Logger) NewReport(ctx context.Context, req *http.Request) *Logger {
 	c, err := errorreporting.NewClient(ctx, l.ProjectID, errorreporting.Config{})
 	if err != nil {
 		l.Error("new error report client: %v", err)
@@ -109,10 +110,11 @@ func (l *Logger) NewReport(ctx context.Context) *Logger {
 	}
 
 	l.ErrorClient = c
+	l.Request = req
 	return l
 }
 
-func (l *Logger) ErrorAndReport(req *http.Request, format string, a ...interface{}) {
+func (l *Logger) ErrorAndReport(format string, a ...interface{}) {
 	l.Error(format, a...)
 	if l.ErrorClient == nil {
 		return
@@ -123,7 +125,7 @@ func (l *Logger) ErrorAndReport(req *http.Request, format string, a ...interface
 		case error:
 			l.ErrorClient.Report(errorreporting.Entry{
 				Error: err,
-				Req:   req,
+				Req:   l.Request,
 			})
 		}
 	}
