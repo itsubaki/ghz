@@ -154,7 +154,8 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 }
 
 func (a *apiFeature) ExecuteQuery(query string) error {
-	if err := dataset.Query(context.Background(), query, func(values []bigquery.Value) {
+	q := strings.ReplaceAll(query, "$PROJECT_ID", dataset.ProjectID)
+	if err := dataset.Query(context.Background(), q, func(values []bigquery.Value) {
 		a.result = append(a.result, values)
 	}); err != nil {
 		return fmt.Errorf("execute query: %v", err)
