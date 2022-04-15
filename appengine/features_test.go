@@ -60,6 +60,7 @@ func (a *apiFeature) Request(method, endpoint string) error {
 	r := a.replace(endpoint)
 	req := httptest.NewRequest(method, r, a.body)
 	req.Header = a.header
+	req.Header.Add("X-Cloud-Trace-Context", "5f5a38f6df30898389ad6923c07c6531/11455964211050109536;")
 
 	a.server.ServeHTTP(a.resp, req)
 	return nil
