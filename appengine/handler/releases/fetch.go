@@ -78,8 +78,8 @@ func Fetch(c *gin.Context) {
 		for i := range t {
 			rtags[t[i].GetName()] = t[i]
 		}
-		log.DebugWith(s.SpanContext().SpanID().String(), "fetched len(tags)=%v", len(rtags))
 
+		log.DebugWith(s.SpanContext().SpanID().String(), "fetched len(tags)=%v", len(rtags))
 		return nil
 	}); err != nil {
 		log.ErrorAndReport("fetch tags: %v", err)
@@ -118,8 +118,8 @@ func Fetch(c *gin.Context) {
 					if err := dataset.Insert(cc, dsn, dataset.ReleasesMeta.Name, items); err != nil {
 						return fmt.Errorf("insert items: %v", err)
 					}
-					log.DebugWith(ss.SpanContext().SpanID().String(), "inserted. len(items)=%v", len(items))
 
+					log.DebugWith(ss.SpanContext().SpanID().String(), "inserted. len(items)=%v", len(items))
 					return nil
 				})
 			},
