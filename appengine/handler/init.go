@@ -22,11 +22,14 @@ func Init(c *gin.Context) {
 	renew := c.Query("renew")
 	traceID := c.GetString("trace_id")
 	spanID := c.GetString("span_id")
+	traceTrue := c.GetBool("trace_true")
 
 	projectID := dataset.ProjectID
 	dsn := dataset.Name(owner, repository)
 
 	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
+	log.DebugWith(spanID, "trace_id=%v, span_id=%v, trace_true=%v", traceID, spanID, traceTrue)
+
 	tra, err := tracer.New(projectID)
 	if err != nil {
 		log.ErrorAndReport("new tracer: %v", err)
@@ -35,7 +38,7 @@ func Init(c *gin.Context) {
 	}
 	defer tra.ForceFlush(ctx)
 
-	parent, err := tracer.NewContext(ctx, traceID, spanID)
+	parent, err := tracer.NewContext(ctx, traceID, spanID, traceTrue)
 	if err != nil {
 		log.ErrorAndReport("new context: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)

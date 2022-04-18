@@ -28,9 +28,9 @@ func Fetch(c *gin.Context) {
 	dsn := dataset.Name(owner, repository)
 	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
 
-	token, err := NextToken(ctx, projectID, dsn)
+	token, err := GetNextToken(ctx, projectID, dsn)
 	if err != nil {
-		log.ErrorAndReport("next token: %v", err)
+		log.ErrorAndReport("get next token: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -87,7 +87,7 @@ func Fetch(c *gin.Context) {
 	})
 }
 
-func NextToken(ctx context.Context, projectID, dsn string) (int64, error) {
+func GetNextToken(ctx context.Context, projectID, dsn string) (int64, error) {
 	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.PullReqsMeta.Name)
 	query := fmt.Sprintf("select max(id) from `%v` limit 1", table)
 

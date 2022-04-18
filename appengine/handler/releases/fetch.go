@@ -24,11 +24,14 @@ func Fetch(c *gin.Context) {
 	repository := c.Param("repository")
 	traceID := c.GetString("trace_id")
 	spanID := c.GetString("span_id")
+	traceTrue := c.GetBool("trace_true")
 
 	projectID := dataset.ProjectID
 	dsn := dataset.Name(owner, repository)
 
 	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
+	log.DebugWith(spanID, "trace_id=%v, span_id=%v, trace_true=%v", traceID, spanID, traceTrue)
+
 	tra, err := tracer.New(projectID)
 	if err != nil {
 		log.ErrorAndReport("new tracer: %v", err)
@@ -37,7 +40,7 @@ func Fetch(c *gin.Context) {
 	}
 	defer tra.ForceFlush(ctx)
 
-	parent, err := tracer.NewContext(ctx, traceID, spanID)
+	parent, err := tracer.NewContext(ctx, traceID, spanID, traceTrue)
 	if err != nil {
 		log.ErrorAndReport("new context: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
@@ -45,8 +48,8 @@ func Fetch(c *gin.Context) {
 	}
 
 	var token int64
-	if err := tra.Span(parent, "next token", func(child context.Context, s trace.Span) error {
-		token, err = NextToken(child, projectID, dsn)
+	if err := tra.Span(parent, "get next token", func(child context.Context, s trace.Span) error {
+		token, err = GetNextToken(child, projectID, dsn)
 		if err != nil {
 			return err
 		}
@@ -54,7 +57,7 @@ func Fetch(c *gin.Context) {
 		log.DebugWith(s.SpanContext().SpanID().String(), "next token=%v", token)
 		return nil
 	}); err != nil {
-		log.ErrorAndReport("next token: %v", err)
+		log.ErrorAndReport("get next token: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -139,7 +142,7 @@ func Fetch(c *gin.Context) {
 	})
 }
 
-func NextToken(ctx context.Context, projectID, dsn string) (int64, error) {
+func GetNextToken(ctx context.Context, projectID, dsn string) (int64, error) {
 	table := fmt.Sprintf("%v.%v.%v", projectID, dsn, dataset.ReleasesMeta.Name)
 	query := fmt.Sprintf("select max(id) from `%v`", table)
 

@@ -11,7 +11,7 @@ import (
 // GOOGLE_APPLICATION_CREDENTIALS=../../credentials.json go test ./appengine/tracer
 func TestTracer(t *testing.T) {
 	traceID, spanID := "fe86487e2a6a0b6b202bd69244be420b", "1234567890123456"
-	ctx, err := tracer.NewContext(context.Background(), traceID, spanID)
+	ctx, err := tracer.NewContext(context.Background(), traceID, spanID, true)
 	if err != nil {
 		t.Fatalf("new context: %v", err)
 	}

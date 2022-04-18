@@ -42,7 +42,7 @@ func (t *Tracer) Span(parent context.Context, spanName string, f func(child cont
 	return f(child, span)
 }
 
-func NewContext(ctx context.Context, traceID, spanID string) (context.Context, error) {
+func NewContext(ctx context.Context, traceID, spanID string, isSampled bool) (context.Context, error) {
 	tID, err := otltrace.TraceIDFromHex(traceID)
 	if err != nil {
 		return nil, fmt.Errorf("traceID from hex(%v): %v", traceID, err)
@@ -54,10 +54,15 @@ func NewContext(ctx context.Context, traceID, spanID string) (context.Context, e
 		return nil, fmt.Errorf("spanID from hex(%v): %v", spanID, err)
 	}
 
+	flags := otltrace.TraceFlags(00)
+	if isSampled {
+		flags = 01
+	}
+
 	return otltrace.ContextWithSpanContext(ctx, otltrace.NewSpanContext(otltrace.SpanContextConfig{
 		TraceID:    tID,
 		SpanID:     sID,
-		TraceFlags: 01,
+		TraceFlags: flags,
 		Remote:     false,
 	})), nil
 }
