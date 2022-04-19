@@ -32,7 +32,7 @@ func Update(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	log.Debug("jobs=%v", list)
+	log.Debug("len(jobs)=%v", len(list))
 
 	for _, j := range list {
 		job, err := jobs.Get(ctx, &jobs.GetInput{

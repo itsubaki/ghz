@@ -10,11 +10,16 @@ import (
 	"syscall"
 	"time"
 
+	"cloud.google.com/go/profiler"
 	"github.com/itsubaki/ghz/appengine/handler"
 )
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
+
+	if err := profiler.Start(profiler.Config{}); err != nil {
+		log.Fatalf("profiler start: %v\n", err)
+	}
 
 	port := os.Getenv("PORT")
 	if port == "" {

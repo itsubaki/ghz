@@ -41,7 +41,7 @@ func Fetch(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	log.Debug("pullreqs=%v", prs)
+	log.Debug("len(pullreqs)=%v", len(prs))
 
 	for _, p := range prs {
 		list, err := commits.Fetch(ctx,

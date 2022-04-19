@@ -32,7 +32,7 @@ func Update(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	log.Debug("pullreqs=%v", open)
+	log.Debug("len(pullreqs)=%v", len(open))
 
 	for _, r := range open {
 		pr, err := pullreqs.Get(ctx, &pullreqs.GetInput{

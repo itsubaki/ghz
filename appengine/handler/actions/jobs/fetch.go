@@ -38,7 +38,7 @@ func Fetch(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	log.Debug("runs=%v", runs)
+	log.Debug("len(runs)=%v", len(runs))
 
 	for _, r := range runs {
 		jobs, err := jobs.Fetch(ctx,
