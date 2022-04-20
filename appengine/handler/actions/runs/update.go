@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
@@ -48,8 +47,7 @@ func Update(c *gin.Context) {
 		}
 
 		if err := UpdateRun(ctx, projectID, dsn, run); err != nil {
-			msg := strings.ReplaceAll(err.Error(), projectID, "$PROJECT_ID")
-			log.Info("update runID=%v: %v", r.RunID, msg)
+			log.Info("update runID=%v: %v", r.RunID, err)
 			continue
 		}
 		log.Debug("updated. runID=%v", r.RunID)

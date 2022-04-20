@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	"strings"
 
 	"cloud.google.com/go/bigquery"
 	"github.com/gin-gonic/gin"
@@ -48,15 +47,13 @@ func Update(c *gin.Context) {
 		}
 
 		if err := UpdatePullReq(ctx, projectID, dsn, pr); err != nil {
-			msg := strings.ReplaceAll(err.Error(), projectID, "$PROJECT_ID")
-			log.Info("update pullreq(%v): %v", r.Number, msg)
+			log.Info("update pullreq(%v): %v", r.Number, err)
 			continue
 		}
 		log.Debug("updated. pr=%v", r.Number)
 
 		if err := UpdatePullReqCommits(ctx, projectID, dsn, pr); err != nil {
-			msg := strings.ReplaceAll(err.Error(), projectID, "$PROJECT_ID")
-			log.Info("update commits(pr=%v): %v", r.Number, msg)
+			log.Info("update commits(pr=%v): %v", r.Number, err)
 			continue
 		}
 
