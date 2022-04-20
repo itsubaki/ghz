@@ -28,7 +28,7 @@ func Update(c *gin.Context) {
 
 	list, err := ListJobs(ctx, projectID, dsn)
 	if err != nil {
-		log.ErrorAndReport("list jobs: %v", err)
+		log.ErrorReport("list jobs: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -42,7 +42,7 @@ func Update(c *gin.Context) {
 			JobID:      j.JobID,
 		})
 		if err != nil {
-			log.ErrorAndReport("get jobID=%v: %v", j.JobID, err)
+			log.ErrorReport("get jobID=%v: %v", j.JobID, err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			continue
 		}

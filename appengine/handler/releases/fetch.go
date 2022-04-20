@@ -34,7 +34,7 @@ func Fetch(c *gin.Context) {
 
 	tra, err := tracer.New(projectID)
 	if err != nil {
-		log.ErrorAndReport("new tracer: %v", err)
+		log.ErrorReport("new tracer: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -42,7 +42,7 @@ func Fetch(c *gin.Context) {
 
 	parent, err := tracer.NewContext(ctx, traceID, spanID, traceTrue)
 	if err != nil {
-		log.ErrorAndReport("new context: %v", err)
+		log.ErrorReport("new context: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -57,7 +57,7 @@ func Fetch(c *gin.Context) {
 		log.DebugWith(s.SpanContext().SpanID().String(), "next token=%v", token)
 		return nil
 	}); err != nil {
-		log.ErrorAndReport("get next token: %v", err)
+		log.ErrorReport("get next token: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -85,7 +85,7 @@ func Fetch(c *gin.Context) {
 		log.DebugWith(s.SpanContext().SpanID().String(), "fetched len(tags)=%v", len(rtags))
 		return nil
 	}); err != nil {
-		log.ErrorAndReport("fetch tags: %v", err)
+		log.ErrorReport("fetch tags: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -132,7 +132,7 @@ func Fetch(c *gin.Context) {
 
 		return nil
 	}); err != nil {
-		log.ErrorAndReport("fetch releases: %v", err)
+		log.ErrorReport("fetch releases: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

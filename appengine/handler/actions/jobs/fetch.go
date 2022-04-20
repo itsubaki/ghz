@@ -26,7 +26,7 @@ func Fetch(c *gin.Context) {
 
 	token, _, err := GetNextToken(ctx, projectID, dsn)
 	if err != nil {
-		log.ErrorAndReport("get next token: %v", err)
+		log.ErrorReport("get next token: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -34,7 +34,7 @@ func Fetch(c *gin.Context) {
 
 	runs, err := ListRuns(ctx, projectID, dsn, token)
 	if err != nil {
-		log.ErrorAndReport("list runs: %v", err)
+		log.ErrorReport("list runs: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -52,7 +52,7 @@ func Fetch(c *gin.Context) {
 			r.RunID,
 		)
 		if err != nil {
-			log.ErrorAndReport("fetch runID=%v: %v", r.RunID, err)
+			log.ErrorReport("fetch runID=%v: %v", r.RunID, err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
@@ -76,7 +76,7 @@ func Fetch(c *gin.Context) {
 		}
 
 		if err := dataset.Insert(ctx, dsn, dataset.WorkflowJobsMeta.Name, items); err != nil {
-			log.ErrorAndReport("insert items runID=%v: %v", r.RunID, err)
+			log.ErrorReport("insert items runID=%v: %v", r.RunID, err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}

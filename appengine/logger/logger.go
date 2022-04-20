@@ -50,7 +50,7 @@ func New(projectID string, traceID ...string) *Logger {
 	}
 }
 
-func (l *Logger) Log(spanID, severity, format string, a ...interface{}) {
+func (l *Logger) LogWith(spanID, severity, format string, a ...interface{}) {
 	if err := json.NewEncoder(os.Stdout).Encode(&LogEntry{
 		Time:     time.Now(),
 		Trace:    l.Trace,
@@ -62,44 +62,52 @@ func (l *Logger) Log(spanID, severity, format string, a ...interface{}) {
 	}
 }
 
-func (l *Logger) Default(format string, a ...interface{}) {
-	l.Log("", DEFAULT, format, a...)
+func (l *Logger) DebugWith(spanID, format string, a ...interface{}) {
+	l.LogWith(spanID, DEBUG, format, a...)
 }
 
-func (l *Logger) DebugWith(spanID, format string, a ...interface{}) {
-	l.Log(spanID, DEBUG, format, a...)
+func (l *Logger) ErrorWith(spanID, format string, a ...interface{}) {
+	l.LogWith(spanID, ERROR, format, a...)
+}
+
+func (l *Logger) Log(severity, format string, a ...interface{}) {
+	l.LogWith("", severity, format, a...)
+}
+
+func (l *Logger) Default(format string, a ...interface{}) {
+	l.Log(DEFAULT, format, a...)
 }
 
 func (l *Logger) Debug(format string, a ...interface{}) {
-	l.Log("", DEBUG, format, a...)
+	l.Log(DEBUG, format, a...)
 }
 
 func (l *Logger) Info(format string, a ...interface{}) {
-	l.Log("", INFO, format, a...)
+	l.Log(INFO, format, a...)
 }
 
 func (l *Logger) Notice(format string, a ...interface{}) {
-	l.Log("", NOTICE, format, a...)
+	l.Log(NOTICE, format, a...)
 }
 
 func (l *Logger) Warning(format string, a ...interface{}) {
-	l.Log("", WARNING, format, a...)
+	l.Log(WARNING, format, a...)
 }
 
 func (l *Logger) Error(format string, a ...interface{}) {
-	l.Log("", ERROR, format, a...)
+	l.Error(format, a...)
 }
 
 func (l *Logger) Critical(format string, a ...interface{}) {
-	l.Log("", CRITICAL, format, a...)
+	l.Log(CRITICAL, format, a...)
 }
 
 func (l *Logger) Alert(format string, a ...interface{}) {
-	l.Log("", ALERT, format, a...)
+	l.Log(ALERT, format, a...)
 }
 
 func (l *Logger) Emergency(format string, a ...interface{}) {
-	l.Log("", EMERGENCY, format, a...)
+	l.Log(EMERGENCY, format, a...)
 }
 
 func (l *Logger) NewReport(ctx context.Context, req *http.Request) *Logger {
@@ -114,8 +122,8 @@ func (l *Logger) NewReport(ctx context.Context, req *http.Request) *Logger {
 	return l
 }
 
-func (l *Logger) ErrorAndReport(format string, a ...interface{}) {
-	l.Error(format, a...)
+func (l *Logger) ReportWith(spanID, severity, format string, a ...interface{}) {
+	l.LogWith(spanID, severity, format, a...)
 	if l.ErrorClient == nil {
 		return
 	}
@@ -129,4 +137,40 @@ func (l *Logger) ErrorAndReport(format string, a ...interface{}) {
 			})
 		}
 	}
+}
+
+func (l *Logger) ErrorReportWith(spanID, format string, a ...interface{}) {
+	l.ReportWith(spanID, ERROR, format, a...)
+}
+
+func (l *Logger) CriticalReportWith(spanID, format string, a ...interface{}) {
+	l.ReportWith(spanID, CRITICAL, format, a...)
+}
+
+func (l *Logger) AlertReportWith(spanID, format string, a ...interface{}) {
+	l.ReportWith(spanID, ALERT, format, a...)
+}
+
+func (l *Logger) EmergencyReportWith(spanID, format string, a ...interface{}) {
+	l.ReportWith(spanID, EMERGENCY, format, a...)
+}
+
+func (l *Logger) Report(severity, format string, a ...interface{}) {
+	l.ReportWith("", severity, format, a...)
+}
+
+func (l *Logger) ErrorReport(format string, a ...interface{}) {
+	l.Report(ERROR, format, a...)
+}
+
+func (l *Logger) CriticalReport(format string, a ...interface{}) {
+	l.Report(CRITICAL, format, a...)
+}
+
+func (l *Logger) AlertReport(format string, a ...interface{}) {
+	l.Report(ALERT, format, a...)
+}
+
+func (l *Logger) EmergencyReport(format string, a ...interface{}) {
+	l.Report(EMERGENCY, format, a...)
 }

@@ -28,7 +28,7 @@ func Update(c *gin.Context) {
 
 	list, err := ListRuns(ctx, projectID, dsn)
 	if err != nil {
-		log.ErrorAndReport("list jobs: %v", err)
+		log.ErrorReport("list jobs: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -42,7 +42,7 @@ func Update(c *gin.Context) {
 			RunID:      r.RunID,
 		})
 		if err != nil {
-			log.ErrorAndReport("get runID=%v: %v", r.RunID, err)
+			log.ErrorReport("get runID=%v: %v", r.RunID, err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}

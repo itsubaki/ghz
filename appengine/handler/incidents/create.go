@@ -40,7 +40,7 @@ func Create(c *gin.Context) {
 
 	resolvedAt, err := time.Parse("2006-01-02 15:04:05 UTC", in.ResolvedAt)
 	if err != nil {
-		log.ErrorAndReport("parse time: %v", err)
+		log.ErrorReport("parse time: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -55,7 +55,7 @@ func Create(c *gin.Context) {
 	})
 
 	if err := dataset.Insert(ctx, dsn, dataset.IncidentsMeta.Name, items); err != nil {
-		log.ErrorAndReport("insert items: %v", err)
+		log.ErrorReport("insert items: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

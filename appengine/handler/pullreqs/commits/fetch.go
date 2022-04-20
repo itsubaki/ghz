@@ -29,7 +29,7 @@ func Fetch(c *gin.Context) {
 
 	token, _, err := GetNextToken(ctx, projectID, dsn)
 	if err != nil {
-		log.ErrorAndReport("get next token: %v", err)
+		log.ErrorReport("get next token: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -37,7 +37,7 @@ func Fetch(c *gin.Context) {
 
 	prs, err := ListPullReqs(ctx, projectID, dsn, token)
 	if err != nil {
-		log.ErrorAndReport("list pullreqs: %v", err)
+		log.ErrorReport("list pullreqs: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -55,7 +55,7 @@ func Fetch(c *gin.Context) {
 			int(p.Number),
 		)
 		if err != nil {
-			log.ErrorAndReport("fetch: %v", err)
+			log.ErrorReport("fetch: %v", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
@@ -80,7 +80,7 @@ func Fetch(c *gin.Context) {
 		}
 
 		if err := dataset.Insert(ctx, dsn, dataset.PullReqCommitsMeta.Name, items); err != nil {
-			log.ErrorAndReport("insert items: %v", err)
+			log.ErrorReport("insert items: %v", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}

@@ -28,7 +28,7 @@ func Update(c *gin.Context) {
 
 	open, err := ListPullReqs(ctx, projectID, dsn, "open")
 	if err != nil {
-		log.ErrorAndReport("list pullreqs: %v", err)
+		log.ErrorReport("list pullreqs: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -42,7 +42,7 @@ func Update(c *gin.Context) {
 			Number:     int(r.Number),
 		})
 		if err != nil {
-			log.ErrorAndReport("fetch pullreq: %v", err)
+			log.ErrorReport("fetch pullreq: %v", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}

@@ -30,7 +30,7 @@ func Fetch(c *gin.Context) {
 
 	token, err := GetNextToken(ctx, projectID, dsn)
 	if err != nil {
-		log.ErrorAndReport("get next token: %v", err)
+		log.ErrorReport("get next token: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -100,7 +100,7 @@ func Fetch(c *gin.Context) {
 			return nil
 		},
 	); err != nil {
-		log.ErrorAndReport("fetch: %v", err)
+		log.ErrorReport("fetch: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}

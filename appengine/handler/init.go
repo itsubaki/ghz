@@ -32,7 +32,7 @@ func Init(c *gin.Context) {
 
 	tra, err := tracer.New(projectID)
 	if err != nil {
-		log.ErrorAndReport("new tracer: %v", err)
+		log.ErrorReport("new tracer: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -40,7 +40,7 @@ func Init(c *gin.Context) {
 
 	parent, err := tracer.NewContext(ctx, traceID, spanID, traceTrue)
 	if err != nil {
-		log.ErrorAndReport("new context: %v", err)
+		log.ErrorReport("new context: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -53,7 +53,7 @@ func Init(c *gin.Context) {
 
 		return dataset.DeleteAllView(child, dsn)
 	}); err != nil {
-		log.ErrorAndReport("delete all view: %v", err)
+		log.ErrorReport("delete all view: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
@@ -85,7 +85,7 @@ func Init(c *gin.Context) {
 			view.PushedFailureRate(dsn),
 		})
 	}); err != nil {
-		log.ErrorAndReport("create if not exists: %v", err)
+		log.ErrorReport("create if not exists: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
