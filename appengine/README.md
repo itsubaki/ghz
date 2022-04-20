@@ -20,7 +20,7 @@
 ## Configuration
 
 - `cron.yaml`
-- create `secrets.yaml`
+- `secrets.yaml`
 
 ```shell
 $ cat secrets.yaml
@@ -28,13 +28,31 @@ env_variables:
   PAT: YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
 ```
 
+## IAM
+
+- `${PROJECT_ID}@appspot.gserviceaccount.com` (App Engine default service account)
+  - App Engine Admin
+  - BigQuery Admin
+  - Cloud Scheduler Job Runner
+- `github@${PROJECT_ID}.iam.gserviceaccount.com` (CI/CD @ GitHub Actions )
+  - App Engine Admin
+  - BigQuery Admin
+  - Cloud Build Editor
+  - Cloud Scheduler Admin
+  - Service Account User
+  - Storage Object Admin
+- `localhost@${PROJECT_ID}.iam.gserviceaccount.com` (Integration Test @ localhost)
+  - BigQuery Admin
+- `${PROFJECT_NUMBER}@cloudbuild.gserviceaccount.com`
+  - Cloud Build Service Account
+
 ## Deployment
 
 ```shell
 $ gcloud app deploy app.yaml cron.yaml
 ```
 
-## Integration Test
+## Integration Tests
 
 - Create google cloud service account.
 - Put `credentials.json` to root directory.
@@ -67,4 +85,6 @@ ok      github.com/itsubaki/ghz/appengine       4.459s  coverage: 15.1% of state
 
 ## GitHub Actions
 
-- Set repository secrets `GOOGLE_APPLICATION_CREDENTIALS` and `PAT`
+- Set repository secrets
+  - `GOOGLE_APPLICATION_CREDENTIALS`: json of `github@${PROJECT_ID}.iam.gserviceaccount.com`
+  - `PAT`: Your GitHub Personal Access Token
