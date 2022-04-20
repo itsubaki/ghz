@@ -84,7 +84,7 @@ ok      github.com/itsubaki/ghz/appengine       4.459s  coverage: 15.1% of state
   - Cloud Scheduler Admin
   - Service Account User
   - Storage Object Admin
-- `localhost@${PROJECT_ID}.iam.gserviceaccount.com` (Integration Test @ localhost)
+- `localhost@${PROJECT_ID}.iam.gserviceaccount.com` (Integration Tests @ localhost)
   - BigQuery Admin
 - `${PROFJECT_NUMBER}@cloudbuild.gserviceaccount.com`
   - Cloud Build Service Account
