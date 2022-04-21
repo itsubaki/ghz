@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v40/github"
+	"github.com/itsubaki/ghz/cmd/encode"
 	"github.com/urfave/cli/v2"
 )
 
@@ -92,21 +93,17 @@ func CSV(r github.PullRequest) string {
 	return out
 }
 
-func JSON(v interface{}) string {
-	b, err := json.Marshal(v)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(b)
-}
-
 func print(format string, list []github.PullRequest) error {
 	sort.Slice(list, func(i, j int) bool { return *list[i].ID > *list[j].ID })
 
 	if format == "json" {
 		for _, r := range list {
-			fmt.Println(JSON(r))
+			json, err := encode.JSON(r)
+			if err != nil {
+				return fmt.Errorf("encode: %v", err)
+			}
+
+			fmt.Println(json)
 		}
 
 		return nil

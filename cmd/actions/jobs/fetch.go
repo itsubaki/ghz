@@ -10,6 +10,7 @@ import (
 
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghz/cmd/actions/runs"
+	"github.com/itsubaki/ghz/cmd/encode"
 	"github.com/itsubaki/ghz/pkg/actions/jobs"
 	"github.com/urfave/cli/v2"
 )
@@ -74,15 +75,6 @@ func Fetch(c *cli.Context) error {
 	return nil
 }
 
-func JSON(v interface{}) string {
-	b, err := json.Marshal(v)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(b)
-}
-
 func Serialize(path string, list []*github.WorkflowJob) error {
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -91,7 +83,12 @@ func Serialize(path string, list []*github.WorkflowJob) error {
 	defer file.Close()
 
 	for _, j := range list {
-		fmt.Fprintln(file, JSON(j))
+		json, err := encode.JSON(j)
+		if err != nil {
+			return fmt.Errorf("encode: %v", err)
+		}
+
+		fmt.Fprintln(file, json)
 	}
 
 	return nil

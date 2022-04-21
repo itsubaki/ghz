@@ -6,6 +6,7 @@ require (
 	cloud.google.com/go v0.100.2
 	cloud.google.com/go/bigquery v1.25.0
 	cloud.google.com/go/errorreporting v0.2.0
+	cloud.google.com/go/profiler v0.2.0
 	github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace v1.3.0
 	github.com/cucumber/godog v0.12.2
 	github.com/gin-gonic/gin v1.7.7
@@ -23,7 +24,6 @@ require (
 require (
 	cloud.google.com/go/compute v1.3.0 // indirect
 	cloud.google.com/go/iam v0.3.0 // indirect
-	cloud.google.com/go/profiler v0.2.0 // indirect
 	cloud.google.com/go/trace v1.0.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/cucumber/gherkin-go/v19 v19.0.3 // indirect
@@ -56,7 +56,7 @@ require (
 	go.opencensus.io v0.23.0 // indirect
 	go.opentelemetry.io/otel v1.6.3 // indirect
 	golang.org/x/crypto v0.0.0-20220411220226-7b82a4e95df4 // indirect
-	golang.org/x/net v0.0.0-20220412020605-290c469a71a5 // indirect
+	golang.org/x/net v0.0.0-20220420153159-1850ba15e1be // indirect
 	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c // indirect
 	golang.org/x/sys v0.0.0-20220209214540-3681064d5158 // indirect
 	golang.org/x/text v0.3.7 // indirect

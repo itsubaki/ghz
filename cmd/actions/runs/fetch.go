@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	"github.com/google/go-github/v40/github"
+	"github.com/itsubaki/ghz/cmd/encode"
 	"github.com/itsubaki/ghz/pkg/actions/runs"
 	"github.com/urfave/cli/v2"
 )
@@ -57,15 +58,6 @@ func Fetch(c *cli.Context) error {
 	return nil
 }
 
-func JSON(v interface{}) string {
-	b, err := json.Marshal(v)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(b)
-}
-
 func Serialize(path string, list []*github.WorkflowRun) error {
 	file, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
@@ -74,7 +66,12 @@ func Serialize(path string, list []*github.WorkflowRun) error {
 	defer file.Close()
 
 	for _, r := range list {
-		fmt.Fprintln(file, JSON(r))
+		json, err := encode.JSON(r)
+		if err != nil {
+			return fmt.Errorf("encode: %v", err)
+		}
+
+		fmt.Fprintln(file, json)
 	}
 
 	return nil

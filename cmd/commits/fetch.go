@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/google/go-github/v40/github"
+	"github.com/itsubaki/ghz/cmd/encode"
 	"github.com/itsubaki/ghz/pkg/commits"
 	"github.com/urfave/cli/v2"
 )
@@ -62,7 +63,12 @@ func Serialize(path string, list []*github.RepositoryCommit) error {
 	defer file.Close()
 
 	for _, r := range list {
-		fmt.Fprintln(file, JSON(r))
+		json, err := encode.JSON(r)
+		if err != nil {
+			return fmt.Errorf("encode: %v", err)
+		}
+
+		fmt.Fprintln(file, json)
 	}
 
 	return nil

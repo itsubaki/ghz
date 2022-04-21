@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -58,7 +59,7 @@ func (l *Logger) LogWith(spanID, severity, format string, a ...interface{}) {
 		Severity: severity,
 		Message:  fmt.Sprintf(format, a...),
 	}); err != nil {
-		panic(err)
+		log.Printf("encode log entry: %v", err)
 	}
 }
 

@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/itsubaki/ghz/cmd/encode"
 	"github.com/urfave/cli/v2"
 )
 
@@ -58,7 +59,12 @@ func print(format string, list []CommitWithPRID) error {
 
 	if format == "json" {
 		for _, r := range list {
-			fmt.Println(JSON(r))
+			json, err := encode.JSON(r)
+			if err != nil {
+				return fmt.Errorf("encode: %v", err)
+			}
+
+			fmt.Println(json)
 		}
 
 		return nil

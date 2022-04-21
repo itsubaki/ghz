@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/google/go-github/v40/github"
+	"github.com/itsubaki/ghz/cmd/encode"
 	"github.com/itsubaki/ghz/cmd/pullreqs"
 	"github.com/itsubaki/ghz/pkg/pullreqs/commits"
 	"github.com/urfave/cli/v2"
@@ -107,7 +108,12 @@ func Serialize(path string, list []CommitWithPRID) error {
 	defer file.Close()
 
 	for _, j := range list {
-		fmt.Fprintln(file, JSON(j))
+		json, err := encode.JSON(j)
+		if err != nil {
+			return fmt.Errorf("encode: %v", err)
+		}
+
+		fmt.Fprintln(file, json)
 	}
 
 	return nil
@@ -140,13 +146,4 @@ func GetLastNumber(path string) (int64, int, error) {
 	}
 
 	return id, number, nil
-}
-
-func JSON(v interface{}) string {
-	b, err := json.Marshal(v)
-	if err != nil {
-		panic(err)
-	}
-
-	return string(b)
 }
