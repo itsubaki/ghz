@@ -18,7 +18,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-var tra = otel.Tracer("releases/fetch")
+var tra = otel.Tracer("handler/releases/fetch")
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
