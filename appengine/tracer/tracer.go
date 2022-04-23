@@ -16,9 +16,11 @@ import (
 )
 
 func Setup(timeout time.Duration) (func(), error) {
+	// https://cloud.google.com/appengine/docs/standard/go/runtime#environment_variables
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	serviceName := os.Getenv("GAE_SERVICE")
 	version := os.Getenv("GAE_VERSION")
+	deploymentID := os.Getenv("GAE_DEPLOYMENT_ID")
 
 	exporter, err := gcptrace.New(gcptrace.WithProjectID(projectID))
 	if err != nil {
@@ -31,7 +33,7 @@ func Setup(timeout time.Duration) (func(), error) {
 			resource.NewWithAttributes(
 				semconv.SchemaURL,
 				semconv.ServiceNameKey.String(serviceName),
-				semconv.ServiceVersionKey.String(version),
+				semconv.ServiceVersionKey.String(fmt.Sprintf("%v.%v", version, deploymentID)),
 			),
 		),
 	)
