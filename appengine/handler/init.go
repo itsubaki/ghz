@@ -12,7 +12,6 @@ import (
 	"github.com/itsubaki/ghz/appengine/logger"
 	"github.com/itsubaki/ghz/appengine/tracer"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/trace"
 )
 
 var tra = otel.Tracer("handler/init")
@@ -40,20 +39,26 @@ func Init(c *gin.Context) {
 		return
 	}
 
-	if err := tracer.Span(tra, parent, "delete all view", func(c context.Context, s trace.Span) error {
+	if err := func() error {
+		c, s := tra.Start(parent, "delete all view")
+		defer s.End()
+
 		if strings.ToLower(renew) != "true" {
 			s.AddEvent("renew flag is not true. nothing to do.")
 			return nil
 		}
 
 		return dataset.DeleteAllView(c, dsn)
-	}); err != nil {
+	}(); err != nil {
 		log.ErrorReport("delete all view: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	if err := tracer.Span(tra, parent, "create table/view", func(c context.Context, s trace.Span) error {
+	if err := func() error {
+		c, s := tra.Start(parent, "create table/view")
+		defer s.End()
+
 		return dataset.Create(c, dsn, []bigquery.TableMetadata{
 			dataset.CommitsMeta,
 			dataset.PullReqsMeta,
@@ -79,7 +84,7 @@ func Init(c *gin.Context) {
 			view.PushedTTRMedianMeta(dsn),
 			view.PushedFailureRate(dsn),
 		})
-	}); err != nil {
+	}(); err != nil {
 		log.ErrorReport("create if not exists: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return

@@ -15,7 +15,6 @@ import (
 	"github.com/itsubaki/ghz/pkg/releases"
 	"github.com/itsubaki/ghz/pkg/tags"
 	"go.opentelemetry.io/otel"
-	"go.opentelemetry.io/otel/trace"
 )
 
 var tra = otel.Tracer("handler/releases/fetch")
@@ -42,24 +41,24 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	var token int64
-	if err := tracer.Span(tra, parent, "get next token", func(c context.Context, s trace.Span) error {
-		token, err = GetNextToken(c, projectID, dsn)
-		if err != nil {
-			return err
-		}
+	token, err := func() (int64, error) {
+		c, s := tra.Start(parent, "get next token")
+		defer s.End()
 
-		log.DebugWith(s.SpanContext().SpanID().String(), "next token=%v", token)
-		return nil
-	}); err != nil {
+		return GetNextToken(c, projectID, dsn)
+	}()
+	if err != nil {
 		log.ErrorReport("get next token: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
+	log.Debug("next token=%v", token)
 
-	var rtags map[string]*github.RepositoryTag
-	if err := tracer.Span(tra, parent, "fetch tags", func(c context.Context, s trace.Span) error {
-		t, err := tags.Fetch(c,
+	t, err := func() ([]*github.RepositoryTag, error) {
+		c, s := tra.Start(parent, "fetch tags")
+		defer s.End()
+
+		return tags.Fetch(c,
 			&tags.FetchInput{
 				Owner:      owner,
 				Repository: repository,
@@ -68,25 +67,24 @@ func Fetch(c *gin.Context) {
 				PerPage:    100,
 			},
 		)
-		if err != nil {
-			return err
-		}
-
-		rtags = make(map[string]*github.RepositoryTag)
-		for i := range t {
-			rtags[t[i].GetName()] = t[i]
-		}
-
-		log.DebugWith(s.SpanContext().SpanID().String(), "fetched len(tags)=%v", len(rtags))
-		return nil
-	}); err != nil {
+	}()
+	if err != nil {
 		log.ErrorReport("fetch tags: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	if err := tracer.Span(tra, parent, "fetch releases", func(c context.Context, s trace.Span) error {
-		if _, err := releases.Fetch(c,
+	tags := make(map[string]*github.RepositoryTag)
+	for i := range t {
+		tags[t[i].GetName()] = t[i]
+	}
+	log.Debug("len(tags)=%v", len(tags))
+
+	if _, err := func() ([]*github.RepositoryRelease, error) {
+		c, s := tra.Start(parent, "fetch releases")
+		defer s.End()
+
+		return releases.Fetch(c,
 			&releases.FetchInput{
 				Owner:      owner,
 				Repository: repository,
@@ -96,37 +94,33 @@ func Fetch(c *gin.Context) {
 				LastID:     token,
 			},
 			func(list []*github.RepositoryRelease) error {
-				return tracer.Span(tra, c, "insert items", func(c context.Context, s trace.Span) error {
-					items := make([]interface{}, 0)
-					for _, r := range list {
-						items = append(items, dataset.Release{
-							Owner:           owner,
-							Repository:      repository,
-							ID:              r.GetID(),
-							TagName:         r.GetTagName(),
-							TagSHA:          rtags[r.GetTagName()].GetCommit().GetSHA(),
-							Login:           r.GetAuthor().GetLogin(),
-							TargetCommitish: r.GetTargetCommitish(),
-							Name:            r.GetName(),
-							CreatedAt:       r.GetCreatedAt().Time,
-							PublishedAt:     r.GetPublishedAt().Time,
-						})
-					}
+				c, s := tra.Start(c, "insert items")
+				defer s.End()
 
-					if err := dataset.Insert(c, dsn, dataset.ReleasesMeta.Name, items); err != nil {
-						return fmt.Errorf("insert items: %v", err)
-					}
+				items := make([]interface{}, 0)
+				for _, r := range list {
+					items = append(items, dataset.Release{
+						Owner:           owner,
+						Repository:      repository,
+						ID:              r.GetID(),
+						TagName:         r.GetTagName(),
+						TagSHA:          tags[r.GetTagName()].GetCommit().GetSHA(),
+						Login:           r.GetAuthor().GetLogin(),
+						TargetCommitish: r.GetTargetCommitish(),
+						Name:            r.GetName(),
+						CreatedAt:       r.GetCreatedAt().Time,
+						PublishedAt:     r.GetPublishedAt().Time,
+					})
+				}
 
-					log.DebugWith(s.SpanContext().SpanID().String(), "inserted. len(items)=%v", len(items))
-					return nil
-				})
-			},
-		); err != nil {
-			return err
-		}
+				if err := dataset.Insert(c, dsn, dataset.ReleasesMeta.Name, items); err != nil {
+					return fmt.Errorf("insert items: %v", err)
+				}
 
-		return nil
-	}); err != nil {
+				log.DebugWith(s.SpanContext().SpanID().String(), "len(items)=%v", len(items))
+				return nil
+			})
+	}(); err != nil {
 		log.ErrorReport("fetch releases: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return

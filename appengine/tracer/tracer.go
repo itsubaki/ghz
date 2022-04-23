@@ -52,13 +52,6 @@ func Setup(timeout time.Duration) (func(), error) {
 	}, nil
 }
 
-func Span(t trace.Tracer, parent context.Context, spanName string, f func(child context.Context, span trace.Span) error) error {
-	child, span := t.Start(parent, spanName)
-	defer span.End()
-
-	return f(child, span)
-}
-
 func NewContext(ctx context.Context, traceID, spanID string, isSampled bool) (context.Context, error) {
 	tID, err := trace.TraceIDFromHex(traceID)
 	if err != nil {
