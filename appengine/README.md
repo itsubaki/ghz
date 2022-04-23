@@ -77,6 +77,7 @@ ok      github.com/itsubaki/ghz/appengine       4.459s  coverage: 15.1% of state
   - App Engine Admin
   - BigQuery Admin
   - Cloud Scheduler Job Runner
+  - Cloud Trace Agent
 - `github@${PROJECT_ID}.iam.gserviceaccount.com` (CI/CD @ GitHub Actions )
   - App Engine Admin
   - BigQuery Admin

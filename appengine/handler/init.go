@@ -11,8 +11,11 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset/view"
 	"github.com/itsubaki/ghz/appengine/logger"
 	"github.com/itsubaki/ghz/appengine/tracer"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
+
+var tra = otel.Tracer("handler/init")
 
 func Init(c *gin.Context) {
 	ctx := context.Background()
@@ -30,14 +33,6 @@ func Init(c *gin.Context) {
 	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
 	log.DebugWith(spanID, "trace_id=%v, span_id=%v, trace_true=%v", traceID, spanID, traceTrue)
 
-	tra, err := tracer.New(projectID)
-	if err != nil {
-		log.ErrorReport("new tracer: %v", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	defer tra.ForceFlush(ctx)
-
 	parent, err := tracer.NewContext(ctx, traceID, spanID, traceTrue)
 	if err != nil {
 		log.ErrorReport("new context: %v", err)
@@ -45,7 +40,7 @@ func Init(c *gin.Context) {
 		return
 	}
 
-	if err := tra.Span(parent, "delete all view", func(child context.Context, s trace.Span) error {
+	if err := tracer.Span(tra, parent, "delete all view", func(child context.Context, s trace.Span) error {
 		if strings.ToLower(renew) != "true" {
 			s.AddEvent("renew flag is not true. nothing to do.")
 			return nil
@@ -58,7 +53,7 @@ func Init(c *gin.Context) {
 		return
 	}
 
-	if err := tra.Span(parent, "create table/view", func(child context.Context, s trace.Span) error {
+	if err := tracer.Span(tra, parent, "create table/view", func(child context.Context, s trace.Span) error {
 		return dataset.Create(child, dsn, []bigquery.TableMetadata{
 			dataset.CommitsMeta,
 			dataset.PullReqsMeta,

@@ -14,7 +14,7 @@ func TestCreateIfNotExists(t *testing.T) {
 		return
 	}
 
-	os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "../../credentials.json")
+	t.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "../../credentials.json")
 
 	cases := []struct {
 		name string

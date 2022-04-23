@@ -14,8 +14,11 @@ import (
 	"github.com/itsubaki/ghz/appengine/tracer"
 	"github.com/itsubaki/ghz/pkg/releases"
 	"github.com/itsubaki/ghz/pkg/tags"
+	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/trace"
 )
+
+var tra = otel.Tracer("releases/fetch")
 
 func Fetch(c *gin.Context) {
 	ctx := context.Background()
@@ -32,14 +35,6 @@ func Fetch(c *gin.Context) {
 	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
 	log.DebugWith(spanID, "trace_id=%v, span_id=%v, trace_true=%v", traceID, spanID, traceTrue)
 
-	tra, err := tracer.New(projectID)
-	if err != nil {
-		log.ErrorReport("new tracer: %v", err)
-		c.AbortWithStatus(http.StatusInternalServerError)
-		return
-	}
-	defer tra.ForceFlush(ctx)
-
 	parent, err := tracer.NewContext(ctx, traceID, spanID, traceTrue)
 	if err != nil {
 		log.ErrorReport("new context: %v", err)
@@ -48,7 +43,7 @@ func Fetch(c *gin.Context) {
 	}
 
 	var token int64
-	if err := tra.Span(parent, "get next token", func(child context.Context, s trace.Span) error {
+	if err := tracer.Span(tra, parent, "get next token", func(child context.Context, s trace.Span) error {
 		token, err = GetNextToken(child, projectID, dsn)
 		if err != nil {
 			return err
@@ -63,7 +58,7 @@ func Fetch(c *gin.Context) {
 	}
 
 	var rtags map[string]*github.RepositoryTag
-	if err := tra.Span(parent, "fetch tags", func(child context.Context, s trace.Span) error {
+	if err := tracer.Span(tra, parent, "fetch tags", func(child context.Context, s trace.Span) error {
 		t, err := tags.Fetch(child,
 			&tags.FetchInput{
 				Owner:      owner,
@@ -90,7 +85,7 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	if err := tra.Span(parent, "fetch releases", func(child context.Context, s trace.Span) error {
+	if err := tracer.Span(tra, parent, "fetch releases", func(child context.Context, s trace.Span) error {
 		if _, err := releases.Fetch(child,
 			&releases.FetchInput{
 				Owner:      owner,
@@ -101,7 +96,7 @@ func Fetch(c *gin.Context) {
 				LastID:     token,
 			},
 			func(list []*github.RepositoryRelease) error {
-				return tra.Span(child, "insert items", func(cc context.Context, ss trace.Span) error {
+				return tracer.Span(tra, child, "insert items", func(cc context.Context, ss trace.Span) error {
 					items := make([]interface{}, 0)
 					for _, r := range list {
 						items = append(items, dataset.Release{
