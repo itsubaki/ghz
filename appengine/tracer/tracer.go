@@ -43,7 +43,7 @@ func Setup(timeout time.Duration) (func(), error) {
 		defer cancel()
 
 		if err := provider.ForceFlush(ctx); err != nil {
-			log.Printf("provider trace flush: %v", err)
+			log.Printf("provider force flush: %v", err)
 		}
 
 		if err := provider.Shutdown(ctx); err != nil {
