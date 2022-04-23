@@ -40,21 +40,21 @@ func Init(c *gin.Context) {
 		return
 	}
 
-	if err := tracer.Span(tra, parent, "delete all view", func(child context.Context, s trace.Span) error {
+	if err := tracer.Span(tra, parent, "delete all view", func(c context.Context, s trace.Span) error {
 		if strings.ToLower(renew) != "true" {
 			s.AddEvent("renew flag is not true. nothing to do.")
 			return nil
 		}
 
-		return dataset.DeleteAllView(child, dsn)
+		return dataset.DeleteAllView(c, dsn)
 	}); err != nil {
 		log.ErrorReport("delete all view: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
 
-	if err := tracer.Span(tra, parent, "create table/view", func(child context.Context, s trace.Span) error {
-		return dataset.Create(child, dsn, []bigquery.TableMetadata{
+	if err := tracer.Span(tra, parent, "create table/view", func(c context.Context, s trace.Span) error {
+		return dataset.Create(c, dsn, []bigquery.TableMetadata{
 			dataset.CommitsMeta,
 			dataset.PullReqsMeta,
 			dataset.PullReqCommitsMeta,

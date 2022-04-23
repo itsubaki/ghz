@@ -43,8 +43,8 @@ func Fetch(c *gin.Context) {
 	}
 
 	var token int64
-	if err := tracer.Span(tra, parent, "get next token", func(child context.Context, s trace.Span) error {
-		token, err = GetNextToken(child, projectID, dsn)
+	if err := tracer.Span(tra, parent, "get next token", func(c context.Context, s trace.Span) error {
+		token, err = GetNextToken(c, projectID, dsn)
 		if err != nil {
 			return err
 		}
@@ -58,8 +58,8 @@ func Fetch(c *gin.Context) {
 	}
 
 	var rtags map[string]*github.RepositoryTag
-	if err := tracer.Span(tra, parent, "fetch tags", func(child context.Context, s trace.Span) error {
-		t, err := tags.Fetch(child,
+	if err := tracer.Span(tra, parent, "fetch tags", func(c context.Context, s trace.Span) error {
+		t, err := tags.Fetch(c,
 			&tags.FetchInput{
 				Owner:      owner,
 				Repository: repository,
@@ -85,8 +85,8 @@ func Fetch(c *gin.Context) {
 		return
 	}
 
-	if err := tracer.Span(tra, parent, "fetch releases", func(child context.Context, s trace.Span) error {
-		if _, err := releases.Fetch(child,
+	if err := tracer.Span(tra, parent, "fetch releases", func(c context.Context, s trace.Span) error {
+		if _, err := releases.Fetch(c,
 			&releases.FetchInput{
 				Owner:      owner,
 				Repository: repository,
@@ -96,7 +96,7 @@ func Fetch(c *gin.Context) {
 				LastID:     token,
 			},
 			func(list []*github.RepositoryRelease) error {
-				return tracer.Span(tra, child, "insert items", func(cc context.Context, ss trace.Span) error {
+				return tracer.Span(tra, c, "insert items", func(c context.Context, s trace.Span) error {
 					items := make([]interface{}, 0)
 					for _, r := range list {
 						items = append(items, dataset.Release{
@@ -113,11 +113,11 @@ func Fetch(c *gin.Context) {
 						})
 					}
 
-					if err := dataset.Insert(cc, dsn, dataset.ReleasesMeta.Name, items); err != nil {
+					if err := dataset.Insert(c, dsn, dataset.ReleasesMeta.Name, items); err != nil {
 						return fmt.Errorf("insert items: %v", err)
 					}
 
-					log.DebugWith(ss.SpanContext().SpanID().String(), "inserted. len(items)=%v", len(items))
+					log.DebugWith(s.SpanContext().SpanID().String(), "inserted. len(items)=%v", len(items))
 					return nil
 				})
 			},
