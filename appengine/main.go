@@ -15,6 +15,8 @@ import (
 	"github.com/itsubaki/ghz/appengine/tracer"
 )
 
+var timeout = 5 * time.Second
+
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
@@ -22,7 +24,7 @@ func main() {
 		log.Fatalf("profiler start: %v", err)
 	}
 
-	f, err := tracer.Setup()
+	f, err := tracer.Setup(timeout)
 	if err != nil {
 		log.Fatalf("tracer setup: %v", err)
 	}
@@ -49,7 +51,7 @@ func main() {
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM)
 	<-ch
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
 	if err := s.Shutdown(ctx); err != nil {

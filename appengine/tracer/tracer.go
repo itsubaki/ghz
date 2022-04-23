@@ -15,7 +15,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func Setup() (func(), error) {
+func Setup(timeout time.Duration) (func(), error) {
 	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
 	serviceName := os.Getenv("GAE_SERVICE")
 	version := os.Getenv("GAE_VERSION")
@@ -39,7 +39,7 @@ func Setup() (func(), error) {
 	otel.SetTracerProvider(provider)
 
 	return func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), timeout)
 		defer cancel()
 
 		if err := provider.ForceFlush(ctx); err != nil {
