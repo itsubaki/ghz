@@ -53,10 +53,10 @@ func New(projectID, traceID string) *Logger {
 
 func (l *Logger) Log(severity, format string, a ...interface{}) {
 	if err := json.NewEncoder(os.Stdout).Encode(&LogEntry{
-		Time:     time.Now(),
-		Trace:    l.trace,
 		Severity: severity,
+		Time:     time.Now(),
 		Message:  fmt.Sprintf(format, a...),
+		Trace:    l.trace,
 	}); err != nil {
 		log.Printf("encode log entry: %v", err)
 	}
@@ -130,11 +130,13 @@ type SpanLogEntry struct {
 }
 
 func (e *SpanLogEntry) Log(severity, format string, a ...interface{}) {
-	e.Severity = severity
-	e.Message = fmt.Sprintf(format, a...)
-	e.Time = time.Now()
-
-	if err := json.NewEncoder(os.Stdout).Encode(e); err != nil {
+	if err := json.NewEncoder(os.Stdout).Encode(&SpanLogEntry{
+		Severity: severity,
+		Time:     time.Now(),
+		Message:  fmt.Sprintf(format, a...),
+		Trace:    e.Trace,
+		SpanID:   e.SpanID,
+	}); err != nil {
 		log.Printf("encode log entry: %v", err)
 	}
 }
