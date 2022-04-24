@@ -17,22 +17,22 @@ import (
 	"go.opentelemetry.io/otel"
 )
 
-var tra = otel.Tracer("handler/releases/fetch")
+var (
+	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
+	tra       = otel.Tracer("handler/releases/fetch")
+)
 
 func Fetch(c *gin.Context) {
-	ctx := context.Background()
-
 	owner := c.Param("owner")
 	repository := c.Param("repository")
 	traceID := c.GetString("trace_id")
 	spanID := c.GetString("span_id")
 	traceTrue := c.GetBool("trace_true")
 
-	projectID := dataset.ProjectID
+	ctx := context.Background()
 	dsn := dataset.Name(owner, repository)
-
 	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
-	log.DebugWith(spanID, "trace_id=%v, span_id=%v, trace_true=%v", traceID, spanID, traceTrue)
+	log.Debug("trace: %v", traceTrue)
 
 	parent, err := tracer.NewContext(ctx, traceID, spanID, traceTrue)
 	if err != nil {

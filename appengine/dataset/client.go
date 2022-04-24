@@ -8,22 +8,16 @@ import (
 	"regexp"
 
 	"cloud.google.com/go/bigquery"
-	"golang.org/x/oauth2/google"
 	"golang.org/x/xerrors"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/iterator"
 )
 
-var invalid = regexp.MustCompile(`[!?"'#$%&@\+\-\*/=~^;:,.|()\[\]{}<>]`)
-
-var ProjectID = func() string {
-	creds, err := google.FindDefaultCredentials(context.Background())
-	if err != nil {
-		panic(fmt.Sprintf("find default credentials: %v", err))
-	}
-
-	return creds.ProjectID
-}()
+var (
+	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
+	location  = os.Getenv("DATASET_LOCATION")
+	invalid   = regexp.MustCompile(`[!?"'#$%&@\+\-\*/=~^;:,.|()\[\]{}<>]`)
+)
 
 func Name(owner, repository string) string {
 	own := invalid.ReplaceAllString(owner, "_")
@@ -37,19 +31,19 @@ type Client struct {
 }
 
 func New(ctx context.Context) (*Client, error) {
-	client, err := bigquery.NewClient(ctx, ProjectID)
+	loc := "US"
+	if len(location) > 0 {
+		loc = location
+	}
+
+	client, err := bigquery.NewClient(ctx, projectID)
 	if err != nil {
 		return nil, fmt.Errorf("new bigquery client: %v", err)
 	}
 
-	location := "US"
-	if len(os.Getenv("DATASET_LOCATION")) > 0 {
-		location = os.Getenv("DATASET_LOCATION")
-	}
-
 	return &Client{
 		client:   client,
-		location: location,
+		location: loc,
 	}, nil
 }
 
@@ -136,7 +130,7 @@ func (c *Client) DeleteAllView(ctx context.Context, dsn string) error {
 
 func (c *Client) Insert(ctx context.Context, dsn, table string, items []interface{}) error {
 	if err := c.client.Dataset(dsn).Table(table).Inserter().Put(ctx, items); err != nil {
-		return fmt.Errorf("insert %v.%v.%v: %v", ProjectID, dsn, table, err)
+		return fmt.Errorf("insert %v.%v: %v", dsn, table, err)
 	}
 
 	return nil
