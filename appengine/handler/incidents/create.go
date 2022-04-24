@@ -4,15 +4,12 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/itsubaki/ghz/appengine/dataset"
 	"github.com/itsubaki/ghz/appengine/logger"
 )
-
-var projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
 
 type Incident struct {
 	Owner       string `json:"owner"`
@@ -31,11 +28,13 @@ func Create(c *gin.Context) {
 		return
 	}
 
+	ctx := context.Background()
+	projectID := dataset.ProjectID
+
 	in.Owner = c.Param("owner")
 	in.Repository = c.Param("repository")
 	traceID := c.GetString("trace_id")
 
-	ctx := context.Background()
 	dsn := dataset.Name(in.Owner, in.Repository)
 	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
 

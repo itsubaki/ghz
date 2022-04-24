@@ -19,24 +19,13 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset"
 	"github.com/itsubaki/ghz/appengine/handler"
 	"github.com/jfilipczyk/gomatch"
-	"golang.org/x/oauth2/google"
-)
-
-var (
-	api       = &apiFeature{}
-	projectID = func() string {
-		creds, err := google.FindDefaultCredentials(context.Background())
-		if err != nil {
-			panic(fmt.Sprintf("find default credentials: %v", err))
-		}
-
-		return creds.ProjectID
-	}()
 )
 
 func NewXCloudTraceContext() (string, string) {
 	return "X-Cloud-Trace-Context", fmt.Sprintf("%016x%016x/%016x;", rand.Int63(), rand.Int63(), rand.Int63())
 }
+
+var api = &apiFeature{}
 
 type apiFeature struct {
 	header http.Header
@@ -128,7 +117,7 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 		if err := dataset.Query(context.Background(),
 			fmt.Sprintf(
 				"SELECT count(*) FROM `%v.%v.%v` WHERE sha = \"%v\"",
-				projectID, dsn, dataset.IncidentsMeta.Name,
+				dataset.ProjectID, dsn, dataset.IncidentsMeta.Name,
 				incidents.Rows[i].Cells[3].Value,
 			),
 			func(values []bigquery.Value) {
@@ -165,7 +154,7 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 }
 
 func (a *apiFeature) ExecuteQuery(query string) error {
-	q := strings.ReplaceAll(query, "$PROJECT_ID", projectID)
+	q := strings.ReplaceAll(query, "$PROJECT_ID", dataset.ProjectID)
 	if err := dataset.Query(context.Background(), q, func(values []bigquery.Value) {
 		a.result = append(a.result, values)
 	}); err != nil {

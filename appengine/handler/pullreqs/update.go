@@ -15,11 +15,13 @@ import (
 )
 
 func Update(c *gin.Context) {
+	ctx := context.Background()
+	projectID := dataset.ProjectID
+
 	owner := c.Param("owner")
 	repository := c.Param("repository")
 	traceID := c.GetString("trace_id")
 
-	ctx := context.Background()
 	dsn := dataset.Name(owner, repository)
 	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
 
