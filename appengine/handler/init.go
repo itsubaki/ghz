@@ -30,7 +30,7 @@ func Init(c *gin.Context) {
 	dsn := dataset.Name(owner, repository)
 
 	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
-	log.DebugWith(spanID, "trace_id=%v, span_id=%v, trace_true=%v", traceID, spanID, traceTrue)
+	log.SpanOf(spanID).Debug("trace=%v", traceTrue)
 
 	parent, err := tracer.NewContext(ctx, traceID, spanID, traceTrue)
 	if err != nil {

@@ -32,7 +32,7 @@ func Fetch(c *gin.Context) {
 	dsn := dataset.Name(owner, repository)
 
 	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
-	log.DebugWith(spanID, "trace_id=%v, span_id=%v, trace_true=%v", traceID, spanID, traceTrue)
+	log.SpanOf(spanID).Debug("trace=%v", traceTrue)
 
 	parent, err := tracer.NewContext(ctx, traceID, spanID, traceTrue)
 	if err != nil {
@@ -117,7 +117,7 @@ func Fetch(c *gin.Context) {
 					return fmt.Errorf("insert items: %v", err)
 				}
 
-				log.DebugWith(s.SpanContext().SpanID().String(), "len(items)=%v", len(items))
+				log.Span(s).Debug("len(items)=%v", len(items))
 				return nil
 			})
 	}(); err != nil {
