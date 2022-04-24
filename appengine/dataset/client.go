@@ -14,16 +14,17 @@ import (
 	"google.golang.org/api/iterator"
 )
 
-var invalid = regexp.MustCompile(`[!?"'#$%&@\+\-\*/=~^;:,.|()\[\]{}<>]`)
+var (
+	invalid   = regexp.MustCompile(`[!?"'#$%&@\+\-\*/=~^;:,.|()\[\]{}<>]`)
+	ProjectID = func() string {
+		creds, err := google.FindDefaultCredentials(context.Background())
+		if err != nil {
+			panic(fmt.Sprintf("find default credentials: %v", err))
+		}
 
-var ProjectID = func() string {
-	creds, err := google.FindDefaultCredentials(context.Background())
-	if err != nil {
-		panic(fmt.Sprintf("find default credentials: %v", err))
-	}
-
-	return creds.ProjectID
-}()
+		return creds.ProjectID
+	}()
+)
 
 func Name(owner, repository string) string {
 	own := invalid.ReplaceAllString(owner, "_")

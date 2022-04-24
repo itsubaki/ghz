@@ -20,8 +20,11 @@ var timeout = 5 * time.Second
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	if err := profiler.Start(profiler.Config{}); err != nil {
-		log.Fatalf("profiler start: %v", err)
+	if len(os.Getenv("GOOGLE_CLOUD_PROJECT")) > 0 {
+		// enable profiler on GCP
+		if err := profiler.Start(profiler.Config{}); err != nil {
+			log.Fatalf("profiler start: %v", err)
+		}
 	}
 
 	f, err := tracer.Setup(timeout)

@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	gcptrace "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
+	gcp "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
 	"go.opentelemetry.io/otel"
 	"go.opentelemetry.io/otel/sdk/resource"
 	sdktrace "go.opentelemetry.io/otel/sdk/trace"
@@ -15,14 +15,16 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-func Setup(timeout time.Duration) (func(), error) {
+var (
 	// https://cloud.google.com/appengine/docs/standard/go/runtime#environment_variables
-	projectID := os.Getenv("GOOGLE_CLOUD_PROJECT")
-	serviceName := os.Getenv("GAE_SERVICE")
-	version := os.Getenv("GAE_VERSION")
-	deploymentID := os.Getenv("GAE_DEPLOYMENT_ID")
+	projectID    = os.Getenv("GOOGLE_CLOUD_PROJECT")
+	serviceName  = os.Getenv("GAE_SERVICE")
+	version      = os.Getenv("GAE_VERSION")
+	deploymentID = os.Getenv("GAE_DEPLOYMENT_ID")
+)
 
-	exporter, err := gcptrace.New(gcptrace.WithProjectID(projectID))
+func Setup(timeout time.Duration) (func(), error) {
+	exporter, err := gcp.New(gcp.WithProjectID(projectID))
 	if err != nil {
 		return nil, fmt.Errorf("new exporter: %v", err)
 	}
