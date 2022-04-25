@@ -10,20 +10,17 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghz/appengine/dataset"
-	"github.com/itsubaki/ghz/appengine/logger"
 	"github.com/itsubaki/ghz/pkg/pullreqs"
 )
 
 func Update(c *gin.Context) {
-	ctx := context.Background()
-	projectID := dataset.ProjectID
-
 	owner := c.Param("owner")
 	repository := c.Param("repository")
 	traceID := c.GetString("trace_id")
 
+	ctx := context.Background()
 	dsn := dataset.Name(owner, repository)
-	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
+	log := logf.New(traceID, c.Request)
 
 	open, err := ListPullReqs(ctx, projectID, dsn, "open")
 	if err != nil {

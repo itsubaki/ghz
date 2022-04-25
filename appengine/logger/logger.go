@@ -25,11 +25,46 @@ const (
 	EMERGENCY = "Emergency"
 )
 
-type LogEntry struct {
-	Severity string    `json:"severity"`
-	Message  string    `json:"message"`
-	Time     time.Time `json:"time"`
-	Trace    string    `json:"logging.googleapis.com/trace"`
+type LoggerFactory struct {
+	projectID string
+	errC      *errorreporting.Client
+}
+
+func Must(f *LoggerFactory, err error) *LoggerFactory {
+	if err != nil {
+		panic(err)
+	}
+
+	return f
+}
+
+func New(ctx context.Context, projectID string) (*LoggerFactory, error) {
+	c, err := errorreporting.NewClient(ctx, projectID, errorreporting.Config{})
+	if err != nil {
+		return nil, fmt.Errorf("new error reporting client: %v", err)
+	}
+
+	return &LoggerFactory{
+		projectID: projectID,
+		errC:      c,
+	}, nil
+}
+
+func MustNew(ctx context.Context, projectID string) *LoggerFactory {
+	return Must(New(ctx, projectID))
+}
+
+func (f *LoggerFactory) New(traceID string, req *http.Request) *Logger {
+	trace := ""
+	if len(traceID) > 0 {
+		trace = fmt.Sprintf("projects/%v/traces/%v", f.projectID, traceID[0])
+	}
+
+	return &Logger{
+		errC:  f.errC,
+		trace: trace,
+		req:   req,
+	}
 }
 
 type Logger struct {
@@ -39,16 +74,11 @@ type Logger struct {
 	req       *http.Request
 }
 
-func New(projectID, traceID string) *Logger {
-	trace := ""
-	if len(traceID) > 0 {
-		trace = fmt.Sprintf("projects/%v/traces/%v", projectID, traceID[0])
-	}
-
-	return &Logger{
-		projectID: projectID,
-		trace:     trace,
-	}
+type LogEntry struct {
+	Severity string    `json:"severity"`
+	Message  string    `json:"message"`
+	Time     time.Time `json:"time"`
+	Trace    string    `json:"logging.googleapis.com/trace"`
 }
 
 func (l *Logger) Log(severity, format string, a ...interface{}) {
@@ -72,18 +102,6 @@ func (l *Logger) Info(format string, a ...interface{}) {
 
 func (l *Logger) Error(format string, a ...interface{}) {
 	l.Log(ERROR, format, a...)
-}
-
-func (l *Logger) NewReport(ctx context.Context, req *http.Request) *Logger {
-	c, err := errorreporting.NewClient(ctx, l.projectID, errorreporting.Config{})
-	if err != nil {
-		l.Error("new error report client: %v", err)
-		return l
-	}
-
-	l.errC = c
-	l.req = req
-	return l
 }
 
 func (l *Logger) LogReport(severity, format string, a ...interface{}) {
@@ -126,7 +144,7 @@ type SpanLogEntry struct {
 	Message  string    `json:"message"`
 	Time     time.Time `json:"time"`
 	Trace    string    `json:"logging.googleapis.com/trace"`
-	SpanID   string    `json:"logging.googleapis.com/spanId,omitempty"`
+	SpanID   string    `json:"logging.googleapis.com/spanId"`
 }
 
 func (e *SpanLogEntry) Log(severity, format string, a ...interface{}) {

@@ -11,6 +11,11 @@ import (
 	"github.com/itsubaki/ghz/appengine/logger"
 )
 
+var (
+	projectID = dataset.ProjectID
+	logf      = logger.MustNew(context.Background(), projectID)
+)
+
 type Incident struct {
 	Owner       string `json:"owner"`
 	Repository  string `json:"repository"`
@@ -28,15 +33,13 @@ func Create(c *gin.Context) {
 		return
 	}
 
-	ctx := context.Background()
-	projectID := dataset.ProjectID
-
 	in.Owner = c.Param("owner")
 	in.Repository = c.Param("repository")
 	traceID := c.GetString("trace_id")
 
+	ctx := context.Background()
 	dsn := dataset.Name(in.Owner, in.Repository)
-	log := logger.New(projectID, traceID).NewReport(ctx, c.Request)
+	log := logf.New(traceID, c.Request)
 
 	resolvedAt, err := time.Parse("2006-01-02 15:04:05 UTC", in.ResolvedAt)
 	if err != nil {
