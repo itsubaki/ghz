@@ -57,7 +57,7 @@ func MustNew(ctx context.Context, projectID string) *LoggerFactory {
 func (f *LoggerFactory) New(traceID string, req *http.Request) *Logger {
 	trace := ""
 	if len(traceID) > 0 {
-		trace = fmt.Sprintf("projects/%v/traces/%v", f.projectID, traceID[0])
+		trace = fmt.Sprintf("projects/%v/traces/%v", f.projectID, traceID)
 	}
 
 	return &Logger{
@@ -68,10 +68,9 @@ func (f *LoggerFactory) New(traceID string, req *http.Request) *Logger {
 }
 
 type Logger struct {
-	projectID string
-	trace     string
-	errC      *errorreporting.Client
-	req       *http.Request
+	trace string
+	errC  *errorreporting.Client
+	req   *http.Request
 }
 
 type LogEntry struct {
@@ -105,7 +104,10 @@ func (l *Logger) Error(format string, a ...interface{}) {
 }
 
 func (l *Logger) LogReport(severity, format string, a ...interface{}) {
+	// logging
 	l.Log(severity, format, a...)
+
+	// error reporting
 	if l.errC == nil {
 		return
 	}
