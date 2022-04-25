@@ -53,7 +53,7 @@ func Fetch(c *gin.Context) {
 		c.AbortWithStatus(http.StatusInternalServerError)
 		return
 	}
-	log.Debug("next token=%v", token)
+	log.SpanOf(spanID).Debug("next token=%v", token)
 
 	t, err := func() ([]*github.RepositoryTag, error) {
 		c, s := tra.Start(parent, "fetch tags")
@@ -79,7 +79,7 @@ func Fetch(c *gin.Context) {
 	for i := range t {
 		tags[t[i].GetName()] = t[i]
 	}
-	log.Debug("len(tags)=%v", len(tags))
+	log.SpanOf(spanID).Debug("len(tags)=%v", len(tags))
 
 	if _, err := func() ([]*github.RepositoryRelease, error) {
 		c, s := tra.Start(parent, "fetch releases")

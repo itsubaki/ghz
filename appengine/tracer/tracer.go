@@ -56,7 +56,7 @@ func Setup(timeout time.Duration) (func(), error) {
 	}, nil
 }
 
-func NewContext(ctx context.Context, traceID, spanID string, isSampled bool) (context.Context, error) {
+func NewContext(ctx context.Context, traceID, spanID string, traceTrue bool) (context.Context, error) {
 	tID, err := trace.TraceIDFromHex(traceID)
 	if err != nil {
 		return nil, fmt.Errorf("traceID from hex(%v): %v", traceID, err)
@@ -69,7 +69,7 @@ func NewContext(ctx context.Context, traceID, spanID string, isSampled bool) (co
 	}
 
 	flags := trace.TraceFlags(00)
-	if isSampled {
+	if traceTrue {
 		flags = 01
 	}
 
