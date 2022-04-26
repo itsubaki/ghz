@@ -15,6 +15,8 @@ import (
 	"github.com/itsubaki/ghz/pkg/releases"
 	"github.com/itsubaki/ghz/pkg/tags"
 	"go.opentelemetry.io/otel"
+	"go.opentelemetry.io/otel/attribute"
+	"go.opentelemetry.io/otel/trace"
 )
 
 var (
@@ -43,7 +45,9 @@ func Fetch(c *gin.Context) {
 	}
 
 	token, err := func() (int64, error) {
-		c, s := tra.Start(parent, "get next token")
+		c, s := tra.Start(parent, "get next token",
+			trace.WithAttributes(attribute.String("dataset_name", dsn)),
+		)
 		defer s.End()
 
 		return GetNextToken(c, projectID, dsn)
