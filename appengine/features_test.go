@@ -22,7 +22,7 @@ import (
 )
 
 func NewXCloudTraceContext() (string, string) {
-	return "X-Cloud-Trace-Context", fmt.Sprintf("%016x%016x/%016x;", rand.Int63(), rand.Int63(), rand.Int63())
+	return "X-Cloud-Trace-Context", fmt.Sprintf("%016x%016x/%d;", rand.Int63(), rand.Int63(), rand.Int63())
 }
 
 var api = &apiFeature{}
