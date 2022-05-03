@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	gcp "github.com/GoogleCloudPlatform/opentelemetry-operations-go/exporter/trace"
@@ -62,8 +63,12 @@ func NewContext(ctx context.Context, traceID, spanID string, traceTrue bool) (co
 		return nil, fmt.Errorf("traceID from hex(%v): %v", traceID, err)
 	}
 
-	// hex encoded span-id must have length equals to 16
-	sID, err := trace.SpanIDFromHex(spanID[:16])
+	i, err := strconv.ParseUint(spanID, 10, 64)
+	if err != nil {
+		return nil, fmt.Errorf("parse %v: %v", spanID, err)
+	}
+
+	sID, err := trace.SpanIDFromHex(fmt.Sprintf("%016x", i))
 	if err != nil {
 		return nil, fmt.Errorf("spanID from hex(%v): %v", spanID, err)
 	}
