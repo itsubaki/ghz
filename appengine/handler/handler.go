@@ -1,7 +1,10 @@
 package handler
 
 import (
+	"fmt"
+	"log"
 	"net/http"
+	"strconv"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -94,7 +97,19 @@ func SetTraceID(c *gin.Context) {
 	// "X-Cloud-Trace-Context: TRACE_ID/SPAN_ID;o=TRACE_TRUE"
 	ids := strings.Split(strings.Split(value, ";")[0], "/")
 	c.Set("trace_id", ids[0])
-	c.Set("span_id", ids[1])
+
+	// https://cloud.google.com/trace/docs/setup
+	// SPAN_ID is the decimal representation of the (unsigned) span ID.
+	i, err := strconv.ParseUint(ids[1], 10, 64)
+	if err != nil {
+		log.Printf("parse %v: %v", ids[1], err)
+		c.AbortWithStatus(http.StatusInternalServerError)
+		return
+	}
+
+	// https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#retrieving-the-traceid-and-spanid
+	// MUST be a 16-hex-character lowercase string
+	c.Set("span_id", fmt.Sprintf("%016x", i))
 
 	c.Set("trace_true", false)
 	if len(strings.Split(value, ";")) > 1 && strings.Split(value, ";")[1] == "o=1" {
