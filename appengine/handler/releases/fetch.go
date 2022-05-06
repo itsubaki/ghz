@@ -21,8 +21,8 @@ import (
 
 var (
 	projectID = dataset.ProjectID
+	logf      = logger.Factory
 	tra       = otel.Tracer("handler/releases/fetch")
-	logf      = logger.MustNew(context.Background(), projectID)
 )
 
 func Fetch(c *gin.Context) {

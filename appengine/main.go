@@ -12,6 +12,7 @@ import (
 
 	"cloud.google.com/go/profiler"
 	"github.com/itsubaki/ghz/appengine/handler"
+	"github.com/itsubaki/ghz/appengine/logger"
 	"github.com/itsubaki/ghz/appengine/tracer"
 )
 
@@ -26,6 +27,8 @@ func main() {
 			log.Fatalf("profiler start: %v", err)
 		}
 	}
+
+	defer logger.Factory.Close()
 
 	f, err := tracer.Setup(timeout)
 	if err != nil {

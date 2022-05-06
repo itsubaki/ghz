@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/errorreporting"
+	"github.com/itsubaki/ghz/appengine/dataset"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -23,6 +24,11 @@ const (
 	CRITICAL  = "Critical"
 	ALERT     = "Alert"
 	EMERGENCY = "Emergency"
+)
+
+var (
+	projectID = dataset.ProjectID
+	Factory   = MustNew(context.Background(), projectID)
 )
 
 type LoggerFactory struct {
@@ -64,6 +70,13 @@ func (f *LoggerFactory) New(traceID string, req *http.Request) *Logger {
 		errC:  f.errC,
 		trace: trace,
 		req:   req,
+	}
+}
+
+func (f *LoggerFactory) Close() {
+	f.errC.Flush()
+	if err := f.errC.Close(); err != nil {
+		log.Printf("errorreporing client close: %v", err)
 	}
 }
 

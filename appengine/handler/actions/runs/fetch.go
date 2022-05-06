@@ -16,7 +16,7 @@ import (
 
 var (
 	projectID = dataset.ProjectID
-	logf      = logger.MustNew(context.Background(), projectID)
+	logf      = logger.Factory
 )
 
 func Fetch(c *gin.Context) {

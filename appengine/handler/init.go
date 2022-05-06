@@ -16,8 +16,8 @@ import (
 
 var (
 	projectID = dataset.ProjectID
+	logf      = logger.Factory
 	tra       = otel.Tracer("handler/init")
-	logf      = logger.MustNew(context.Background(), projectID)
 )
 
 func Init(c *gin.Context) {
