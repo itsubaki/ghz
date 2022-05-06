@@ -16,12 +16,15 @@ import (
 	"github.com/itsubaki/ghz/appengine/tracer"
 )
 
-var timeout = 5 * time.Second
+var (
+	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
+	timeout   = 5 * time.Second
+)
 
 func main() {
 	log.SetFlags(log.LstdFlags | log.Lshortfile)
 
-	if len(os.Getenv("GOOGLE_CLOUD_PROJECT")) > 0 {
+	if len(projectID) > 0 {
 		// enable profiler on GCP
 		if err := profiler.Start(profiler.Config{}); err != nil {
 			log.Fatalf("profiler start: %v", err)

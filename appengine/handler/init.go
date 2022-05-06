@@ -3,6 +3,7 @@ package handler
 import (
 	"context"
 	"net/http"
+	"os"
 	"strings"
 
 	"cloud.google.com/go/bigquery"
@@ -15,7 +16,7 @@ import (
 )
 
 var (
-	projectID = dataset.ProjectID
+	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
 	logf      = logger.Factory
 	tra       = otel.Tracer("handler/init")
 )
@@ -70,20 +71,20 @@ func Init(c *gin.Context) {
 			dataset.WorkflowRunsMeta,
 			dataset.WorkflowJobsMeta,
 			dataset.IncidentsMeta,
-			view.FrequencyRunsMeta(dsn),
-			view.FrequencyJobsMeta(dsn),
-			view.PullReqsMeta(dsn),
-			view.PullReqsLeadTimeMeta(dsn),
-			view.PullReqsLeadTimeMedianMeta(dsn),
-			view.PullReqsTTRMeta(dsn),
-			view.PullReqsTTRMedianMeta(dsn),
-			view.PullReqsFailureRate(dsn),
-			view.PushedMeta(dsn),
-			view.PushedLeadTimeMeta(dsn),
-			view.PushedLeadTimeMedianMeta(dsn),
-			view.PushedTTRMeta(dsn),
-			view.PushedTTRMedianMeta(dsn),
-			view.PushedFailureRate(dsn),
+			view.FrequencyRunsMeta(projectID, dsn),
+			view.FrequencyJobsMeta(projectID, dsn),
+			view.PullReqsMeta(projectID, dsn),
+			view.PullReqsLeadTimeMeta(projectID, dsn),
+			view.PullReqsLeadTimeMedianMeta(projectID, dsn),
+			view.PullReqsTTRMeta(projectID, dsn),
+			view.PullReqsTTRMedianMeta(projectID, dsn),
+			view.PullReqsFailureRate(projectID, dsn),
+			view.PushedMeta(projectID, dsn),
+			view.PushedLeadTimeMeta(projectID, dsn),
+			view.PushedLeadTimeMedianMeta(projectID, dsn),
+			view.PushedTTRMeta(projectID, dsn),
+			view.PushedTTRMedianMeta(projectID, dsn),
+			view.PushedFailureRate(projectID, dsn),
 		})
 	}(); err != nil {
 		log.ErrorReport("create if not exists: %v", err)

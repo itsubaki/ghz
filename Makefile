@@ -11,13 +11,13 @@ install:
 	go install -ldflags "${LDFLAGS}"
 
 test:
-	GOOGLE_APPLICATION_CREDENTIALS=../credentials.json DATASET_LOCATION=asia-northeast1 go test ./appengine --godog.format=pretty -v -coverprofile=coverage.out -covermode=atomic -coverpkg ./...
+	GOOGLE_APPLICATION_CREDENTIALS=../credentials.json DATASET_LOCATION=asia-northeast1 GOOGLE_CLOUD_PROJECT=${PROJECT_ID} go test ./appengine --godog.format=pretty -v -coverprofile=coverage.out -covermode=atomic -coverpkg ./...
 
 testpkg:
 	go test -v -cover $(shell go list ./... | grep pkg) -coverprofile=coverage-pkg.out -covermode=atomic
 
 run:
-	GOOGLE_APPLICATION_CREDENTIALS=./credentials.json go run appengine/main.go
+	GOOGLE_APPLICATION_CREDENTIALS=./credentials.json GOOGLE_CLOUD_PROJECT=${PROJECT_ID} go run appengine/main.go
 
 merge:
 	echo "" > coverage.txt

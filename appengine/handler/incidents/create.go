@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -12,7 +13,7 @@ import (
 )
 
 var (
-	projectID = dataset.ProjectID
+	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
 	logf      = logger.Factory
 )
 

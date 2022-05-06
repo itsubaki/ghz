@@ -7,7 +7,7 @@ import (
 	"github.com/itsubaki/ghz/appengine/dataset"
 )
 
-func PullReqsLeadTimeMeta(dsn string) bigquery.TableMetadata {
+func PullReqsLeadTimeMeta(projectID, dsn string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
 		Name: "_pullreqs_leadtime",
 		ViewQuery: fmt.Sprintf(
@@ -32,13 +32,13 @@ func PullReqsLeadTimeMeta(dsn string) bigquery.TableMetadata {
 			ON A.head_sha = B.merge_commit_sha
 			AND A.conclusion = "success"
 			`,
-			fmt.Sprintf("`%v.%v.%v`", dataset.ProjectID, dsn, dataset.WorkflowRunsMeta.Name),
-			fmt.Sprintf("`%v.%v.%v`", dataset.ProjectID, dsn, PullReqsMeta(dsn).Name),
+			fmt.Sprintf("`%v.%v.%v`", projectID, dsn, dataset.WorkflowRunsMeta.Name),
+			fmt.Sprintf("`%v.%v.%v`", projectID, dsn, PullReqsMeta(projectID, dsn).Name),
 		),
 	}
 }
 
-func PullReqsLeadTimeMedianMeta(dsn string) bigquery.TableMetadata {
+func PullReqsLeadTimeMedianMeta(projectID, dsn string) bigquery.TableMetadata {
 	return bigquery.TableMetadata{
 		Name: "_pullreqs_leadtime_median",
 		ViewQuery: fmt.Sprintf(
@@ -61,7 +61,7 @@ func PullReqsLeadTimeMedianMeta(dsn string) bigquery.TableMetadata {
 			FROM A
 			GROUP BY owner, repository, workflow_name, date
 			`,
-			fmt.Sprintf("`%v.%v.%v`", dataset.ProjectID, dsn, PullReqsLeadTimeMeta(dsn).Name),
+			fmt.Sprintf("`%v.%v.%v`", projectID, dsn, PullReqsLeadTimeMeta(projectID, dsn).Name),
 		),
 	}
 }

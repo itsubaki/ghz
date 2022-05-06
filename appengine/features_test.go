@@ -8,6 +8,7 @@ import (
 	"math/rand"
 	"net/http"
 	"net/http/httptest"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -21,11 +22,10 @@ import (
 	"github.com/jfilipczyk/gomatch"
 )
 
-func NewXCloudTraceContext() (string, string) {
-	return "X-Cloud-Trace-Context", fmt.Sprintf("%016x%016x/%d;", rand.Int63(), rand.Int63(), rand.Int63())
-}
-
-var api = &apiFeature{}
+var (
+	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
+	api       = &apiFeature{}
+)
 
 type apiFeature struct {
 	header http.Header
@@ -117,7 +117,7 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 		if err := dataset.Query(context.Background(),
 			fmt.Sprintf(
 				"SELECT count(*) FROM `%v.%v.%v` WHERE sha = \"%v\"",
-				dataset.ProjectID, dsn, dataset.IncidentsMeta.Name,
+				projectID, dsn, dataset.IncidentsMeta.Name,
 				incidents.Rows[i].Cells[3].Value,
 			),
 			func(values []bigquery.Value) {
@@ -154,7 +154,7 @@ func (a *apiFeature) IncidentsExists(incidents *godog.Table) error {
 }
 
 func (a *apiFeature) ExecuteQuery(query string) error {
-	q := strings.ReplaceAll(query, "$PROJECT_ID", dataset.ProjectID)
+	q := strings.ReplaceAll(query, "$PROJECT_ID", projectID)
 	if err := dataset.Query(context.Background(), q, func(values []bigquery.Value) {
 		a.result = append(a.result, values)
 	}); err != nil {
@@ -223,4 +223,8 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^the following incidents exist:$`, api.IncidentsExists)
 	ctx.Step(`^I execute query with:$`, api.ExecuteQuery)
 	ctx.Step(`^I get the following result:$`, api.QueryResult)
+}
+
+func NewXCloudTraceContext() (string, string) {
+	return "X-Cloud-Trace-Context", fmt.Sprintf("%016x%016x/%d;", rand.Int63(), rand.Int63(), rand.Int63())
 }

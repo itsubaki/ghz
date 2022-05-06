@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"cloud.google.com/go/errorreporting"
-	"github.com/itsubaki/ghz/appengine/dataset"
 	"go.opentelemetry.io/otel/trace"
 )
 
@@ -27,7 +26,7 @@ const (
 )
 
 var (
-	projectID = dataset.ProjectID
+	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
 	Factory   = MustNew(context.Background(), projectID)
 )
 

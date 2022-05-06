@@ -14,7 +14,7 @@ import (
 )
 
 var (
-	projectID = dataset.ProjectID
+	projectID = os.Getenv("GOOGLE_CLOUD_PROJECT")
 	logf      = logger.Factory
 )
 
