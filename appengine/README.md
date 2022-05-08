@@ -28,7 +28,7 @@ env_variables:
   PAT: YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
 ```
 
-## Deployment
+## Deploying to AppEngine
 
 ```shell
 $ gcloud app deploy app.yaml cron.yaml
