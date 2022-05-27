@@ -21,7 +21,7 @@
 ### Time to Restore Services
 
  - The median amount of time between the <deployment> which caused the failure and the remediation.
- - In this product, The median amount of time between the <push event/pull request merge> which caused the failure and the remediation.
+   - In this product, The median amount of time between the <push event/pull request merge> which caused the failure and the remediation.
  - Elite: Over the last 3 months, the median amount is equal to or less than 1 day.
 
 ### Change Failure Rate
