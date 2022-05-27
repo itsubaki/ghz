@@ -15,12 +15,12 @@
 
 ### Lead Time for Changes
  
- - The median amount of time for a commit to be deployed into production.
+ - The time for a commit to be deployed into production.
  - Elite: Over the last 3 months, the median amount is equal to or less than 1 day.
 
 ### Time to Restore Services
 
- - The median amount of time between the <deployment> which caused the failure and the remediation.
+ - The time between the <deployment> which caused the failure and the remediation.
    - In this product, `resolved_at - merged_at` or `resolved_at - pushed_at`, To be precise　`resolved_at - deployed_at`
  - Elite: Over the last 3 months, the median amount is equal to or less than 1 day.
 
