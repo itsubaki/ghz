@@ -21,13 +21,13 @@
 ### Time to Restore Services
 
  - The time between the <deployment> which caused the failure and the remediation.
-   - In this product, `resolved_at - merged_at` or `resolved_at - pushed_at`, To be precise　`resolved_at - deployed_at`
+   - In this product, `resolved_at - merged_at` or `resolved_at - pushed_at`, To be exact `resolved_at - deployed_at`
  - Elite: Over the last 3 months, the median amount is equal to or less than 1 day.
 
 ### Change Failure Rate
 
  - The number of failures per the number of deployments.
-   - In this product, `count(failure)/count(merged)`, To be precise　`count(failure)/count(depyloyed)`.
+   - In this product, `count(failure)/count(merged)`, To be exact `count(failure)/count(depyloyed)`.
  - Elite: Over the last 3 months, the median amount is equal to or less than 15 %.
 
 ## Required
