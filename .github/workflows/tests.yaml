@@ -60,7 +60,7 @@ jobs:
         with:
           credentials_json: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
 
-      - name: Deploying to Google App Engine
+      - name: Deploy to Google App Engine
         uses: "google-github-actions/deploy-appengine@v0"
         with:
           deliverables: "app.yaml cron.yaml"
