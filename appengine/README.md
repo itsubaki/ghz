@@ -5,11 +5,30 @@
 
 ## DORA's Four Keys
 
-- Deployment Frequency: The number of deployments to production per day.
-- Lead Time for Changes: The median amount of time for a commit to be deployed into production.
-- Time to Restore Services: The median amount of time between the <deployment> which caused the failure and the remediation.
-  - In this product, The median amount of time between the <push event/pull request merge> which caused the failure and the remediation.
-- Change Failure Rate: The number of failures per the number of deployments.
+ - [Definitions](https://github.com/GoogleCloudPlatform/fourkeys/blob/main/METRICS.md)
+
+### Deployment Frequency
+
+ - The number of deployments to production per week.
+ - Elite: Over the last 3 months, the median number is equal to or greater than 3.
+
+
+### Lead Time for Changes
+ 
+ - The time for a commit to be deployed into production.
+ - Elite: Over the last 3 months, the median amount is equal to or less than 1 day.
+
+### Time to Restore Services
+
+ - The time between the <deployment> which caused the failure and the remediation.
+   - In this product, `resolved_at - merged_at` or `resolved_at - pushed_at`, To be exact `resolved_at - deployed_at`
+ - Elite: Over the last 3 months, the median amount is equal to or less than 1 day.
+
+### Change Failure Rate
+
+ - The number of failures per the number of deployments.
+   - In this product, `count(failure)/count(merged)`, To be exact `count(failure)/count(depyloyed)`.
+ - Elite: Over the last 3 months, the median amount is equal to or less than 15 %.
 
 ## Required
 
@@ -28,7 +47,7 @@ env_variables:
   PAT: YOUR_GITHUB_PERSONAL_ACCESS_TOKEN
 ```
 
-## Deployment
+## Deploying to AppEngine
 
 ```shell
 $ gcloud app deploy app.yaml cron.yaml
