@@ -12,8 +12,6 @@ on:
       - published
   workflow_dispatch:
 
-concurrency: integration_tests
-
 jobs:
   test:
     strategy:
@@ -31,41 +29,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Add mask
-        run: |
-          echo "::add-mask::${{ secrets.PROJECT_ID }}"
-
       - name: Unit Tests
         run: |
-          make testpkg
-
-      - name: Integration Tests
-        env:
-          PROJECT_ID: ${{ secrets.PROJECT_ID }}
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-        run: |
-          echo ${GOOGLE_APPLICATION_CREDENTIALS} > ./credentials.json
           make test
-          rm -rf ./credentials/json
-
-      - name: Create secrets.yaml
-        env:
-          PAT: ${{ secrets.PAT }}
-        run: |
-          echo "env_variables:" > ./secrets.yaml
-          echo "  PAT: ${PAT}" >> ./secrets.yaml
-
-      - name: Auth Google Cloud
-        uses: "google-github-actions/auth@v0"
-        with:
-          credentials_json: "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}"
-
-      - name: Deploy to Google App Engine
-        uses: "google-github-actions/deploy-appengine@v0"
-        with:
-          deliverables: "app.yaml cron.yaml"
-
-      - name: Remove Old Versions
-        run: |
-          NOTRAFIC_VERSIONS=$(gcloud app versions list --format="value(id)" --sort-by="~lastDeployedTime" --filter="traffic_split=0")
-          echo ${NOTRAFIC_VERSIONS}

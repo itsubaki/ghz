@@ -11,21 +11,9 @@ install:
 	go install -ldflags "${LDFLAGS}"
 
 test:
-	GOOGLE_APPLICATION_CREDENTIALS=../credentials.json DATASET_LOCATION=asia-northeast1 GOOGLE_CLOUD_PROJECT=${PROJECT_ID} go test ./appengine --godog.format=pretty -v -coverprofile=coverage.out -covermode=atomic -coverpkg ./...
-
-testpkg:
 	go test -v -cover $(shell go list ./... | grep pkg) -coverprofile=coverage-pkg.out -covermode=atomic
-
-run:
-	GOOGLE_APPLICATION_CREDENTIALS=./credentials.json GOOGLE_CLOUD_PROJECT=${PROJECT_ID} go run appengine/main.go
 
 merge:
 	echo "" > coverage.txt
 	cat coverage.out     >> coverage.txt
 	cat coverage-pkg.out >> coverage.txt
-
-deploy:
-	gcloud app deploy app.yaml cron.yaml
-
-browse:
-	gcloud app browse
