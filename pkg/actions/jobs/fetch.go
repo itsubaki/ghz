@@ -3,6 +3,7 @@ package jobs
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/google/go-github/v40/github"
 	"golang.org/x/oauth2"
@@ -36,6 +37,10 @@ func Fetch(ctx context.Context, in *FetchInput, runID int64) ([]*github.Workflow
 	for {
 		jobs, resp, err := client.Actions.ListWorkflowJobs(ctx, in.Owner, in.Repository, runID, &opts)
 		if err != nil {
+			if resp.StatusCode == http.StatusNotFound {
+				return out, nil
+			}
+
 			return nil, fmt.Errorf("list workflow jobs: %v", err)
 		}
 
