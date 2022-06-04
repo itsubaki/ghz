@@ -1,6 +1,6 @@
 module github.com/itsubaki/ghz
 
-go 1.17
+go 1.18
 
 require (
 	github.com/google/go-github/v40 v40.0.0

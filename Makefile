@@ -12,8 +12,3 @@ install:
 
 test:
 	go test -v -cover $(shell go list ./... | grep pkg) -coverprofile=coverage-pkg.out -covermode=atomic
-
-merge:
-	echo "" > coverage.txt
-	cat coverage.out     >> coverage.txt
-	cat coverage-pkg.out >> coverage.txt

@@ -21,3 +21,4 @@ credentials.json
 
 # GitHub codespaces
 oryxBuildBinary
+.vscode
