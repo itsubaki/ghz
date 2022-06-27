@@ -3,7 +3,7 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/itsubaki/ghz)](https://pkg.go.dev/github.com/itsubaki/ghz)
 [![Go Report Card](https://goreportcard.com/badge/github.com/itsubaki/ghz?style=flat-square)](https://goreportcard.com/report/github.com/itsubaki/ghz)
 
-- CLI for GitHub repository metadata
+- CLI for GitHub activity
 
 ## Install
 
