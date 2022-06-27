@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	"github.com/google/go-github/v40/github"
-	"github.com/itsubaki/ghz/pkg/pullreqs"
+	"github.com/itsubaki/ghz/pullreqs"
 	"github.com/urfave/cli/v2"
 )
 

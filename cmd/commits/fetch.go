@@ -11,7 +11,7 @@ import (
 
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghz/cmd/encode"
-	"github.com/itsubaki/ghz/pkg/commits"
+	"github.com/itsubaki/ghz/commits"
 	"github.com/urfave/cli/v2"
 )
 

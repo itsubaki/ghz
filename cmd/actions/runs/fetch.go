@@ -9,8 +9,8 @@ import (
 	"sort"
 
 	"github.com/google/go-github/v40/github"
+	"github.com/itsubaki/ghz/actions/runs"
 	"github.com/itsubaki/ghz/cmd/encode"
-	"github.com/itsubaki/ghz/pkg/actions/runs"
 	"github.com/urfave/cli/v2"
 )
 

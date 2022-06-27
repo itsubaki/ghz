@@ -12,7 +12,7 @@ import (
 	"github.com/google/go-github/v40/github"
 	"github.com/itsubaki/ghz/cmd/encode"
 	"github.com/itsubaki/ghz/cmd/pullreqs"
-	"github.com/itsubaki/ghz/pkg/pullreqs/commits"
+	"github.com/itsubaki/ghz/pullreqs/commits"
 	"github.com/urfave/cli/v2"
 )
 
