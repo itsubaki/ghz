@@ -3,15 +3,13 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/itsubaki/ghz)](https://pkg.go.dev/github.com/itsubaki/ghz)
 [![Go Report Card](https://goreportcard.com/badge/github.com/itsubaki/ghz?style=flat-square)](https://goreportcard.com/report/github.com/itsubaki/ghz)
 
-- CLI for GitHub activity
+- GitHub activity library for Go
 
-## Install
+## CommandLine Example
 
 ```shell
 go install github.com/itsubaki/ghz@latest
 ```
-
-## Example
 
 ```shell
 $ ghz commits fetch --owner itsubaki -repo q
