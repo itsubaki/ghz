@@ -21,7 +21,7 @@ var date, hash, goversion string
 func New(version string) *cli.App {
 	app := cli.NewApp()
 	app.Name = "ghz"
-	app.Usage = "Github Stats"
+	app.Usage = "GitHub activity stats"
 	app.Version = version
 
 	dir := cli.StringFlag{
