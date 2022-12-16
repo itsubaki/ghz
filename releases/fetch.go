@@ -3,6 +3,7 @@ package releases
 import (
 	"context"
 	"fmt"
+	"sort"
 
 	"github.com/google/go-github/v40/github"
 	"golang.org/x/oauth2"
@@ -37,6 +38,8 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Reposi
 		if err != nil {
 			return nil, fmt.Errorf("list releases: %v", err)
 		}
+
+		sort.Slice(rels, func(i, j int) bool { return *rels[i].ID > *rels[j].ID })
 
 		buf := make([]*github.RepositoryRelease, 0)
 		var last bool
