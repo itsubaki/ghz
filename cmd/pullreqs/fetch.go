@@ -8,7 +8,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/google/go-github/v40/github"
+	"github.com/google/go-github/v50/github"
 	"github.com/itsubaki/ghz/cmd/encode"
 	"github.com/itsubaki/ghz/pullreqs"
 	"github.com/urfave/cli/v2"
