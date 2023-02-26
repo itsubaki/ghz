@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/google/go-github/v40/github"
+	"github.com/google/go-github/v50/github"
 	"github.com/itsubaki/ghz/cmd/encode"
 	"github.com/urfave/cli/v2"
 )
@@ -69,7 +69,7 @@ func CSV(c github.RepositoryCommit) string {
 }
 
 func print(format string, list []github.RepositoryCommit) error {
-	sort.Slice(list, func(i, j int) bool { return list[i].Commit.Author.Date.After(*list[j].Commit.Author.Date) })
+	sort.Slice(list, func(i, j int) bool { return list[i].Commit.Author.Date.After(list[j].Commit.Author.Date.Time) })
 
 	if format == "json" {
 		for _, r := range list {

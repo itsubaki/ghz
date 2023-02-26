@@ -9,7 +9,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/google/go-github/v40/github"
+	"github.com/google/go-github/v50/github"
 	"github.com/itsubaki/ghz/cmd/encode"
 	"github.com/itsubaki/ghz/commits"
 	"github.com/urfave/cli/v2"
@@ -47,7 +47,7 @@ func Fetch(c *cli.Context) error {
 		return fmt.Errorf("serialize: %v", err)
 	}
 
-	sort.Slice(list, func(i, j int) bool { return list[i].Commit.Author.Date.Before(*list[j].Commit.Author.Date) })
+	sort.Slice(list, func(i, j int) bool { return list[i].Commit.Author.Date.Before(list[j].Commit.Author.Date.Time) })
 	for _, r := range list {
 		fmt.Printf("%v(%v)\n", *r.SHA, r.Commit.Author.Date)
 	}
@@ -86,8 +86,8 @@ func GetLastSHA(path string) (string, error) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	var date time.Time
 	var sha string
+	var date time.Time
 	for scanner.Scan() {
 		var c github.RepositoryCommit
 		if err := json.Unmarshal([]byte(scanner.Text()), &c); err != nil {
@@ -96,7 +96,7 @@ func GetLastSHA(path string) (string, error) {
 
 		if c.Commit.Author.Date.After(date) {
 			sha = *c.SHA
-			date = *c.Commit.Author.Date
+			date = c.Commit.Author.Date.Time
 		}
 	}
 
