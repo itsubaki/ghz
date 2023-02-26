@@ -3,8 +3,6 @@
 [![PkgGoDev](https://pkg.go.dev/badge/github.com/itsubaki/ghz)](https://pkg.go.dev/github.com/itsubaki/ghz)
 [![Go Report Card](https://goreportcard.com/badge/github.com/itsubaki/ghz?style=flat-square)](https://goreportcard.com/report/github.com/itsubaki/ghz)
 
-- GitHub activity library for Go
-
 ## CommandLine Example
 
 ```shell
