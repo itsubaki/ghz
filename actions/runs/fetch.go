@@ -3,6 +3,7 @@ package runs
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
@@ -15,6 +16,7 @@ type FetchInput struct {
 	Page       int
 	PerPage    int
 	LastID     int64
+	LastDay    *time.Time
 }
 
 func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.WorkflowRun) error) ([]*github.WorkflowRun, error) {
@@ -44,6 +46,11 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Workfl
 		var last bool
 		for i := range runs.WorkflowRuns {
 			if runs.WorkflowRuns[i].GetID() <= in.LastID {
+				last = true
+				break
+			}
+
+			if in.LastDay != nil && runs.WorkflowRuns[i].CreatedAt.Time.Before(*in.LastDay) {
 				last = true
 				break
 			}

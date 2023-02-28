@@ -27,17 +27,12 @@ func LastNWeeksWith(now time.Time, n int) []Date {
 		days = append(days, laststartday.AddDate(0, 0, -i*7))
 	}
 
-	tmp := make([]Date, 0)
+	out := make([]Date, 0)
 	for _, d := range days {
-		tmp = append(tmp, Date{
+		out = append(out, Date{
 			Start: d,
 			End:   d.AddDate(0, 0, 7),
 		})
-	}
-
-	out := make([]Date, 0)
-	for i := len(tmp) - 1; i > -1; i-- {
-		out = append(out, tmp[i])
 	}
 
 	sort.Slice(out, func(i, j int) bool { return out[i].Start.After(out[j].Start) })

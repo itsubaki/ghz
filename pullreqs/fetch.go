@@ -3,6 +3,7 @@ package pullreqs
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
@@ -16,6 +17,7 @@ type FetchInput struct {
 	PerPage    int
 	State      string
 	LastID     int64
+	LastDay    *time.Time
 }
 
 func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.PullRequest) error) ([]*github.PullRequest, error) {
@@ -46,6 +48,11 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.PullRe
 		var last bool
 		for i := range pr {
 			if pr[i].GetID() <= in.LastID {
+				last = true
+				break
+			}
+
+			if in.LastDay != nil && pr[i].CreatedAt.Time.Before(*in.LastDay) {
 				last = true
 				break
 			}

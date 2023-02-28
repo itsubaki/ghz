@@ -3,6 +3,7 @@ package events
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
@@ -15,6 +16,7 @@ type FetchInput struct {
 	Page       int
 	PerPage    int
 	LastID     string
+	LastDay    *time.Time
 }
 
 func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Event) error) ([]*github.Event, error) {
@@ -42,6 +44,11 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Event)
 		var last bool
 		for i := range events {
 			if in.LastID != "" && events[i].GetID() == in.LastID {
+				last = true
+				break
+			}
+
+			if in.LastDay != nil && events[i].CreatedAt.Time.Before(*in.LastDay) {
 				last = true
 				break
 			}

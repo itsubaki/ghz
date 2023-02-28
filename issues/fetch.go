@@ -3,6 +3,7 @@ package issues
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
@@ -14,6 +15,8 @@ type FetchInput struct {
 	PAT        string
 	Page       int
 	PerPage    int
+	LastID     int64
+	LastDay    *time.Time
 }
 
 func Fetch(ctx context.Context, in *FetchInput) ([]*github.Issue, error) {
@@ -39,8 +42,24 @@ func Fetch(ctx context.Context, in *FetchInput) ([]*github.Issue, error) {
 			return nil, fmt.Errorf("list workflow runs: %v", err)
 		}
 
-		out = append(out, issues...)
-		if resp.NextPage == 0 {
+		buf := make([]*github.Issue, 0)
+		var last bool
+		for i := range issues {
+			if issues[i].GetID() <= in.LastID {
+				last = true
+				break
+			}
+
+			if in.LastDay != nil && issues[i].CreatedAt.Time.Before(*in.LastDay) {
+				last = true
+				break
+			}
+
+			buf = append(buf, issues[i])
+		}
+
+		out = append(out, buf...)
+		if last || resp.NextPage == 0 {
 			break
 		}
 

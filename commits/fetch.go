@@ -3,6 +3,7 @@ package commits
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
@@ -15,6 +16,7 @@ type FetchInput struct {
 	Page       int
 	PerPage    int
 	LastSHA    string
+	LastDay    *time.Time
 }
 
 func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.RepositoryCommit) error) ([]*github.RepositoryCommit, error) {
@@ -44,6 +46,11 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Reposi
 		var last bool
 		for i := range commits {
 			if in.LastSHA != "" && commits[i].GetSHA() == in.LastSHA {
+				last = true
+				break
+			}
+
+			if in.LastDay != nil && commits[i].Commit.Author.Date.Time.Before(*in.LastDay) {
 				last = true
 				break
 			}

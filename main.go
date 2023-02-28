@@ -66,6 +66,11 @@ func New(version string) *cli.App {
 		Value: 100,
 	}
 
+	days := cli.IntFlag{
+		Name:  "days",
+		Value: -1,
+	}
+
 	runs := cli.Command{
 		Name:    "runs",
 		Aliases: []string{"r"},
@@ -81,6 +86,7 @@ func New(version string) *cli.App {
 					&pat,
 					&page,
 					&perpage,
+					&days,
 				},
 			},
 			{
@@ -157,6 +163,7 @@ func New(version string) *cli.App {
 					&pat,
 					&page,
 					&perpage,
+					&days,
 					&cli.StringFlag{
 						Name:    "state",
 						Aliases: []string{"s"},
@@ -236,6 +243,7 @@ func New(version string) *cli.App {
 					&pat,
 					&page,
 					&perpage,
+					&days,
 				},
 			},
 			{
@@ -267,6 +275,7 @@ func New(version string) *cli.App {
 					&pat,
 					&page,
 					&perpage,
+					&days,
 				},
 			},
 		},
@@ -288,6 +297,7 @@ func New(version string) *cli.App {
 					&page,
 					&perpage,
 					&format,
+					&days,
 				},
 			},
 		},
@@ -308,6 +318,7 @@ func New(version string) *cli.App {
 					&pat,
 					&page,
 					&perpage,
+					&days,
 				},
 			},
 		},

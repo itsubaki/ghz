@@ -38,6 +38,12 @@ func Fetch(c *cli.Context) error {
 		LastSHA:    sha,
 	}
 
+	days := c.Int("days")
+	if days > 0 {
+		lastDay := time.Now().AddDate(0, 0, -1*days)
+		in.LastDay = &lastDay
+	}
+
 	list, err := commits.Fetch(context.Background(), &in)
 	if err != nil {
 		return fmt.Errorf("fetch: %v", err)

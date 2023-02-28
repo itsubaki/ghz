@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/google/go-github/v50/github"
 	"golang.org/x/oauth2"
@@ -16,6 +17,7 @@ type FetchInput struct {
 	Page       int
 	PerPage    int
 	LastID     int64
+	LastDay    *time.Time
 }
 
 func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.RepositoryRelease) error) ([]*github.RepositoryRelease, error) {
@@ -45,6 +47,11 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Reposi
 		var last bool
 		for i := range rels {
 			if rels[i].GetID() <= in.LastID {
+				last = true
+				break
+			}
+
+			if in.LastDay != nil && rels[i].CreatedAt.Time.Before(*in.LastDay) {
 				last = true
 				break
 			}

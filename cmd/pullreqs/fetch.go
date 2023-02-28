@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"sort"
+	"time"
 
 	"github.com/google/go-github/v50/github"
 	"github.com/itsubaki/ghz/cmd/encode"
@@ -36,6 +37,12 @@ func Fetch(c *cli.Context) error {
 		PerPage:    c.Int("perpage"),
 		State:      c.String("state"),
 		LastID:     id,
+	}
+
+	days := c.Int("days")
+	if days > 0 {
+		lastDay := time.Now().AddDate(0, 0, -1*days)
+		in.LastDay = &lastDay
 	}
 
 	fmt.Printf("target: %v/%v\n", in.Owner, in.Repository)
