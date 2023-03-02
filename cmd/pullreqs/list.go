@@ -67,25 +67,25 @@ func CSV(r github.PullRequest) string {
 	)
 
 	if r.UpdatedAt == nil {
-		out = out + fmt.Sprintf("null, ")
+		out = out + "null, "
 	} else {
 		out = out + fmt.Sprintf("%v, ", r.UpdatedAt.Format("2006-01-02 15:04:05"))
 	}
 
 	if r.MergedAt == nil {
-		out = out + fmt.Sprintf("null, ")
+		out = out + "null, "
 	} else {
 		out = out + fmt.Sprintf("%v, ", r.MergedAt.Format("2006-01-02 15:04:05"))
 	}
 
 	if r.ClosedAt == nil {
-		out = out + fmt.Sprintf("null, ")
+		out = out + "null, "
 	} else {
 		out = out + fmt.Sprintf("%v, ", r.ClosedAt.Format("2006-01-02 15:04:05"))
 	}
 
 	if r.MergeCommitSHA == nil {
-		out = out + fmt.Sprintf("null, ")
+		out = out + "null, "
 	} else {
 		out = out + fmt.Sprintf("%v, ", *r.MergeCommitSHA)
 	}
