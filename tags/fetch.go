@@ -14,6 +14,7 @@ type FetchInput struct {
 	PAT        string
 	Page       int
 	PerPage    int
+	LastName   string
 }
 
 func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.RepositoryTag) error) ([]*github.RepositoryTag, error) {
@@ -37,14 +38,25 @@ func Fetch(ctx context.Context, in *FetchInput, fn ...func(list []*github.Reposi
 			return nil, fmt.Errorf("list tags: %v", err)
 		}
 
+		buf := make([]*github.RepositoryTag, 0)
+		var last bool
+		for i := range tags {
+			if in.LastName != "" && tags[i].GetName() == in.LastName {
+				last = true
+				break
+			}
+
+			buf = append(buf, tags[i])
+		}
+
 		for i, f := range fn {
-			if err := f(tags); err != nil {
+			if err := f(buf); err != nil {
 				return nil, fmt.Errorf("func[%v]: %v", i, err)
 			}
 		}
 
 		out = append(out, tags...)
-		if resp.NextPage == 0 {
+		if last || resp.NextPage == 0 {
 			break
 		}
 
