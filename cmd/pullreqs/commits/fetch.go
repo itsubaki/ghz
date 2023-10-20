@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/google/go-github/v50/github"
+	"github.com/google/go-github/v56/github"
 	"github.com/itsubaki/ghz/cmd/encode"
 	"github.com/itsubaki/ghz/cmd/pullreqs"
 	"github.com/itsubaki/ghz/pullreqs/commits"

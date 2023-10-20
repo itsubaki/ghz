@@ -8,7 +8,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/google/go-github/v50/github"
+	"github.com/google/go-github/v56/github"
 	"github.com/itsubaki/ghz/actions/jobs"
 	"github.com/itsubaki/ghz/cmd/actions/runs"
 	"github.com/itsubaki/ghz/cmd/encode"

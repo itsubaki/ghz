@@ -9,7 +9,7 @@ import (
 	"sort"
 	"time"
 
-	"github.com/google/go-github/v50/github"
+	"github.com/google/go-github/v56/github"
 	"github.com/itsubaki/ghz/actions/runs"
 	"github.com/itsubaki/ghz/cmd/encode"
 	"github.com/urfave/cli/v2"
