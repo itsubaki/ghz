@@ -9,9 +9,14 @@
 go install github.com/itsubaki/ghz@latest
 ```
 
+## Examples
+
 ```shell
-$ ghz commits fetch --owner itsubaki --repository ghz
-$ ghz commits list  --owner itsubaki --repository ghz --format csv | column -t -s, | less -S
+ghz commits fetch --owner itsubaki --repository ghz
+ghz commits list  --owner itsubaki --repository ghz --format csv | column -t -s, | less -S
+```
+
+```tsv
 sha                                        login      date                  message
 20838b4c89bfc3b018c82cd5f290dd014a92cc15   itsubaki   2022-06-30 13:32:59   Update description                                                     
 51d552207c68303387b8628043f08b4a2eb62743   itsubaki   2022-06-27 03:59:37   Update README.md                                                       
@@ -21,8 +26,11 @@ e7297e67c2ff550c1f7dcbdfb99b3111ba514692   itsubaki   2022-06-27 03:58:04   Remo
 ```
 
 ```shell
-$ ghz pullreqs fetch --owner itsubaki --repository ghz
-$ ghz pullreqs list  --owner itsubaki --repository ghz --format csv | column -t -s, | less -S
+ghz pullreqs fetch --owner itsubaki --repository ghz
+ghz pullreqs list  --owner itsubaki --repository ghz --format csv | column -t -s, | less -S
+```
+
+```tsv
 id          number   title                       login      state    created_at            updated_at            merged_at             closed_at             merge_commit_sha               
 888469760   9        Update Makefile             itsubaki   closed   2022-03-24 14:47:03   2022-03-24 14:47:16   2022-03-24 14:47:12   2022-03-24 14:47:12   9b79b1fb4e2ad0cff8873cfc70f7077
 831019272   7        Update cron schedule        itsubaki   closed   2022-01-25 03:01:27   2022-02-08 04:20:27   2022-01-25 03:30:33   2022-01-25 03:30:33   166b2e6654700e6fc900cc9323e0e0b
@@ -33,8 +41,11 @@ id          number   title                       login      state    created_at 
 ```
 
 ```shell
-$ ghz pullreqs commits fetch --owner itsubaki --repository ghz
-$ ghz pullreqs commits list  --owner itsubaki --repository ghz --format csv | column -t -s, | less -S
+ghz pullreqs commits fetch --owner itsubaki --repository ghz
+ghz pullreqs commits list  --owner itsubaki --repository ghz --format csv | column -t -s, | less -S
+```
+
+```tsv
 id          number   sha                                        login      date                  message                     
 888469760   9        95f21a055aaf62130d1a6f4d29b0f4a0e92d638b   itsubaki   2022-03-24 14:46:42   Update Makefile             
 831019272   7        765c9d33721fa282df4e03879c499c0a8961ac89   itsubaki   2022-01-25 03:00:54   Update cron schedule        
@@ -51,8 +62,11 @@ id          number   sha                                        login      date 
 ```
 
 ```shell
-$ ghz actions runs fetch --owner itsubaki --repository ghz
-$ ghz actions runs list  --owner itsubaki --repository ghz --format csv | column -t -s, | less -S
+ghz actions runs fetch --owner itsubaki --repository ghz
+ghz actions runs list  --owner itsubaki --repository ghz --format csv | column -t -s, | less -S
+```
+
+```tsv
 workflow_id   workflow_name   run_id       run_number   status      conclusion   created_at            updated_at            head_commit.sha                            head_commit.date    
 16163576      tests           2590287280   214          completed   success      2022-06-30 13:33:20   2022-06-30 13:33:45   20838b4c89bfc3b018c82cd5f290dd014a92cc15   2022-06-30 13:32:59 
 16163576      tests           2566678851   213          completed   success      2022-06-27 03:59:45   2022-06-27 04:00:13   51d552207c68303387b8628043f08b4a2eb62743   2022-06-27 03:59:37 
@@ -66,8 +80,11 @@ workflow_id   workflow_name   run_id       run_number   status      conclusion  
 ```
 
 ```shell
-$ ghz actions jobs fetch --owner itsubaki --repository ghz
-$ ghz actions jobs list  --owner itsubaki --repository ghz --format csv | column -t -s, | less -S
+ghz actions jobs fetch --owner itsubaki --repository ghz
+ghz actions jobs list  --owner itsubaki --repository ghz --format csv | column -t -s, | less -S
+```
+
+```tsv
 run_id       job_id       job_name               status      conclusion   started_at            completed_at          
 2590287280   7132461391   test (ubuntu-latest)   completed   success      2022-06-30 13:33:32   2022-06-30 13:33:43   
 2566678851   7065991966   test (ubuntu-latest)   completed   success      2022-06-27 03:59:53   2022-06-27 04:00:11   
@@ -83,7 +100,10 @@ run_id       job_id       job_name               status      conclusion   starte
 ```
 
 ```shell
-$ ghz pullreqs list --owner itsubaki --repository ghz | jq -r '[.id, .number, .user.login, .title, .state] | @csv' | tr -d '"' | column -t -s, | less -S
+ghz pullreqs list --owner itsubaki --repository ghz | jq -r '[.id, .number, .user.login, .title, .state] | @csv' | tr -d '"' | column -t -s, | less -S
+```
+
+```tsv
 888469760  9  itsubaki  Update Makefile            closed
 831019272  7  itsubaki  Update cron schedule       closed
 811825160  6  itsubaki  Update google api version  closed
